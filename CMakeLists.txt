@@ -60,6 +60,9 @@ set(compiler_OPTS)
 # Linker options
 set(linker_OPTS)
 
+# Set output directory for binary files (hex, bin, etc)
+set(CMAKE_BINARY_DIR_BIN ${CMAKE_BINARY_DIR}/../bin)
+
 # Now call generated cmake
 # This will add script generated
 # information to the project
@@ -118,12 +121,17 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
     $<$<CONFIG:Release>:-Og -g0>
 )
 
+# Set the output directories for build files
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR_BIN}
+)
+
 # Linker options
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
     -T${linker_script_SRC}
     ${cpu_PARAMS}
     ${linker_OPTS}
-    -Wl,-Map=${CMAKE_PROJECT_NAME}.map
+    -Wl,-Map=${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.map
     -u _printf_float # STDIO float formatting support (remove if not used)
     --specs=nosys.specs
     -Wl,--start-group
@@ -138,7 +146,14 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Execute post-build to print size, generate hex and bin
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.hex
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.bin
+    COMMENT "Generating HEX and BIN file from ELF"
+)
+
+# Post build print size
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "******** Print size information:"
     COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
-    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_PROJECT_NAME}.hex
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_PROJECT_NAME}.bin
+    COMMENT "Size information"
 )
