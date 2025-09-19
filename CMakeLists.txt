@@ -3,9 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 #
 # User is free to modify the file as much as necessary
 #
-
-#list(APPEND CMAKE_MODULE_PATH "C:/Users/user1/Downloads/CmakeTestProject/cmake")
-list(APPEND CMAKE_MODULE_PATH "{{sr:cmake_path}}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 message("Build CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
 include("cmake/gcc-arm-none-eabi.cmake")
 message("Build CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
@@ -110,7 +108,6 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
     -Wno-unused-parameter
     $<$<COMPILE_LANGUAGE:C>: >
     $<$<COMPILE_LANGUAGE:CXX>:
-
     # -Wno-volatile
     # -Wold-style-cast
     # -Wuseless-cast

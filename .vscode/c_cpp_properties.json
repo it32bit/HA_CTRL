@@ -10,7 +10,11 @@
              */
             "name": "STM32",
             "configurationProvider": "ms-vscode.cmake-tools",
-            "intelliSenseMode": "${default}"
+            "intelliSenseMode": "${default}",
+            "includePath": [
+                "${workspaceRoot}/**",
+				"${workspaceRoot}/inc"
+			]
         }
-    ]
+	]
 }

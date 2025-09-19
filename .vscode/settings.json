@@ -1,0 +1,9 @@
+{    
+    "cortex-debug.stlinkPath": "/home/kojot/opt/stm32cubeclt_1.19.0/STLink-gdb-server/bin/ST-LINK_gdbserver",
+    "cortex-debug.armToolchainPath": "/home/kojot/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin",
+    "cortex-debug.armToolchainPath.linux": null,
+    "STM32VSCodeExtension.productFinder.executablePath": "/home/kojot/opt/stmMCUFinder/STMCUFinder",
+    "STM32VSCodeExtension.cubeCLT.path": "/home/kojot/opt/stm32cubeclt_1.19.0",
+    "cmake.sourceDirectory": "/home/kojot/repos/ha-ctrl",
+    "makefile.makePath": "make"
+}

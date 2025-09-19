@@ -27,17 +27,12 @@
             "serverArgs": [
                 "-m","0",
             ],
-            //"preLaunchTask": "Build + Flash"
-            /* If you use external loader, add additional arguments */
-            //"serverArgs": ["--extload", "path/to/ext/loader.stldr"],
         },
         {
             "name": "Attach to Microcontroller - ST-Link",
             "cwd": "${workspaceFolder}",
             "type": "cortex-debug",
             "executable": "${command:cmake.launchTargetPath}",
-            // Let CMake extension decide executable: "${command:cmake.launchTargetPath}"
-            // Or fixed file path: "${workspaceFolder}/path/to/filename.elf"
             "request": "attach",
             "servertype": "stlink",
             "device": "STM32F407VGTx", //MCU used
