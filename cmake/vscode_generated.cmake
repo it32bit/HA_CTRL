@@ -23,16 +23,22 @@ set(linker_script_SRC ${linker_script_SRC}
 # Sources
 set(sources_SRCS ${sources_SRCS}
     
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/main.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/syscall.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/sysmem.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_gpio.c
 )
 
 # Include directories
 set(include_c_DIRS ${include_c_DIRS}
     
-	${CMAKE_CURRENT_SOURCE_DIR}/Inc
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
 )
 set(include_cxx_DIRS ${include_cxx_DIRS}
     

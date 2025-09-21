@@ -17,6 +17,14 @@
  */
 
 #include <stdint.h>
+#include "main.h"
+#include "stm32f4xx_hal.h"
+
+
+void SystemClock_Config(void)
+{
+    /* Configure the system clock here if needed */
+}
 
 int main(void)
 {

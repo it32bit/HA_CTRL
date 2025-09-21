@@ -61,7 +61,7 @@ set(compiler_OPTS)
 set(linker_OPTS)
 
 # Set output directory for binary files (hex, bin, etc)
-set(CMAKE_BINARY_DIR_BIN ${CMAKE_BINARY_DIR}/../bin)
+set(CMAKE_BINARY_DIR_BIN ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Now call generated cmake
 # This will add script generated
@@ -124,6 +124,11 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
 # Set the output directories for build files
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR_BIN}
+)
+
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+    USE_HAL_DRIVER
+    STM32F407xx
 )
 
 # Linker options
