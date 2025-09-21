@@ -1,9 +1,14 @@
 {    
+    "cmake.sourceDirectory": "/home/kojot/repos/ha-ctrl",    
+    "STM32VSCodeExtension.productFinder.executablePath": "/opt/stmMCUFinder/STMCUFinder",
+    "STM32VSCodeExtension.cubeCLT.path": "/opt/stm32cubeclt_1.19.0",    
+    "cortex-debug.debugType": "stlink",
     "cortex-debug.stlinkPath": "/opt/stm32cubeclt_1.19.0/STLink-gdb-server/bin/ST-LINK_gdbserver",
     "cortex-debug.armToolchainPath": "/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin",
     "cortex-debug.armToolchainPath.linux": null,
-    "STM32VSCodeExtension.productFinder.executablePath": "/opt/stmMCUFinder/STMCUFinder",
-    "STM32VSCodeExtension.cubeCLT.path": "/opt/stm32cubeclt_1.19.0",
-    "cmake.sourceDirectory": "/home/kojot/repos/ha-ctrl",
-    "makefile.makePath": "make"
+    "cortex-debug.gdbPath": "/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",   
+    "cortex-debug.liveWatchRefreshRate": 250,
+    "cortex-debug.showDevDebugOutput": true,
+    "cortex-debug.variableUseNaturalFormat": false,
+
 }

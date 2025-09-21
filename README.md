@@ -17,7 +17,7 @@ STM32F407G-DISC1
 
 ## Submodules
 
-git submodule add https://github.com/STMicroelectronics/stm32f4xx-hal-driver.git Drivers
+git submodule add https://github.com/STMicroelectronics/stm32f4xx-hal-driver.git Drivers/stm32f4xx-hal-driver
 
 ## GNU Tools for STM32
 
