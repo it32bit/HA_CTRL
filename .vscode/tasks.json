@@ -2,22 +2,26 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "shell",
+            "label": "CMake: clean rebuild",
+            "type": "cmake",
+            "command": "cleanRebuild",
+            "targets": ["all"],
+            "preset": "${command:cmake.activeBuildPresetName}",            
+            "group": "build",
+            "problemMatcher": [],
+        },
+        {
             "label": "CubeProg: Flash project (SWD)",
+            "type": "shell",
             "command": "STM32_Programmer_CLI",
             "args": [
-                "--connect",
-                "port=swd",
-                "--download",
-                "${command:cmake.launchTargetPath}",
-                // Let CMake extension decide executable: "${command:cmake.launchTargetPath}",
-                "-hardRst", // Hardware reset - if rst pin is connected
-                "-rst",     // Software reset (backup)
-                "--start"   // Start execution
+                "-c", "port=SWD",
+                "-d", "${workspaceFolder}/build/bin/ha-ctrl.elf",
+                "-hardRst",
+                "-rst",
+                "--start"
             ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
+            "group": "build",
             "problemMatcher": []
         },
         {
@@ -25,28 +29,27 @@
             "dependsOrder": "sequence",
             "dependsOn": [
                 "CMake: clean rebuild",
-                "CubeProg: Flash project (SWD)",
-            ]
-        },
-        {
-            "type": "cmake",
-            "label": "CMake: clean rebuild",
-            "command": "cleanRebuild",
-            "targets": ["all"],
-            "preset": "${command:cmake.activeBuildPresetName}",
+                "CubeProg: Flash project (SWD)"
+            ],
             "group": "build",
-            "problemMatcher": [],
-            "detail": "CMake clean rebuild task"
+            "problemMatcher": []
         },
         {
-            "type": "shell",
             "label": "CubeProg: List all available communication interfaces",
+            "type": "shell",
             "command": "STM32_Programmer_CLI",
             "args": ["--list"],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
+            "group": "build",
             "problemMatcher": []
+        },
+        {
+            "label": "CMake: build",
+            "type": "cmake",
+            "command": "build",
+            "targets": ["all"],
+            "preset": "debug",
+            "group": "build",
+            "problemMatcher": [],
         }
     ]
 }

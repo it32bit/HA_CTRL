@@ -157,3 +157,10 @@ add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
     COMMENT "Size information"
 )
+
+# Flash target using STM32CubeProgrammer CLI
+add_custom_target(flash
+    DEPENDS ${CMAKE_PROJECT_NAME}
+    COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.elf    
+    COMMENT "Flashing firmware to STM32 via ST-Link"
+)

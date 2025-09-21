@@ -15,6 +15,10 @@ STM32F407G-DISC1
 
 STM32F407G-DISC1
 
+## Submodules
+
+git submodule add https://github.com/STMicroelectronics/stm32f4xx-hal-driver.git Drivers
+
 ## GNU Tools for STM32
 
 $ /opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin/arm-none-eabi-gcc --version
@@ -36,3 +40,7 @@ remove it (in whole file) if using GCC10 or earlier.
     ...
     .init_array (READONLY) :
     ...
+
+## Linux
+
+    sudo ln -s /opt/stm32cubeclt_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI /usr/bin/

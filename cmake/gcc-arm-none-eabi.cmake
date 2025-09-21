@@ -6,6 +6,8 @@ set(CMAKE_SYSTEM_PROCESSOR          arm)
 
 set(TOOLCHAIN_PREFIX                arm-none-eabi-)
 set(TOOLCHAIN_PATH                  "/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin")
+set(STM32CUBE_PROGRAMMER            "/opt/stm32cubeclt_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI")
+
 set(FLAGS                           "-fdata-sections -ffunction-sections -Wl,--gc-sections")
 set(CPP_FLAGS                       "${FLAGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics")
 

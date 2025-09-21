@@ -20,6 +20,10 @@
 
 int main(void)
 {
+    static uint32_t counter = 0;
     /* Loop forever */
-	for(;;);
+	for(;;)
+    {
+        counter++;
+    };
 }
