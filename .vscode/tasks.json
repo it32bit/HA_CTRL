@@ -2,21 +2,39 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "CMake: clean rebuild",
+            "label": "Build",
             "type": "cmake",
-            "command": "cleanRebuild",
+            "command": "build",
             "targets": ["all"],
-            "preset": "${command:cmake.activeBuildPresetName}",            
+            "preset": "debug",
             "group": "build",
             "problemMatcher": [],
         },
         {
-            "label": "CubeProg: Flash project (SWD)",
+            "label": "Clean all",
+            "type": "cmake",
+            "command": "build",
+            "targets": ["clean-extra"],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "problemMatcher": [],
+        },
+        {
+            "label": "Clean rebuild",
+            "type": "cmake",
+            "command": "cleanRebuild",
+            "targets": ["all"],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "problemMatcher": [],
+        },
+        {
+            "label": "Shell: Flash project (SWD)",
             "type": "shell",
             "command": "STM32_Programmer_CLI",
             "args": [
                 "-c", "port=SWD",
-                "-d", "${workspaceFolder}/build/bin/ha-ctrl.elf",
+                "-d", "${workspaceFolder}/bin/ha-ctrl.elf",
                 "-hardRst",
                 "-rst",
                 "--start"
@@ -25,11 +43,12 @@
             "problemMatcher": []
         },
         {
-            "label": "Build + Flash",
+            "label": "Clean + Build + Flash",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "CMake: clean rebuild",
-                "CubeProg: Flash project (SWD)"
+                "Clean all",
+                "Build",
+                "Shell: Flash project (SWD)"
             ],
             "group": "build",
             "problemMatcher": []
@@ -41,15 +60,7 @@
             "args": ["--list"],
             "group": "build",
             "problemMatcher": []
-        },
-        {
-            "label": "CMake: build",
-            "type": "cmake",
-            "command": "build",
-            "targets": ["all"],
-            "preset": "debug",
-            "group": "build",
-            "problemMatcher": [],
         }
+
     ]
 }

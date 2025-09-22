@@ -170,3 +170,12 @@ add_custom_target(flash
     COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.elf
     COMMENT "Flashing firmware to STM32 via ST-Link"
 )
+
+# Extra clean target to remove generated binary files
+add_custom_target(clean-extra
+    COMMAND ${CMAKE_COMMAND} -E rm -rf
+        ${CMAKE_SOURCE_DIR}/bin/*
+        ${CMAKE_BINARY_DIR}/CMakeFiles/${CMAKE_PROJECT_NAME}.dir/*
+
+    COMMENT "Removing generated binary files (*.elf, *.map, *.hex, *.bin)"
+)
