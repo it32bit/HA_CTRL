@@ -49,6 +49,8 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* Initialize all configured peripherals */
+  HAL_Init();
   LD3_Init();
 
   static uint32_t counter = 0;
@@ -59,6 +61,10 @@ int main(void)
   };
 }
 
+/**
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   uint32_t loop = 0;
@@ -66,6 +72,19 @@ void Error_Handler(void)
   while (1)
   {
     ++loop;
+  }
+}
+
+/**
+ * @brief  Heatbeat LDx Led Toggle
+ */
+void Heartbeat(void)
+{
+  static uint32_t ticks = 0;
+  if (ticks++ >= 500) // Toggle every 500ms
+  {
+    ticks = 0;
+    HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13); // Toggle LD3
   }
 }
 

@@ -27,6 +27,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc.c
