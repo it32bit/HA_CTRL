@@ -22,7 +22,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 # Core MCU flags, CPU type, instruction set and FPU setup
-set(cpu_PARAMS 
+set(cpu_PARAMS
     # Other parameters
     # -mthumb
     # -mcpu, -mfloat, -mfloat-abi, ...
@@ -127,8 +127,8 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
 )
 
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-    USE_HAL_DRIVER
     STM32F407xx
+    USE_HAL_DRIVER
 )
 
 # Linker options
@@ -166,6 +166,6 @@ add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
 # Flash target using STM32CubeProgrammer CLI
 add_custom_target(flash
     DEPENDS ${CMAKE_PROJECT_NAME}
-    COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.elf    
+    COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.elf
     COMMENT "Flashing firmware to STM32 via ST-Link"
 )
