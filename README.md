@@ -9,7 +9,7 @@ VSCode
 
 ## CPU
 
-STM32F407G-DISC1
+STM32F407G
 
 ## Board
 
@@ -20,7 +20,7 @@ STM32F407G-DISC1
 git submodule add https://github.com/STMicroelectronics/stm32f4xx-hal-driver.git Drivers/stm32f4xx-hal-driver
 git submodule add https://github.com/STMicroelectronics/cmsis-device-f4.git Drivers/cmsis-device-f4
 
-## Linux
+## Linux usefull command
 
     sudo ln -s /opt/stm32cubeclt_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI /usr/bin/
 
@@ -29,6 +29,27 @@ git submodule add https://github.com/STMicroelectronics/cmsis-device-f4.git Driv
     VS Code can hide folders based on your settings.
     Fix:
         Open Command Palette (Ctrl+Shift+P) → type Preferences: Open Settings (JSON) and check for missing folders.
+
+    Common issue in VS Code when IntelliSense doesn't pick up preprocessor definitions that are correctly passed to the compiler via CMake.
+    Sections like #ifdef MY_DEFINICTION are properly recognized and not shadowed:
+    Fix IntelliSense Preprocessor Defines in VS Code:
+        1.Enable CMake Configuration Provider In your .vscode/settings.json, add:
+        {
+        "CMake.configureOnOpen": true,
+        "CMake: UseCMakePresets": "always"
+        }
+        2.Make sure your CMake build generates a compile_commands.json file:
+            set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+        3.Point VS Code to compile_commands.json in .vscode/c_cpp_properties.json, set:
+            "configurations": [
+                {
+                ...
+                "defines": [
+                    "HAL_LIB"
+                ],
+                "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json"
+                }
+            ]
 
 ## Problems
 

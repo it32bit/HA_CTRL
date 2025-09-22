@@ -9,7 +9,6 @@
 #include <stdint.h>
 #include "main.h"
 
-
 /**
  * @brief System Clock Configuration
  * @retval None
@@ -35,6 +34,11 @@
  */
 static void SystemClock_Config(void);
 
+/**
+ *  @brief LD3 GPIO Configuration:
+ *         PD13 ------> LD3
+ */
+static void LD3_Init(void);
 
 /**
  * @brief  The application entry point.
@@ -42,30 +46,31 @@ static void SystemClock_Config(void);
  */
 int main(void)
 {
-    /* Configure the system clock */
-    SystemClock_Config();
+  /* Configure the system clock */
+  SystemClock_Config();
 
+  LD3_Init();
 
-    static uint32_t counter = 0;
-    /* Loop forever */
-    for(;;)
-    {
-        counter++;
-    };
+  static uint32_t counter = 0;
+  /* Loop forever */
+  for (;;)
+  {
+    ++counter;
+  };
 }
 
 void Error_Handler(void)
 {
-    uint32_t loop = 0;
-    __disable_irq();
-    while (1)
-    {
-        ++loop;
-    }
+  uint32_t loop = 0;
+  __disable_irq();
+  while (1)
+  {
+    ++loop;
+  }
 }
 
 /**
- * @description  : Static function 
+ * @description  : Static function
  */
 
 static void SystemClock_Config(void)
@@ -78,8 +83,8 @@ static void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
+   * in the RCC_OscInitTypeDef structure.
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -88,14 +93,14 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 7;
-  
+
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-  */
+   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
@@ -107,4 +112,18 @@ static void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+static void LD3_Init(void)
+{
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+
+  GPIO_InitTypeDef GPIO_InitStruct = {
+      .Pin = GPIO_PIN_13,
+      .Mode = GPIO_MODE_OUTPUT_PP,
+      .Pull = GPIO_NOPULL,
+      .Speed = GPIO_SPEED_FREQ_LOW};
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
 }
