@@ -76,3 +76,5 @@ set(compiler_OPTS ${compiler_OPTS})
 
 # Linker options
 set(linker_OPTS ${linker_OPTS})
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

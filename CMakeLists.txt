@@ -129,6 +129,7 @@ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     STM32F407xx
     USE_HAL_DRIVER
+    USE_FULL_LL_DRIVER
 )
 
 # Linker options

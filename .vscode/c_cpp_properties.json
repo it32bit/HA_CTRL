@@ -18,8 +18,10 @@
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "defines": [
+                "DEBUG",
                 "STM32F407xx",
-                "USE_HAL_DRIVER"
+                "USE_HAL_DRIVER",
+                "USE_FULL_LL_DRIVER"
             ]
         }
     ]
