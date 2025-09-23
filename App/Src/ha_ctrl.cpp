@@ -11,7 +11,39 @@
  * are owned by their respective copyright owners.
  */
 #include "led_ctrl.hpp"
+#include "mod_hal_gpio.hpp"
 #include "ha_ctrl.hpp"
+
+/**
+ * @brief GPIO configuration
+ * @details This will be located in flash, and the configure function will consume the data in pace,
+ * without the need to populate structs in stack memory
+ */
+static const std::array<GPIODEF, 4> gpiodefs = {{
+    // green LED 4
+    {GPIOD, 12, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
+     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
+     GPIODEF::IOSTATE::LOGIC_LOW},
+    // orange LED 3
+    {GPIOD, 13, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
+     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
+     GPIODEF::IOSTATE::LOGIC_LOW},
+    // orange LED 5
+    {GPIOD, 14, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
+     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
+     GPIODEF::IOSTATE::LOGIC_LOW},
+    // orange LED 6
+    {GPIOD, 15, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
+     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
+     GPIODEF::IOSTATE::LOGIC_LOW},
+
+    // ... and so on
+}};
+
+LedController led3(GPIOD, GPIO_PIN_13);
+
+LedController led5(GPIOD, GPIO_PIN_14);
+LedController led6(GPIOD, GPIO_PIN_15);
 
 static void AppInit_cpp();
 
@@ -22,10 +54,6 @@ extern "C" void App_cpp(void)
 {
     /** Initialization code for C++ application can be added here */
     AppInit_cpp();
-
-    LedController led(GPIOD, GPIO_PIN_12);
-
-    led.on();
 
     /** Main loop */
     for (;;)
@@ -39,50 +67,25 @@ extern "C" void App_cpp(void)
 extern "C" void HeartBeat_SysTick(void)
 {
     static uint32_t ticks = 0;
+    LedController led4(GPIOD, GPIO_PIN_12);
+
     if (ticks++ >= 500) // Toggle every 500ms
     {
         ticks = 0;
-        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13); // Toggle LD3
+        led4.toggle();
     }
 }
 
 /**
  * Initialization function for C++ application
  */
-static void LD4_Init(void);
-static void LD3_Init(void);
-
 static void AppInit_cpp()
 {
-    LD4_Init();
-    LD3_Init();
+    Configure(gpiodefs);
+
+    led3.on();
+    led5.on();
+    led6.on();
+
     /** Any initialization code can be added here */
-}
-
-static void LD3_Init(void)
-{
-    /* GPIO Ports Clock Enable */
-    __HAL_RCC_GPIOD_CLK_ENABLE();
-
-    GPIO_InitTypeDef GPIO_InitStruct = {
-        .Pin = GPIO_PIN_13,
-        .Mode = GPIO_MODE_OUTPUT_PP,
-        .Pull = GPIO_NOPULL,
-        .Speed = GPIO_SPEED_FREQ_LOW,
-        .Alternate = 0};
-    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-}
-
-static void LD4_Init(void)
-{
-    /* GPIO Ports Clock Enable */
-    __HAL_RCC_GPIOD_CLK_ENABLE();
-
-    GPIO_InitTypeDef GPIO_InitStruct = {
-        .Pin = GPIO_PIN_12,
-        .Mode = GPIO_MODE_OUTPUT_PP,
-        .Pull = GPIO_NOPULL,
-        .Speed = GPIO_SPEED_FREQ_LOW,
-        .Alternate = 0};
-    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 }
