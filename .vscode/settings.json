@@ -18,7 +18,11 @@
         "system_stm32f4xx.h": "c",
         "core_cm4.h": "c",
         "ha_ctrl.hpp": "c",
-        "led_ctrl.hpp": "c"
+        "led_ctrl.hpp": "c",
+        "cstdint": "cpp",
+        "array": "cpp",
+        "cstdio": "cpp",
+        "concepts": "cpp"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.profiles.linux": {
@@ -42,6 +46,9 @@
     "cortex-debug.variableUseNaturalFormat": false,
     "STM32VSCodeExtension.productFinder.executablePath": "/opt/stmMCUFinder/STMCUFinder",
     "STM32VSCodeExtension.cubeCLT.path": "/opt/stm32cubeclt_1.19.0",
+    "C_Cpp.clang_format_style": "file",
+    "clang-format.executable": "/usr/bin/clang-format",
+    "[cpp]": {"editor.defaultFormatter": "xaver.clang-format"},
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.errorSquiggles": "enabled"
 }

@@ -11,7 +11,8 @@
                 "${workspaceRoot}/**",
                 "${workspaceRoot}/Core/Inc",
                 "${workspaceRoot}/Core/Src",
-                "${workspaceRoot}/App",
+                "${workspaceRoot}/App/Inc",
+                "${workspaceRoot}/App/Src",
                 "${workspaceRoot}/Drivers/stm32f4xx-hal-driver/Inc",
                 "${workspaceRoot}/Drivers/stm32f4xx-hal-driver/Src",
                 "${workspaceRoot}/Drivers/cmsis-device-f4/Include",
@@ -23,7 +24,7 @@
                 "STM32F407xx",
                 "USE_HAL_DRIVER",
                 "USE_FULL_LL_DRIVER",
-                "__cplusplus"
+                "__cplusplus==201703L"
             ],
             "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json"
         }
