@@ -5,8 +5,8 @@
  *                   This file contains the common defines of the application.
  ******************************************************************************
  */
-#ifndef __HA_CTRL_HPP
-#define __HA_CTRL_HPP
+#ifndef __LED_CTRL_HPP
+#define __LED_CTRL_HPP
 
 #include "stm32f4xx_hal.h"
 

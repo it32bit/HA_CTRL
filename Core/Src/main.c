@@ -35,11 +35,6 @@
  */
 static void SystemClock_Config(void);
 
-/**
- *  @brief LD3 GPIO Configuration:
- *         PD13 ------> LD3
- */
-static void LD3_Init(void);
 
 /**
  * @brief  The application entry point.
@@ -52,12 +47,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   HAL_Init();
-  LD3_Init();
 
   /* Call the C++ application entry point with infinite loop */
   App_cpp();
 
-  /* Loop forever - newe goes here */
+  /* We should never get here as App_cpp() contains an infinite loop */
   for (;;)
   {
     ;
@@ -78,18 +72,7 @@ void Error_Handler(void)
   }
 }
 
-/**
- * @brief  Heatbeat LDx Led Toggle
- */
-void Heartbeat(void)
-{
-  static uint32_t ticks = 0;
-  if (ticks++ >= 500) // Toggle every 500ms
-  {
-    ticks = 0;
-    HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13); // Toggle LD3
-  }
-}
+
 
 /**
  * @description  : Static function
@@ -134,19 +117,3 @@ static void SystemClock_Config(void)
     Error_Handler();
   }
 }
-
-static void LD3_Init(void)
-{
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-
-  GPIO_InitTypeDef GPIO_InitStruct = {
-      .Pin = GPIO_PIN_13,
-      .Mode = GPIO_MODE_OUTPUT_PP,
-      .Pull = GPIO_NOPULL,
-      .Speed = GPIO_SPEED_FREQ_LOW};
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
-}
-
-

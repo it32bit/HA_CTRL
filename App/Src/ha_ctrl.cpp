@@ -13,7 +13,6 @@
 #include "led_ctrl.hpp"
 #include "ha_ctrl.hpp"
 
-static void LD4_Init(void);
 static void AppInit_cpp();
 
 /**
@@ -35,12 +34,43 @@ extern "C" void App_cpp(void)
 }
 
 /**
+ * @brief  Heatbeat LDx Led Toggle
+ */
+extern "C" void HeartBeat_SysTick(void)
+{
+    static uint32_t ticks = 0;
+    if (ticks++ >= 500) // Toggle every 500ms
+    {
+        ticks = 0;
+        HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13); // Toggle LD3
+    }
+}
+
+/**
  * Initialization function for C++ application
  */
+static void LD4_Init(void);
+static void LD3_Init(void);
+
 static void AppInit_cpp()
 {
     LD4_Init();
+    LD3_Init();
     /** Any initialization code can be added here */
+}
+
+static void LD3_Init(void)
+{
+    /* GPIO Ports Clock Enable */
+    __HAL_RCC_GPIOD_CLK_ENABLE();
+
+    GPIO_InitTypeDef GPIO_InitStruct = {
+        .Pin = GPIO_PIN_13,
+        .Mode = GPIO_MODE_OUTPUT_PP,
+        .Pull = GPIO_NOPULL,
+        .Speed = GPIO_SPEED_FREQ_LOW,
+        .Alternate = 0};
+    HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 }
 
 static void LD4_Init(void)
@@ -52,7 +82,7 @@ static void LD4_Init(void)
         .Pin = GPIO_PIN_12,
         .Mode = GPIO_MODE_OUTPUT_PP,
         .Pull = GPIO_NOPULL,
-        .Speed = GPIO_SPEED_FREQ_LOW};
+        .Speed = GPIO_SPEED_FREQ_LOW,
+        .Alternate = 0};
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
 }

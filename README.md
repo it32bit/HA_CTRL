@@ -32,7 +32,8 @@ git submodule add <https://github.com/STMicroelectronics/cmsis-device-f4.git> Dr
 
     Common issue in VS Code when IntelliSense doesn't pick up preprocessor definitions that are correctly passed to the compiler via CMake.
     Sections like #ifdef MY_DEFINICTION are properly recognized and not shadowed:
-    Fix IntelliSense Preprocessor Defines in VS Code:
+
+    Fix: IntelliSense Preprocessor Defines in VS Code:
         1.Enable CMake Configuration Provider In your .vscode/settings.json, add:
         {
         "CMake.configureOnOpen": true,

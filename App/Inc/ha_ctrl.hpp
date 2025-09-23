@@ -13,6 +13,7 @@ extern "C"
 {
 #endif
 
+    void HeartBeat_SysTick(void);
     void App_cpp(void);
 
 #ifdef __cplusplus

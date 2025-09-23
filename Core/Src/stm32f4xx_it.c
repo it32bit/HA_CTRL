@@ -18,6 +18,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "ha_ctrl.hpp"
 #include "stm32f4xx_it.h"
 
 /******************************************************************************/
@@ -102,5 +103,5 @@ void DebugMon_Handler(void)
 void SysTick_Handler(void)
 {
   HAL_IncTick(); // Required if using HAL
-  Heartbeat();
+  HeartBeat_SysTick();
 }

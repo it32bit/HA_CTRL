@@ -16,7 +16,9 @@
         "stm32f407xx.h": "c",
         "main.h": "c",
         "system_stm32f4xx.h": "c",
-        "core_cm4.h": "c"
+        "core_cm4.h": "c",
+        "ha_ctrl.hpp": "c",
+        "led_ctrl.hpp": "c"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.profiles.linux": {
