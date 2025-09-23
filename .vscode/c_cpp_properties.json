@@ -11,6 +11,7 @@
                 "${workspaceRoot}/**",
                 "${workspaceRoot}/Core/Inc",
                 "${workspaceRoot}/Core/Src",
+                "${workspaceRoot}/App",
                 "${workspaceRoot}/Drivers/stm32f4xx-hal-driver/Inc",
                 "${workspaceRoot}/Drivers/stm32f4xx-hal-driver/Src",
                 "${workspaceRoot}/Drivers/cmsis-device-f4/Include",

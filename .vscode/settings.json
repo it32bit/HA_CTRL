@@ -40,5 +40,6 @@
     "cortex-debug.variableUseNaturalFormat": false,
     "STM32VSCodeExtension.productFinder.executablePath": "/opt/stmMCUFinder/STMCUFinder",
     "STM32VSCodeExtension.cubeCLT.path": "/opt/stm32cubeclt_1.19.0",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.errorSquiggles": "enabled"
 }
