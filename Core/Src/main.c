@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include "main.h"
+#include "ha_ctrl.hpp"
 
 /**
  * @brief System Clock Configuration
@@ -53,12 +54,14 @@ int main(void)
   HAL_Init();
   LD3_Init();
 
-  static uint32_t counter = 0;
-  /* Loop forever */
+  /* Call the C++ application entry point with infinite loop */
+  App_cpp();
+
+  /* Loop forever - newe goes here */
   for (;;)
   {
-    ++counter;
-  };
+    ;
+  }
 }
 
 /**
@@ -120,8 +123,7 @@ static void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
    */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -146,3 +148,5 @@ static void LD3_Init(void)
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
 }
+
+
