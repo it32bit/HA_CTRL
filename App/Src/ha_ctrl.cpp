@@ -15,27 +15,24 @@
 #include "ha_ctrl.hpp"
 
 /**
- * @brief GPIO configuration
+ * @brief   GPIO PIN configuration array
+ *
  * @details This will be located in flash, and the configure function will consume the data in pace,
- * without the need to populate structs in stack memory
+ *          without the need to populate structs in stack memory
  */
-static const std::array<GPIODEF, 4> gpiodefs = {{
+static const std::array<IOD, 4> IODs = {{
     // green LED 4
-    {GPIOD, 12, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
-     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
-     GPIODEF::IOSTATE::LOGIC_LOW},
+    {GPIOD, 12, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
     // orange LED 3
-    {GPIOD, 13, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
-     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
-     GPIODEF::IOSTATE::LOGIC_LOW},
+    {GPIOD, 13, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
     // orange LED 5
-    {GPIOD, 14, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
-     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
-     GPIODEF::IOSTATE::LOGIC_LOW},
+    {GPIOD, 14, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
     // orange LED 6
-    {GPIOD, 15, GPIODEF::IOFUNCTION::OUTPUT, 0, GPIODEF::IOTYPE::NORMAL, GPIODEF::IOSPEED::LOW,
-     GPIODEF::IOPULL::NONEPULL, GPIODEF::IOEXTI::NONEEXTI, GPIODEF::IOTRIGGER::NONETRG,
-     GPIODEF::IOSTATE::LOGIC_LOW},
+    {GPIOD, 15, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
 
     // ... and so on
 }};
@@ -67,7 +64,7 @@ extern "C" void App_cpp(void)
 extern "C" void HeartBeat_SysTick(void)
 {
     static uint32_t ticks = 0;
-    LedController led4(GPIOD, GPIO_PIN_12);
+    LedController   led4(GPIOD, GPIO_PIN_12);
 
     if (ticks++ >= 500) // Toggle every 500ms
     {
@@ -81,7 +78,7 @@ extern "C" void HeartBeat_SysTick(void)
  */
 static void AppInit_cpp()
 {
-    Configure(gpiodefs);
+    hal_ConfigGpio(IODs);
 
     led3.on();
     led5.on();

@@ -3,16 +3,57 @@
 #include "stm32f4xx_ll_system.h"
 #include "stm32f4xx_ll_exti.h"
 
-static constexpr bool     gpio_ClockEnable(const GPIO_TypeDef* port);
-static constexpr uint32_t gpio_ExtiLine(const uint32_t PinNumber);
-static constexpr uint32_t gpio_PinPositionTable(const uint32_t PinNumber);
+static constexpr bool     clockEnable(const GPIO_TypeDef* port);
+static constexpr uint32_t extiLine(const uint32_t PinNumber);
+static constexpr uint32_t pinPosition(const uint32_t PinNumber);
+static constexpr uint32_t extiLine(const uint32_t PinNumber);
 
-static constexpr uint32_t gpio_ExtiLine(const uint32_t PinNumber)
+/**
+ * @brief Lower-level hal_ConfigGpio(def) function to handle individual GPIO setup.
+ */
+bool hal_ConfigGpio(const IOD& io)
+{
+    clockEnable(io.GPIO);
+
+    LL_GPIO_SetPinSpeed(io.GPIO, pinPosition(io.PinNumber), io.Speed);
+    LL_GPIO_SetPinOutputType(io.GPIO, pinPosition(io.PinNumber), io.Type);
+    LL_GPIO_SetPinPull(io.GPIO, pinPosition(io.PinNumber), io.Pupdr);
+
+    if (io.Mode == IOD::MODER::ANALOG)
+    {
+        if (io.PinNumber < 9u)
+        {
+            LL_GPIO_SetAFPin_0_7(io.GPIO, pinPosition(io.PinNumber), io.AltFunc);
+        }
+        else
+        {
+            LL_GPIO_SetAFPin_8_15(io.GPIO, pinPosition(io.PinNumber), io.AltFunc);
+        }
+    }
+    LL_GPIO_SetPinMode(io.GPIO, pinPosition(io.PinNumber), io.Mode);
+
+    if(io.Mode == IOD::MODER::OUTPUT)
+    {
+        
+    }
+
+/**
+ * @deprecated Configure the External Interrupt or event for the current IO
+ *             NOT SUPPORTET
+ */
+    return true;
+}
+
+/**
+ * @section Static function hal_gpio.cpp
+ */
+
+static constexpr uint32_t extiLine(const uint32_t PinNumber)
 {
     return (PinNumber & 0x03U) | ((PinNumber - 1u) << 16U);
 }
 
-constexpr uint32_t gpio_PinPositionTable(const uint32_t PinNumber)
+static constexpr uint32_t pinPosition(const uint32_t PinNumber)
 {
     if (PinNumber > 15u)
         return 0u;
@@ -20,67 +61,9 @@ constexpr uint32_t gpio_PinPositionTable(const uint32_t PinNumber)
 }
 
 /**
- * @brief Configure the port pins
- */
-bool Configure(const GPIODEF& def)
-{
-    gpio_ClockEnable(def.GPIO);
-
-    LL_GPIO_SetPinSpeed(def.GPIO, gpio_PinPositionTable(def.PinNumber), def.Speed);
-    LL_GPIO_SetPinOutputType(def.GPIO, gpio_PinPositionTable(def.PinNumber), def.Type);
-    LL_GPIO_SetPinPull(def.GPIO, gpio_PinPositionTable(def.PinNumber), def.Bias);
-
-    if (def.Function == GPIODEF::IOFUNCTION::ANALOG)
-    {
-        if (def.PinNumber < 9u)
-        {
-            LL_GPIO_SetAFPin_0_7(def.GPIO, gpio_PinPositionTable(def.PinNumber), def.AltFunc);
-        }
-        else
-        {
-            LL_GPIO_SetAFPin_8_15(def.GPIO, gpio_PinPositionTable(def.PinNumber), def.AltFunc);
-        }
-    }
-    LL_GPIO_SetPinMode(def.GPIO, gpio_PinPositionTable(def.PinNumber), def.Function);
-
-    /* Configure the External Interrupt or event for the current IO */
-    if (def.Exti != GPIODEF::IOEXTI::NONEEXTI)
-    {
-        /* Enable SYSCFG Clock */
-        __HAL_RCC_SYSCFG_CLK_ENABLE();
-
-        LL_SYSCFG_SetEXTISource(GPIO_GET_INDEX(def.GPIO), gpio_ExtiLine(def.PinNumber));
-
-        /* Clear Rising Falling edge configuration */
-        LL_SYSCFG_SetEXTISource(GPIO_GET_INDEX(def.GPIO), gpio_ExtiLine(def.PinNumber));
-
-        // Configure EXTI line
-        gpio_PinPositionTable(def.PinNumber);
-
-        LL_EXTI_EnableIT_0_31(gpio_PinPositionTable(def.PinNumber));
-
-        if (def.Trigg == GPIODEF::IOTRIGGER::RISING)
-        {
-            LL_EXTI_EnableRisingTrig_0_31(gpio_PinPositionTable(def.PinNumber));
-        }
-        else
-        {
-            LL_EXTI_EnableFallingTrig_0_31(gpio_PinPositionTable(def.PinNumber));
-        }
-
-        LL_EXTI_EnableEvent_0_31(gpio_ExtiLine(def.PinNumber));
-
-        /* Clear EXTI line configuration */
-        LL_EXTI_EnableIT_0_31(gpio_ExtiLine(def.PinNumber));
-    }
-
-    return true;
-}
-
-/**
  * @brief Perypheral GPIO Clock Enable
  */
-static constexpr bool gpio_ClockEnable(const GPIO_TypeDef* port)
+static constexpr bool clockEnable(const GPIO_TypeDef* port)
 {
     if (port == GPIOA)
     {

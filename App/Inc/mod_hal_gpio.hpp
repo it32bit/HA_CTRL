@@ -1,38 +1,37 @@
 #ifndef MOD_HAL_GPIO_HPP
 #define MOD_HAL_GPIO_HPP
 
-#include <cstddef>
-#include <cstdio>
-#include <cstdint>
 #include <array>
 #include <ranges>
 #include "stm32f4xx.h"
 
-
-using GPIODEF = struct IODefStuct
+/**
+ * @brief Input / Output Definition
+ */
+using IOD = struct GPIOStuct
 {
     GPIO_TypeDef* GPIO;
 
     uint32_t PinNumber;
 
-    enum IOFUNCTION : uint32_t
+    enum MODER : uint32_t
     {
         INPUT    = 0,
         OUTPUT   = 1,
         ALT      = 2,
         ANALOG   = 3,
         OUT_TYPE = 16
-    } Function;
+    } Mode;
 
     uint32_t AltFunc;
 
-    enum IOTYPE : uint32_t
+    enum TYPE : uint32_t
     {
         NORMAL    = 0,
         OPENDRAIN = 1
     } Type;
 
-    enum IOSPEED : uint32_t
+    enum SPEED : uint32_t
     {
         LOW      = 0,
         MEDIUM   = 1,
@@ -40,53 +39,84 @@ using GPIODEF = struct IODefStuct
         VERYHIGH = 3
     } Speed;
 
-    enum IOPULL : uint32_t
+    enum PUPDR : uint32_t
     {
-        NONEPULL = 0,
+        NO       = 0,
         PULLUP   = 1,
         PULLDOWN = 2
-    } Bias;
+    } Pupdr;
 
-    enum IOEXTI : uint32_t
+    enum GEXTI : uint32_t
     {
-        NONEEXTI = 0,
-        IT       = 1,
-        EVT      = 2
+        NONE = 0,
+        IT   = 1,
+        EVT  = 2
     } Exti;
 
-    enum IOTRIGGER : uint32_t
+    enum ITRG : uint32_t
     {
-        NONETRG = 0,
+        NOTRG   = 0,
         RISING  = 1,
         FALLING = 2
-    } Trigg;
+    } Trg;
 
-    enum IOSTATE : uint32_t
+    enum ISTATE : uint32_t
     {
         LOGIC_LOW,
         LOGIC_HIGH,
         DONT_CARE
-    } InitialState;
+    } InitState;
 };
 
-bool Configure(const GPIODEF& def);
+/**
+ * @brief Lower-level hal_ConfigGpio(def) function to handle individual GPIO setup.
+ */
+bool hal_ConfigGpio(const IOD& def);
 
-template <typename Iter> bool Configure(Iter begin, Iter end)
+/**
+ * @section Template hal_gpio.hpp
+ */
+
+/**
+ * @brief   template<typename Iter> bool hal_ConfigGpio
+ * @param   Iter begin
+ * @param   Iter end
+ * @return  bool
+ *
+ * @attention Lower-level hal_ConfigGpio(def) function must exists to handle individual GPIO setup.
+ *
+ * @details Works with raw iterators. Functions provide flexible ways to batch-configure GPIOs
+ *          This function takes a pair of iterators
+ *          and configures each GPIO definition in the range [begin, end).
+ *          It calls hal_ConfigGpio on each element individually.
+ */
+template <typename Iter> bool hal_ConfigGpio(Iter begin, Iter end)
 {
     while (begin != end)
     {
-        Configure(*begin++);
+        hal_ConfigGpio(*begin++);
     }
     return true;
 }
 
+/**
+ * @brief   template <typename T> requires std::ranges::range<T> bool hal_ConfigGpio(const T& iodef)
+ * @param   T& iodef
+ * @return  bool
+ *
+ * @attention Lower-level hal_ConfigGpio(def) function must exists to handle individual GPIO setup.
+ *
+ * @details Works with modern C++ ranges. Functions provide flexible ways to batch-configure GPIOs.
+ *          Template accepts any range-compatible container (like std::vector, std::array, etc.)
+ *          and iterates through it, configuring each GPIO definition using hal_ConfigGpio.
+ */
 template <typename T>
     requires std::ranges::range<T>
-bool Configure(const T& definitions)
+bool hal_ConfigGpio(const T& iodef)
 {
-    for (auto& def : definitions)
+    for (auto& def : iodef)
     {
-        Configure(def);
+        hal_ConfigGpio(def);
     }
     return true;
 }
