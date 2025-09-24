@@ -3,8 +3,8 @@
         "ms-vscode.cpptools",                   // (dependencies to ms-vscode.cpptools-extension-pack)
         "ms-vscode.cpptools-themes",            // (dependencies to ms-vscode.cpptools-extension-pack)
         "ms-vscode.cmake-tools",                // (dependencies to ms-vscode.cpptools-extension-pack)
-        "twxs.cmake",				            // (dependencies to ms-vscode.cpptools-extension-pack)
         "ms-vscode.cpptools-extension-pack",    // Provides CMake and C++ file coloring, completion & support
+        "twxs.cmake",				            // (dependencies to ms-vscode.cpptools-extension-pack)
         "dan-c-underwood.arm",		            // Provides syntax highlighting for the Arm Assembly language
         "zixuanwang.linkerscript",	            // Provides syntax highlighting for linker scripts
         "ms-vscode.hexeditor",                  // Provides hex editor fo viewing & anipulating files in their raw hexadecimal representation

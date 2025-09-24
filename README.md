@@ -1,102 +1,96 @@
-# CPP_HA_CTRL
+# Home Automation Control Unit – Embedded Project
 
-System Supporting Smart Home Control
+This project is a home automation control unit built around the **STM32F4-DISC1** development board. It is designed to manage key household systems including:
 
-## Host
+- Lighting
+- Gate control
+- Air conditioning
 
-Ubuntu 24.04 Lts
-VSCode
+## Software Stack
 
-## CPU
+- Embedded Platform: `STM32F4-DISC1`
+- Microcontroller: `STM32F407G`
+- Programming Language: `C++`
+- Host Environment: `Ubuntu 24.04 LTS`
+- IDE: `VSCode` with extensions.
+- Toolchain: `GCC`, `VSCode`, `CMake`
+- Code Formatting: `clang-format`
 
-STM32F407G
+## Software Stack
 
-## Board
+- **Embedded Platform:** STM32F4-DISC1
+- **Programming Language:** C++
+- **Host Environment:** Ubuntu 24.04 LTS
+- **Toolchain:** GCC, VSCode, CMake
+- **Initial HAL:** External `stm32f4xx-hal-drivers`
+- **Future Plan:** Replace HAL with custom implementation for deeper hardware control
 
-STM32F407G-DISC1
-
-## Submodules
-
-git submodule add <https://github.com/STMicroelectronics/stm32f4xx-hal-driver.git> Drivers/stm32f4xx-hal-driver
-git submodule add <https://github.com/STMicroelectronics/cmsis-device-f4.git> Drivers/cmsis-device-f4
-
-## Linux usefull command
-
-    sudo ln -s /opt/stm32cubeclt_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI /usr/bin/
-
-## VSCode
-
-    VS Code can hide folders based on your settings.
-    Fix:
-        Open Command Palette (Ctrl+Shift+P) → type Preferences: Open Settings (JSON) and check for missing folders.
-
-    Common issue in VS Code when IntelliSense doesn't pick up preprocessor definitions that are correctly passed to the compiler via CMake.
-    Sections like #ifdef MY_DEFINICTION are properly recognized and not shadowed:
-
-    Fix: IntelliSense Preprocessor Defines in VS Code:
-        1.Enable CMake Configuration Provider In your .vscode/settings.json, add:
-        {
-        "CMake.configureOnOpen": true,
-        "CMake: UseCMakePresets": "always"
-        }
-        2.Make sure your CMake build generates a compile_commands.json file:
-            set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-        3.Point VS Code to compile_commands.json in .vscode/c_cpp_properties.json, set:
-            "configurations": [
-                {
-                ...
-                "defines": [
-                    "HAL_LIB"
-                ],
-                "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json"
-                }
-            ]
-
-## Problems
-
-Solution for incorrect toolchain path:
-
-    [Fille:cmake/gcc-arm-none-eabi.cmake]
-    set(TOOLCHAIN_PATH "/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin")
-
-Solution for TAG: "READONLY" in *_FLASH.ld  file. The "READONLY" keyword is only supported in GCC11 and later,
-remove it (in whole file) if using GCC10 or earlier.
-
-    [Fille:stm32f407vgtx_FLASH.ld]
-    ...
-    .init_array (READONLY) :
-    ...
-
-Solution for missing path headers from stm3244xx_hal.h in *.{cpp, hpp} files
-    Section include_c_DIRS include_cxx_DIRS and should contain the same folders
-    # Include directories
-    set(include_c_DIRS ${include_c_DIRS}
-
-        ${CMAKE_CURRENT_SOURCE_DIR}/App/Inc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
-        ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
-    )
-    set(include_cxx_DIRS ${include_cxx_DIRS}
-
-        ${CMAKE_CURRENT_SOURCE_DIR}/App/Inc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
-        ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
-    )
-
-Solution for error: unknown type name 'class' in ha_ctrl.hpp
-    Move your class LedController to a separate led_ctrl.hpp file and expose only C-compatible functions in the header.
-
-## VS Code Settings
-
-"C_Cpp.errorSquiggles": "enabled" - will show error squiggles for: Missing includes, Type mismatches, Undefined symbols, Other IntelliSense-based diagnostics
 
 ## GNU Tools for STM32
 
-"$ /opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin/arm-none-eabi-gcc --version"
+```C
+cmake --version
+cmake version 3.28.3
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+```
 
+```C
+arm-none-eabi-gcc --version
 arm-none-eabi-gcc (GNU Tools for STM32 13.3.rel1.20240926-1715) 13.3.1 20240614
 Copyright (C) 2023 Free Software Foundation, Inc.
+```
+
+```C
+ninja --version
+1.11.1
+```
+
+# VSCode Extensions
+
+```json
+{
+    "recommendations": [
+        "ms-vscode.cpptools",                   // (dependencies to ms-vscode.cpptools-extension-pack)
+        "ms-vscode.cpptools-themes",            // (dependencies to ms-vscode.cpptools-extension-pack)
+        "ms-vscode.cmake-tools",                // (dependencies to ms-vscode.cpptools-extension-pack)
+        "ms-vscode.cpptools-extension-pack",    // Provides CMake and C++ file coloring, completion & support
+        "twxs.cmake",				            // (dependencies to ms-vscode.cpptools-extension-pack)
+        "dan-c-underwood.arm",		            // Provides syntax highlighting for the Arm Assembly language
+        "zixuanwang.linkerscript",	            // Provides syntax highlighting for linker scripts
+        "ms-vscode.hexeditor",                  // Provides hex editor fo viewing & anipulating files in their raw hexadecimal representation
+        "trond-snekvik.gnu-mapfiles",           // Provides syntax highlighting and symbol listing for GNU linker .map files
+        "jeff-hykin.better-cpp-syntax",         // Provides syntax highlighting for C++
+        "marus25.cortex-debug",		            // Provides debug support on Arm Cortex-M
+        "mcu-debug.debug-tracker-vscode",       // Dependencies to "marus25.cortex-debug"
+        "mcu-debug.memory-view",                // Dependencies to "marus25.cortex-debug"
+        "mcu-debug.peripheral-viewer",          // Dependencies to "marus25.cortex-debug"
+        "mcu-debug.rtos-views"                  // Dependencies to "marus25.cortex-debug"
+    ]
+}
+```
+
+## Git Submodules
+
+The project uses the following external dependencies:
+
+``` bash
+[submodule "Drivers/stm32f4xx-hal-driver"]
+    path = Drivers/stm32f4xx-hal-driver
+    url = https://github.com/STMicroelectronics/stm32f4xx-hal-driver.git
+[submodule "Drivers/cmsis-device-f4"]
+    path = Drivers/cmsis-device-f4
+    url = https://github.com/STMicroelectronics/cmsis-device-f4.git
+```
+
+## Project Status
+
+The board is currently in its initial state.
+At this stage, only basic LED blinking functionality has been implemented. No control logic or peripheral interaction is in place yet.
+
+## Goals
+
+- Develop a robust and modular control application
+- Ensure reliable communication between host and embedded system
+- Transition to a custom HAL for optimized performance and flexibility
+
+Stay tuned for updates as the project evolves!
