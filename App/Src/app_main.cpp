@@ -35,6 +35,14 @@ static const std::array<IOD, 4> ioDefinitions = {{
     // ... and so on
 }};
 
+const std::map<std::string, size_t> boardPinNames = {
+    {"LED4", 0}, {"LED3", 1}, {"LED5", 2}, {"LED6", 3}
+
+    // ... and so on
+};
+
+GpioManager<4> gpio(ioDefinitions, boardPinNames);
+
 static void AppInit_cpp();
 
 /**
@@ -57,7 +65,7 @@ extern "C" void App_cpp(void)
 extern "C" void HeartBeat_SysTick(void)
 {
     static uint32_t ticks = 0;
-    PinController   led4(GPIOD, GPIO_PIN_12);
+    auto            led4  = gpio.get("LED4");
 
     if (ticks++ >= 500) // Toggle every 500ms
     {
