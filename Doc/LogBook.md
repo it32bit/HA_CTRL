@@ -131,8 +131,8 @@ Section "include_c_DIRS" & "include_cxx_DIRS" --should contain the same folders-
 
 ## ISSUE-08
 
-Solution for error: unknown type name 'class' in ha_ctrl.hpp when included in main.c
-Fix: Move all class LedController to a separate led_ctrl.hpp file and expose only C-compatible functions in the header.
+Solution for error: unknown type name 'class' in app_main.hpp when included in main.c
+Fix: Move all class LedController to a separate api_gpio.hpp file and expose only C-compatible functions in the header.
 
 ## WARN-09 Related to C++
 
@@ -150,8 +150,8 @@ constexpr std::array<GpioAction, 3> dispatch = { noop, setLow, setHigh };
 
 ```
 
-~/repos/ha-ctrl/App/Inc/mod_hal_gpio.hpp: In function 'constexpr void setOutputLow(GPIO_TypeDef*, uint32_t)':
-~/repos/ha-ctrl/App/Inc/mod_hal_gpio.hpp:89:27: warning: call to non-'constexpr' function 'void LL_GPIO_ResetOutputPin(GPIO_TypeDef*, uint32_t)' [-Winvalid-constexpr]
+~/repos/ha-ctrl/App/Inc/hal_gpio.hpp: In function 'constexpr void setOutputLow(GPIO_TypeDef*, uint32_t)':
+~/repos/ha-ctrl/App/Inc/hal_gpio.hpp:89:27: warning: call to non-'constexpr' function 'void LL_GPIO_ResetOutputPin(GPIO_TypeDef*, uint32_t)' [-Winvalid-constexpr]
    89 |     LL_GPIO_ResetOutputPin(gpio, pin);
 
 ```bash

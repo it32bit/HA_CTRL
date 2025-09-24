@@ -1,5 +1,5 @@
-#ifndef MOD_HAL_GPIO_HPP
-#define MOD_HAL_GPIO_HPP
+#ifndef HAL_GPIO_HPP
+#define HAL_GPIO_HPP
 
 #include <array>
 #include <ranges>
@@ -122,4 +122,4 @@ bool hal_ConfigGpio(const T& iodef)
     return true;
 }
 
-#endif // MOD_HAL_GPIO_HPP
+#endif // HAL_GPIO_HPP

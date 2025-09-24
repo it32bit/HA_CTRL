@@ -1,12 +1,13 @@
 /**
  ******************************************************************************
- * @file           : ha_ctrl.hpp
- * @brief          : Header for ha_ctrl.cpp file.
- *                   This file contains the common defines of the application.
+ * @file        : app_main.hpp
+ * @author      : i32bit
+ * @brief       : Header for app_main.cpp file.
+ * @details     : This file contains the common defines of the application.
  ******************************************************************************
  */
-#ifndef __HA_CTRL_HPP
-#define __HA_CTRL_HPP
+#ifndef __APP_MAIN_HPP
+#define __APP_MAIN_HPP
 
 #ifdef __cplusplus
 extern "C"
@@ -20,4 +21,4 @@ extern "C"
 }
 #endif
 
-#endif /* __HA_CTRL_HPP */
+#endif /* __APP_MAIN_HPP */

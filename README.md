@@ -16,16 +16,6 @@ This project is a home automation control unit built around the **STM32F4-DISC1*
 - Toolchain: `GCC`, `VSCode`, `CMake`
 - Code Formatting: `clang-format`
 
-## Software Stack
-
-- **Embedded Platform:** STM32F4-DISC1
-- **Programming Language:** C++
-- **Host Environment:** Ubuntu 24.04 LTS
-- **Toolchain:** GCC, VSCode, CMake
-- **Initial HAL:** External `stm32f4xx-hal-drivers`
-- **Future Plan:** Replace HAL with custom implementation for deeper hardware control
-
-
 ## GNU Tools for STM32
 
 ```C
@@ -82,6 +72,10 @@ The project uses the following external dependencies:
     url = https://github.com/STMicroelectronics/cmsis-device-f4.git
 ```
 
+## Clock configuration
+
+<img src="./Doc/HaCtrl-ClockConfig.png" alt="Clock">
+
 ## Project Status
 
 The board is currently in its initial state.
@@ -93,4 +87,4 @@ At this stage, only basic LED blinking functionality has been implemented. No co
 - Ensure reliable communication between host and embedded system
 - Transition to a custom HAL for optimized performance and flexibility
 
-Stay tuned for updates as the project evolves!
+*Stay tuned for updates as the project evolves!*

@@ -1,18 +1,16 @@
 /**
  ******************************************************************************
- * @file           : ha_ctrl.cpp
+ * @file           : app_main.cpp
  * @author         : i32bit
  * @brief          : High-level application control logic
  ******************************************************************************
- * This notice applies to any and all portions of this file
- * that are not between comment pairs USER CODE BEGIN and
- * USER CODE END. Other portions of this file, whether
- * inserted by the user or by software development tools
- * are owned by their respective copyright owners.
+ * This software is licensed under the MIT License.
+ * Provided "as is", without warranty of any kind.
+ * The author is not liable for any damages resulting from its use.
+ ******************************************************************************
  */
-#include "led_ctrl.hpp"
-#include "mod_hal_gpio.hpp"
-#include "ha_ctrl.hpp"
+#include "api_gpio.hpp"
+#include "app_main.hpp"
 
 /**
  * @brief   GPIO PIN configuration array
@@ -37,11 +35,6 @@ static const std::array<IOD, 4> ioDefinitions = {{
     // ... and so on
 }};
 
-LedController led3(GPIOD, GPIO_PIN_13);
-
-LedController led5(GPIOD, GPIO_PIN_14);
-LedController led6(GPIOD, GPIO_PIN_15);
-
 static void AppInit_cpp();
 
 /**
@@ -64,7 +57,7 @@ extern "C" void App_cpp(void)
 extern "C" void HeartBeat_SysTick(void)
 {
     static uint32_t ticks = 0;
-    LedController   led4(GPIOD, GPIO_PIN_12);
+    PinController   led4(GPIOD, GPIO_PIN_12);
 
     if (ticks++ >= 500) // Toggle every 500ms
     {
@@ -79,10 +72,6 @@ extern "C" void HeartBeat_SysTick(void)
 static void AppInit_cpp()
 {
     hal_ConfigGpio(ioDefinitions);
-
-    // led3.on();
-    // led5.on();
-    // led6.on();
 
     /** Any initialization code can be added here */
 }
