@@ -32,12 +32,25 @@ bool hal_ConfigGpio(const IOD& io)
     }
     LL_GPIO_SetPinMode(io.GPIO, pinPosition(io.PinNumber), io.Mode);
 
-    if(io.Mode == IOD::MODER::OUTPUT)
+    if (io.Mode == IOD::MODER::OUTPUT)
     {
-        
+        switch (io.InitState)
+        {
+            case IOD::ISTATE::LOGIC_HIGH:
+                LL_GPIO_SetOutputPin(io.GPIO, io.PinNumber);
+                break;
+
+            case IOD::ISTATE::LOGIC_LOW:
+                LL_GPIO_ResetOutputPin(io.GPIO, io.PinNumber);
+                break;
+
+            default:
+                /** Empty on purpose */
+                break;
+        }
     }
 
-/**
+    /**
  * @deprecated Configure the External Interrupt or event for the current IO
  *             NOT SUPPORTET
  */
