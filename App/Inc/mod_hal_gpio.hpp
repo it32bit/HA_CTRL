@@ -4,6 +4,7 @@
 #include <array>
 #include <ranges>
 #include "stm32f4xx.h"
+#include "stm32f4xx_ll_gpio.h"
 
 /**
  * @brief Input / Output Definition
@@ -12,16 +13,15 @@ using IOD = struct GPIOStuct
 {
     GPIO_TypeDef* GPIO;
 
-    uint32_t PinNumber;
+    uint32_t PinNb;
 
     enum MODER : uint32_t
     {
-        INPUT    = 0,
-        OUTPUT   = 1,
-        ALT      = 2,
-        ANALOG   = 3,
-        OUT_TYPE = 16
-    } Mode;
+        INPUT  = 0,
+        OUTPUT = 1,
+        ALT    = 2,
+        ANALOG = 3,
+    } Moder;
 
     uint32_t AltFunc;
 
@@ -62,9 +62,10 @@ using IOD = struct GPIOStuct
 
     enum ISTATE : uint32_t
     {
+        DONT_CARE,
         LOGIC_LOW,
-        LOGIC_HIGH,
-        DONT_CARE
+        LOGIC_HIGH
+
     } InitState;
 };
 

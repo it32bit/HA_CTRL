@@ -20,19 +20,19 @@
  * @details This will be located in flash, and the configure function will consume the data in pace,
  *          without the need to populate structs in stack memory
  */
-static const std::array<IOD, 4> IODs = {{
+static const std::array<IOD, 4> ioDefinitions = {{
     // green LED 4
     {GPIOD, 12, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
      IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
     // orange LED 3
     {GPIOD, 13, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_HIGH},
     // orange LED 5
     {GPIOD, 14, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_HIGH},
     // orange LED 6
     {GPIOD, 15, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_HIGH},
 
     // ... and so on
 }};
@@ -78,11 +78,11 @@ extern "C" void HeartBeat_SysTick(void)
  */
 static void AppInit_cpp()
 {
-    hal_ConfigGpio(IODs);
+    hal_ConfigGpio(ioDefinitions);
 
-    led3.on();
-    led5.on();
-    led6.on();
+    // led3.on();
+    // led5.on();
+    // led6.on();
 
     /** Any initialization code can be added here */
 }

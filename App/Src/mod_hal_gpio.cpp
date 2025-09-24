@@ -1,12 +1,28 @@
 #include "mod_hal_gpio.hpp"
 #include "stm32f4xx_ll_gpio.h"
-#include "stm32f4xx_ll_system.h"
-#include "stm32f4xx_ll_exti.h"
 
 static constexpr bool     clockEnable(const GPIO_TypeDef* port);
-static constexpr uint32_t extiLine(const uint32_t PinNumber);
 static constexpr uint32_t pinPosition(const uint32_t PinNumber);
-static constexpr uint32_t extiLine(const uint32_t PinNumber);
+
+/**
+ * @section Inline hal_gpio
+ */
+using gpioAction = void (*)(GPIO_TypeDef*, uint32_t);
+
+inline void setOutputLow(GPIO_TypeDef* gpio, uint32_t pin)
+{
+    LL_GPIO_ResetOutputPin(gpio, pin);
+}
+
+inline void setOutputHigh(GPIO_TypeDef* gpio, uint32_t pin)
+{
+    LL_GPIO_SetOutputPin(gpio, pin);
+}
+
+inline void setOutputNoop(GPIO_TypeDef*, uint32_t) {}
+
+/** IOD -> enum ISTATE : uint32_t {DONT_CARE,     LOGIC_LOW,    LOGIC_HIGH} */
+inline std::array<gpioAction, 3> outputDispatcher = {setOutputNoop, setOutputLow, setOutputHigh};
 
 /**
  * @brief Lower-level hal_ConfigGpio(def) function to handle individual GPIO setup.
@@ -15,56 +31,39 @@ bool hal_ConfigGpio(const IOD& io)
 {
     clockEnable(io.GPIO);
 
-    LL_GPIO_SetPinSpeed(io.GPIO, pinPosition(io.PinNumber), io.Speed);
-    LL_GPIO_SetPinOutputType(io.GPIO, pinPosition(io.PinNumber), io.Type);
-    LL_GPIO_SetPinPull(io.GPIO, pinPosition(io.PinNumber), io.Pupdr);
+    LL_GPIO_SetPinSpeed(io.GPIO, pinPosition(io.PinNb), io.Speed);
+    LL_GPIO_SetPinOutputType(io.GPIO, pinPosition(io.PinNb), io.Type);
+    LL_GPIO_SetPinPull(io.GPIO, pinPosition(io.PinNb), io.Pupdr);
 
-    if (io.Mode == IOD::MODER::ANALOG)
+    if (io.Moder == IOD::MODER::OUTPUT)
     {
-        if (io.PinNumber < 9u)
+        /** Replace switch-case for IOD::MODER::OUTPUT */
+        outputDispatcher[static_cast<std::size_t>(io.InitState)](io.GPIO, pinPosition(io.PinNb));
+    }
+    else if (io.Moder == IOD::MODER::ANALOG)
+    {
+        if (io.PinNb < 9u)
         {
-            LL_GPIO_SetAFPin_0_7(io.GPIO, pinPosition(io.PinNumber), io.AltFunc);
+            LL_GPIO_SetAFPin_0_7(io.GPIO, pinPosition(io.PinNb), io.AltFunc);
         }
         else
         {
-            LL_GPIO_SetAFPin_8_15(io.GPIO, pinPosition(io.PinNumber), io.AltFunc);
+            LL_GPIO_SetAFPin_8_15(io.GPIO, pinPosition(io.PinNb), io.AltFunc);
         }
     }
-    LL_GPIO_SetPinMode(io.GPIO, pinPosition(io.PinNumber), io.Mode);
 
-    if (io.Mode == IOD::MODER::OUTPUT)
-    {
-        switch (io.InitState)
-        {
-            case IOD::ISTATE::LOGIC_HIGH:
-                LL_GPIO_SetOutputPin(io.GPIO, io.PinNumber);
-                break;
-
-            case IOD::ISTATE::LOGIC_LOW:
-                LL_GPIO_ResetOutputPin(io.GPIO, io.PinNumber);
-                break;
-
-            default:
-                /** Empty on purpose */
-                break;
-        }
-    }
+    LL_GPIO_SetPinMode(io.GPIO, pinPosition(io.PinNb), io.Moder);
 
     /**
- * @deprecated Configure the External Interrupt or event for the current IO
- *             NOT SUPPORTET
- */
+     * @deprecated Configure the External Interrupt or event for the current IO
+     *             NOT SUPPORTET
+     */
     return true;
 }
 
 /**
  * @section Static function hal_gpio.cpp
  */
-
-static constexpr uint32_t extiLine(const uint32_t PinNumber)
-{
-    return (PinNumber & 0x03U) | ((PinNumber - 1u) << 16U);
-}
 
 static constexpr uint32_t pinPosition(const uint32_t PinNumber)
 {

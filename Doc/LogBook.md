@@ -133,3 +133,33 @@ Section "include_c_DIRS" & "include_cxx_DIRS" --should contain the same folders-
 
 Solution for error: unknown type name 'class' in ha_ctrl.hpp when included in main.c
 Fix: Move all class LedController to a separate led_ctrl.hpp file and expose only C-compatible functions in the header.
+
+## WARN-09 Related to C++
+
+```C
+using GpioAction = void(*)(GPIO_TypeDef*, uint32_t);
+
+constexpr void noop(GPIO_TypeDef*, uint32_t) {}
+constexpr void setLow(GPIO_TypeDef* gpio, uint32_t pin) {
+    LL_GPIO_ResetOutputPin(gpio, pin);
+}
+constexpr void setHigh(GPIO_TypeDef* gpio, uint32_t pin) {
+    LL_GPIO_SetOutputPin(gpio, pin);
+}
+constexpr std::array<GpioAction, 3> dispatch = { noop, setLow, setHigh };
+
+```
+
+~/repos/ha-ctrl/App/Inc/mod_hal_gpio.hpp: In function 'constexpr void setOutputLow(GPIO_TypeDef*, uint32_t)':
+~/repos/ha-ctrl/App/Inc/mod_hal_gpio.hpp:89:27: warning: call to non-'constexpr' function 'void LL_GPIO_ResetOutputPin(GPIO_TypeDef*, uint32_t)' [-Winvalid-constexpr]
+   89 |     LL_GPIO_ResetOutputPin(gpio, pin);
+
+```bash
+**constexpr** means “can be evaluated at compile time.”
+But hardware access functions like LL_GPIO_ResetOutputPin() are **runtime-only** — they read/write memory-mapped registers, which the compiler cannot simulate during compilation.
+```
+
+Summary:
+    - constexpr → not allowed for hardware access.
+    - inline → safe and efficient for embedded headers.
+    - static → optional if you want internal linkage in a .cpp file.
