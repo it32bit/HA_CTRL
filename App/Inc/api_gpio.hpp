@@ -4,30 +4,16 @@
  * @author      : i32bit
  * @brief       : API for GPIO perypheral
  ******************************************************************************
+ * This software is licensed under the MIT License.
+ * Provided "as is", without warranty of any kind.
+ * The author is not liable for any damages resulting from its use.
+ ******************************************************************************
  */
 #ifndef __API_GPIO_HPP
 #define __API_GPIO_HPP
 
 #include "hal_gpio.hpp"
-#include <map>
-
-/**
- * @brief Computes the GPIO pin mask for a given pin number.
- *
- * This function returns a bitmask corresponding to the specified GPIO pin.
- * If the pin number is greater than 15, it returns 0.
- *
- * @param pinNumber GPIO pin number (0–15).
- *
- * @details Attribute [[nodiscard]] warns if return value is ignired.
- *          uint_fast8_t - for better perfor
- *
- * @return Bitmask with the corresponding bit set, or 0 if out of range.
- */
-[[nodiscard]] static constexpr uint32_t getGpioPinMask(const uint_fast8_t pinNumber)
-{
-    return (pinNumber > 15u) ? 0u : (1u << pinNumber);
-}
+#include <string_view>
 
 /**
  * Simple PIN controller class
@@ -53,31 +39,31 @@ class PinController
 template <size_t N> class GpioManager
 {
   public:
-    GpioManager(const std::array<IOD, N>& ioDefs, const std::map<std::string, size_t>& nameMap)
-        : pinArrayDef(ioDefs), nMap(nameMap)
+    GpioManager(const std::array<IOD, N>&                                 ioDefs,
+                const std::array<std::pair<std::string_view, size_t>, N>& nameDefs)
+        : ioDefCfg(ioDefs), pinLabelArray(nameDefs)
     {
     }
 
-    PinController get(const std::string& name) const
+    PinController get(std::string_view pinLabel) const
     {
-        auto it = nMap.find(name);
-        if (it != nMap.end() && it->second <= N)
+        for (const auto& entry : pinLabelArray)
         {
-            return PinController(pinArrayDef[it->second]);
-        }
-        else
-        {
-            for (;;)
+            if (entry.first == pinLabel)
             {
-                /** Empty on purpose */
+                return PinController(ioDefCfg[static_cast<int>(entry.second)]);
             }
+        }
+
+        for (;;)
+        {
+            /** Empty on purpose */
         }
     }
 
   private:
-    const std::array<IOD, N>& pinArrayDef;
-
-    const std::map<std::string, size_t> nMap;
+    const std::array<IOD, N>&                                 ioDefCfg;
+    const std::array<std::pair<std::string_view, size_t>, N>& pinLabelArray;
 };
 
 #endif /* __API_GPIO_HPP */

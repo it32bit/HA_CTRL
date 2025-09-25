@@ -23,7 +23,9 @@
         "cstdint": "cpp",
         "array": "cpp",
         "cstdio": "cpp",
-        "concepts": "cpp"
+        "concepts": "cpp",
+        "string_view": "cpp",
+        "typeinfo": "cpp"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.profiles.linux": {

@@ -24,7 +24,7 @@
                 "STM32F407xx",
                 "USE_HAL_DRIVER",
                 "USE_FULL_LL_DRIVER",
-                "__cplusplus==201703L"
+                "__cplusplus==202002L"
             ],
             "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json"
         }

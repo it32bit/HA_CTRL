@@ -202,3 +202,44 @@ extern "C" int _getentropy(void* buffer, size_t length) {
     return -1; // always fail, It will override the weak symbol from libc.a
 }
 ```
+
+First warning occur in:
+    Commit: 3cdf35e7fbd82525eff7aa2b03ea5bee3f99f225
+    Date: Thu Sep 25 2025 01:32:08 GMT+0200 (Central European Summer Time)
+    Generic GpioManager implemented.
+
+Related to adding `map` array.
+
+## INFO-11 Code Size
+
+```bash
+[14/14] Linking CXX executable ~/repos/ha-ctrl/bin/ha-ctrl.elf
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4248 B       128 KB      3.24%
+           FLASH:       75432 B         1 MB      7.19%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  73636    1784    2464   77884   1303c ~/repos/ha-ctrl/bin/ha-ctrl.elf
+build finished successfully.
+```
+
+## INFO-12 Code Size
+
+```bash
+[14/14] Linking CXX executable ~/repos/ha-ctrl/bin/ha-ctrl.elf
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        2016 B       128 KB      1.54%
+           FLASH:        5428 B         1 MB      0.52%
+******** Print size information:
+   text    data     bss     dec     hex filename
+   5400      28    1988    7416    1cf8 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+build finished successfully.
+```
+
+Replaced 'map' array to 'pair' array and constexpr for pinLabelDefArray.
+Those changes were fix WARN-10 and no need to use stub for _getentropy.
+
+Make pinLabelDefArray constexpr for compile-time evaluation, adjust GpioManager to accept const reference.
+Fix WARN-10, no need to use stub for _getentropy.

@@ -36,23 +36,24 @@ static const std::array<IOD, 4> ioPinConfiguratnionArray = {{
 }};
 
 /**
- * @brief Maps board pin names to their corresponding index in ioPinConfiguratnionArray.
+ * @brief Compile-time pin name to their corresponding index in ioPinConfiguratnionArray.
  *
- * This map allows name-based access to GPIO configurations. Each string key (e.g. "LD4")
+ * This pair allows name-based access to GPIO configurations. Each string key (e.g. "LED_GREEN")
  * corresponds to an index in the ioPinConfiguratnionArray, which holds the actual pin setup.
  *
  * Example:
  * @code
  *      size_t index = boardPinNames.at("LED_RED");         // returns 2
  *      const IOD& pin = ioPinConfiguratnionArray[index];   // access GPIO definition
- *      // In one line to all pins (size )
- *      GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinNamesMap);
+ *
+ *      // In one line configuration to all pins.
+ *      GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinLabelDefArray);
  * @endcode
  */
-const std::map<std::string, size_t> pinNamesMap = {
-    {"LED_GREEN", 0}, {"LED_ORANGE", 1}, {"LED_RED", 2}, {"LED_BLUE", 3}};
+constexpr std::array<std::pair<std::string_view, size_t>, 4> pinLabelDefArray = {
+    {{"LED_GREEN", 0}, {"LED_ORANGE", 1}, {"LED_RED", 2}, {"LED_BLUE", 3}}};
 
-GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinNamesMap);
+GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinLabelDefArray);
 
 static void AppInit_cpp();
 
@@ -94,13 +95,4 @@ static void AppInit_cpp()
     hal_ConfigGpio(ioPinConfiguratnionArray);
 
     /** Any initialization code can be added here */
-}
-
-/**
- * @warning WARN-10 Provide a stub to silence the warning:
- *          libc_a-getentropyr.o: _getentropy is not implemented and will always fail
- */
-extern "C" int _getentropy(void* buffer, size_t length)
-{
-    return -1; // It will override the weak symbol from libc.a
 }

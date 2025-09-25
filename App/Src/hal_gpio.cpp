@@ -1,8 +1,8 @@
 #include "hal_gpio.hpp"
 #include "stm32f4xx_ll_gpio.h"
 
-static constexpr bool     clockEnable(const GPIO_TypeDef* port);
-static constexpr uint32_t pinPosition(const uint32_t PinNumber);
+
+static constexpr bool clockEnable(const GPIO_TypeDef* port);
 
 /**
  * @section Inline hal_gpio
@@ -31,45 +31,34 @@ bool hal_ConfigGpio(const IOD& io)
 {
     clockEnable(io.GPIO);
 
-    LL_GPIO_SetPinSpeed(io.GPIO, pinPosition(io.PinNb), io.Speed);
-    LL_GPIO_SetPinOutputType(io.GPIO, pinPosition(io.PinNb), io.Type);
-    LL_GPIO_SetPinPull(io.GPIO, pinPosition(io.PinNb), io.Pupdr);
+    LL_GPIO_SetPinSpeed(io.GPIO, getGpioPinMask(io.PinNb), io.Speed);
+    LL_GPIO_SetPinOutputType(io.GPIO, getGpioPinMask(io.PinNb), io.Type);
+    LL_GPIO_SetPinPull(io.GPIO, getGpioPinMask(io.PinNb), io.Pupdr);
 
     if (io.Moder == IOD::MODER::OUTPUT)
     {
         /** Replace switch-case for IOD::MODER::OUTPUT */
-        outputDispatcher[static_cast<std::size_t>(io.InitState)](io.GPIO, pinPosition(io.PinNb));
+        outputDispatcher[static_cast<std::size_t>(io.InitState)](io.GPIO, getGpioPinMask(io.PinNb));
     }
     else if (io.Moder == IOD::MODER::ANALOG)
     {
         if (io.PinNb < 9u)
         {
-            LL_GPIO_SetAFPin_0_7(io.GPIO, pinPosition(io.PinNb), io.AltFunc);
+            LL_GPIO_SetAFPin_0_7(io.GPIO, getGpioPinMask(io.PinNb), io.AltFunc);
         }
         else
         {
-            LL_GPIO_SetAFPin_8_15(io.GPIO, pinPosition(io.PinNb), io.AltFunc);
+            LL_GPIO_SetAFPin_8_15(io.GPIO, getGpioPinMask(io.PinNb), io.AltFunc);
         }
     }
 
-    LL_GPIO_SetPinMode(io.GPIO, pinPosition(io.PinNb), io.Moder);
+    LL_GPIO_SetPinMode(io.GPIO, getGpioPinMask(io.PinNb), io.Moder);
 
     /**
      * @deprecated Configure the External Interrupt or event for the current IO
      *             NOT SUPPORTET
      */
     return true;
-}
-
-/**
- * @section Static function hal_gpio.cpp
- */
-
-static constexpr uint32_t pinPosition(const uint32_t PinNumber)
-{
-    if (PinNumber > 15u)
-        return 0u;
-    return (uint32_t)1u << (PinNumber);
 }
 
 /**

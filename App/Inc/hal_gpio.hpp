@@ -65,9 +65,26 @@ using IOD = struct GPIOStuct
         DONT_CARE,
         LOGIC_LOW,
         LOGIC_HIGH
-
     } InitState;
 };
+
+/**
+ * @brief Computes the GPIO pin mask for a given pin number.
+ *
+ * This function returns a bitmask corresponding to the specified GPIO pin.
+ * If the pin number is greater than 15, it returns 0.
+ *
+ * @param pinNumber GPIO pin number (0–15).
+ *
+ * @details Attribute [[nodiscard]] warns if return value is ignired.
+ *          uint_fast8_t - for better perfor
+ *
+ * @return Bitmask with the corresponding bit set, or 0 if out of range.
+ */
+[[nodiscard]] constexpr uint32_t getGpioPinMask(const uint_fast8_t pinNumber)
+{
+    return (pinNumber > 15u) ? 0u : (1u << pinNumber);
+}
 
 /**
  * @brief Lower-level hal_ConfigGpio(def) function to handle individual GPIO setup.

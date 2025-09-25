@@ -12,7 +12,7 @@ This project is a home automation control unit built around the **STM32F4-DISC1*
 - Microcontroller: `STM32F407G`
 - Programming Language: `C++`
 - Host Environment: `Ubuntu 24.04 LTS`
-- IDE: `VSCode` with extensions.
+- IDE: `VSCode` with extensions and `STM32CubeMX`
 - Toolchain: `GCC`, `VSCode`, `CMake`
 - Code Formatting: `clang-format`
 
@@ -35,7 +35,7 @@ ninja --version
 1.11.1
 ```
 
-# VSCode Extensions
+## VSCode Extensions
 
 ```json
 {
@@ -44,13 +44,13 @@ ninja --version
         "ms-vscode.cpptools-themes",            // (dependencies to ms-vscode.cpptools-extension-pack)
         "ms-vscode.cmake-tools",                // (dependencies to ms-vscode.cpptools-extension-pack)
         "ms-vscode.cpptools-extension-pack",    // Provides CMake and C++ file coloring, completion & support
-        "twxs.cmake",				            // (dependencies to ms-vscode.cpptools-extension-pack)
-        "dan-c-underwood.arm",		            // Provides syntax highlighting for the Arm Assembly language
-        "zixuanwang.linkerscript",	            // Provides syntax highlighting for linker scripts
+        "twxs.cmake",                           // (dependencies to ms-vscode.cpptools-extension-pack)
+        "dan-c-underwood.arm",                  // Provides syntax highlighting for the Arm Assembly language
+        "zixuanwang.linkerscript",              // Provides syntax highlighting for linker scripts
         "ms-vscode.hexeditor",                  // Provides hex editor fo viewing & anipulating files in their raw hexadecimal representation
         "trond-snekvik.gnu-mapfiles",           // Provides syntax highlighting and symbol listing for GNU linker .map files
         "jeff-hykin.better-cpp-syntax",         // Provides syntax highlighting for C++
-        "marus25.cortex-debug",		            // Provides debug support on Arm Cortex-M
+        "marus25.cortex-debug",                 // Provides debug support on Arm Cortex-M
         "mcu-debug.debug-tracker-vscode",       // Dependencies to "marus25.cortex-debug"
         "mcu-debug.memory-view",                // Dependencies to "marus25.cortex-debug"
         "mcu-debug.peripheral-viewer",          // Dependencies to "marus25.cortex-debug"
@@ -74,7 +74,7 @@ The project uses the following external dependencies:
 
 ## Clock configuration
 
-<img src="./Doc/HaCtrl-ClockConfig.png" alt="Clock">
+<img src="./Doc/HaCtrl-ClockConfig.png" alt="Clock configuration">
 
 ## Project Status
 
