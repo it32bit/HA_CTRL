@@ -243,3 +243,30 @@ Those changes were fix WARN-10 and no need to use stub for _getentropy.
 
 Make pinLabelDefArray constexpr for compile-time evaluation, adjust GpioManager to accept const reference.
 Fix WARN-10, no need to use stub for _getentropy.
+
+## INFO-13 `std::string_view`
+
+Why use `std::string_view` instead of `std::string` in in `std::pair<std::string_view, size_t>`
+
+Use of std::string_view is a deliberate choice for performance and efficiency, especially in contexts like compile-time mapping or read-only lookup tables.
+
+1. No ownership or allocation
+-std::string_view is a lightweight, non-owning view into a string.
+-It doesn’t allocate memory or copy data — it just points to an existing string buffer.
+
+2. Faster and cheaper
+-Ideal for read-only access to string data.
+-Much faster than std::string when you don’t need to modify or store the string.
+
+3. Works well with constexpr
+-std::string is not constexpr-friendly due to dynamic allocation.
+-std::string_view can be used in constexpr contexts, making it perfect for compile-time.
+
+4. Avoids unnecessary copies
+If you use std::string, each entry would copy the string into the container.
+With string_view, it just references the original string literal.
+
+Use std::string_view when:
+ -You’re working with string literals or static strings.
+ -You want fast, read-only access.
+ -You’re building constexpr data structures.

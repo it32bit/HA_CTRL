@@ -12,49 +12,12 @@
 #include "api_gpio.hpp"
 #include "app_main.hpp"
 
-/**
- * @brief   GPIO PIN configuration array
- *
- * @details This will be located in flash, and the configure function will consume the data in pace,
- *          without the need to populate structs in stack memory
- */
-static const std::array<IOD, 4> ioPinConfiguratnionArray = {{
-    // green LED 4
-    {GPIOD, 12, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
-    // orange LED 3
-    {GPIOD, 13, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
-    // orange LED 5
-    {GPIOD, 14, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
-    // orange LED 6
-    {GPIOD, 15, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
-
-    // ... and so on
-}};
+extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;
 
 /**
- * @brief Compile-time pin name to their corresponding index in ioPinConfiguratnionArray.
- *
- * This pair allows name-based access to GPIO configurations. Each string key (e.g. "LED_GREEN")
- * corresponds to an index in the ioPinConfiguratnionArray, which holds the actual pin setup.
- *
- * Example:
- * @code
- *      size_t index = boardPinNames.at("LED_RED");         // returns 2
- *      const IOD& pin = ioPinConfiguratnionArray[index];   // access GPIO definition
- *
- *      // In one line configuration to all pins.
- *      GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinLabelDefArray);
- * @endcode
+ * @brief Static declaration
+ *          AppInit_cpp
  */
-constexpr std::array<std::pair<std::string_view, size_t>, 4> pinLabelDefArray = {
-    {{"LED_GREEN", 0}, {"LED_ORANGE", 1}, {"LED_RED", 2}, {"LED_BLUE", 3}}};
-
-GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinLabelDefArray);
-
 static void AppInit_cpp();
 
 /**
@@ -78,7 +41,7 @@ extern "C" void HeartBeat_SysTick(void)
 {
     static uint32_t ticks = 0u;
 
-    auto ledHeartBeat = gpioMannager.get("LED_GREEN");
+    auto ledHeartBeat = ioDispatcher.get("LED_GREEN");
 
     if (ticks++ >= 500)
     {
@@ -92,7 +55,7 @@ extern "C" void HeartBeat_SysTick(void)
  */
 static void AppInit_cpp()
 {
-    hal_ConfigGpio(ioPinConfiguratnionArray);
+    hal_ConfigGpio(ioPinConfigDefArray);
 
     /** Any initialization code can be added here */
 }

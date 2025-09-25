@@ -25,6 +25,8 @@ set(sources_SRCS ${sources_SRCS}
 
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/app_main.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_gpio.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/cfg_gpio.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/disp_gpio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/sysmem.c

@@ -15,6 +15,13 @@
 #include "hal_gpio.hpp"
 #include <string_view>
 
+constexpr size_t PIN_CONFIG_ARRAY_SIZE = 5;
+
+extern const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray;
+extern const std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SIZE>
+    pinLabelDefArray;
+
+
 /**
  * Simple PIN controller class
  */
@@ -36,11 +43,11 @@ class PinController
     uint32_t      ioPin;
 };
 
-template <size_t N> class GpioManager
+template <size_t N> class GpioDispatcher
 {
   public:
-    GpioManager(const std::array<IOD, N>&                                 ioDefs,
-                const std::array<std::pair<std::string_view, size_t>, N>& nameDefs)
+    GpioDispatcher(const std::array<IOD, N>&                                 ioDefs,
+                   const std::array<std::pair<std::string_view, size_t>, N>& nameDefs)
         : ioDefCfg(ioDefs), pinLabelArray(nameDefs)
     {
     }
