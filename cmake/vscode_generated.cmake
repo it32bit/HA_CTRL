@@ -38,6 +38,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_gpio.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_cortex.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc_ex.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_exti.c
 )
 
 # Include directories

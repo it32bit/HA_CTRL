@@ -35,6 +35,24 @@ extern "C" void App_cpp(void)
 }
 
 /**
+ * Initialization function for C++ application
+ */
+static void AppInit_cpp()
+{
+    hal_ConfigGpio(ioPinConfigDefArray);
+
+    /** Any initialization code can be added here */
+}
+
+static void UserButton_Handler();
+
+static void UserButton_Handler()
+{
+    auto ledButton = ioDispatcher.get("LED_BLUE");
+    ledButton.toggle();
+}
+
+/**
  * @brief  Heatbeat Led Toggle every 500[ms]
  */
 extern "C" void HeartBeat_SysTick(void)
@@ -51,11 +69,19 @@ extern "C" void HeartBeat_SysTick(void)
 }
 
 /**
- * Initialization function for C++ application
+ * @brief  Callback function for Externall Interrupt on Gpio
  */
-static void AppInit_cpp()
+extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    hal_ConfigGpio(ioPinConfigDefArray);
+    if (GPIO_Pin == GPIO_PIN_0)
+    {
+        static uint32_t lastPress = 0;
+        uint32_t        now       = HAL_GetTick(); // milliseconds since startup
 
-    /** Any initialization code can be added here */
+        if (now - lastPress > 200) // debounce threshold in ms
+        {
+            lastPress = now;
+            UserButton_Handler();
+        }
+    }
 }

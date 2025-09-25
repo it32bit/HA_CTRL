@@ -55,9 +55,10 @@ using IOD = struct GPIOStuct
 
     enum ITRG : uint32_t
     {
-        NOTRG   = 0,
-        RISING  = 1,
-        FALLING = 2
+        NOTRG    = 0,
+        RISING   = 1,
+        FALLING  = 2,
+        RIS_FALL = 3
     } Trg;
 
     enum ISTATE : uint32_t
@@ -81,10 +82,8 @@ using IOD = struct GPIOStuct
  *
  * @return Bitmask with the corresponding bit set, or 0 if out of range.
  */
-[[nodiscard]] constexpr uint32_t getGpioPinMask(const uint_fast8_t pinNumber)
-{
-    return (pinNumber > 15u) ? 0u : (1u << pinNumber);
-}
+    [[nodiscard]] constexpr uint32_t getGpioPinMask(const uint_fast8_t pinNumber){
+        return (pinNumber > 15u) ? 0u : (1u << pinNumber);}
 
 /**
  * @brief Lower-level hal_ConfigGpio(def) function to handle individual GPIO setup.

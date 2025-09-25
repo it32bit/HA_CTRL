@@ -102,3 +102,11 @@ void SysTick_Handler(void)
     HAL_IncTick(); // Required if using HAL
     HeartBeat_SysTick();
 }
+
+/**
+ * @brief This function handles External Interrupts
+ */
+void EXTI0_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+}
