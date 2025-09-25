@@ -163,3 +163,42 @@ Summary:
     - constexpr → not allowed for hardware access.
     - inline → safe and efficient for embedded headers.
     - static → optional if you want internal linkage in a .cpp file.
+
+## WARN-10 Related to C++
+
+```bash
+[14/14] Linking CXX executable ~/repos/ha-ctrl/bin/ha-ctrl.elf
+/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/bin/ld: /opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc.a(libc_a-getentropyr.o): in function `_getentropy_r':
+(.text._getentropy_r+0xe): warning: _getentropy is not implemented and will always fail
+/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/bin/ld: /opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc.a(libc_a-getentropyr.o): note: the message above does not take linker garbage collection into account
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4248 B       128 KB      3.24%
+           FLASH:       75432 B         1 MB      7.19%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  73636    1784    2464   77884   1303c ~/repos/ha-ctrl/bin/ha-ctrl.elf
+build finished with warning(s).
+```
+
+What is _getentropy?
+_getentropy is a system-level function typically used to retrieve random data from the operating system. It's part of the POSIX API, but:
+
+STM32 microcontrollers don’t have an operating system by default.
+newlib includes a placeholder for _getentropy, but it’s not functional unless you provide your own implementation or use an RTOS with entropy support.
+
+Solution is to:
+1.Avoid linking code that uses it. Make sure you’re not using features (may internally call _getentropy) like:
+
+```C
+    std::random_device from <random> // in C++
+    arc4random() // or other high-level entropy functions
+```
+
+2.Provide a stub to silence the warning:
+
+```C
+extern "C" int _getentropy(void* buffer, size_t length) {
+    return -1; // always fail, It will override the weak symbol from libc.a
+}
+```

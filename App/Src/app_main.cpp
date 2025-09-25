@@ -1,8 +1,8 @@
 /**
  ******************************************************************************
- * @file           : app_main.cpp
- * @author         : i32bit
- * @brief          : High-level application control logic
+ * @file        : app_main.cpp
+ * @author      : i32bit
+ * @brief       : High-level application control logic
  ******************************************************************************
  * This software is licensed under the MIT License.
  * Provided "as is", without warranty of any kind.
@@ -18,30 +18,41 @@
  * @details This will be located in flash, and the configure function will consume the data in pace,
  *          without the need to populate structs in stack memory
  */
-static const std::array<IOD, 4> ioDefinitions = {{
+static const std::array<IOD, 4> ioPinConfiguratnionArray = {{
     // green LED 4
     {GPIOD, 12, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
      IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
     // orange LED 3
     {GPIOD, 13, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_HIGH},
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
     // orange LED 5
     {GPIOD, 14, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_HIGH},
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
     // orange LED 6
     {GPIOD, 15, IOD::MODER::OUTPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::NO,
-     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_HIGH},
+     IOD::GEXTI::NONE, IOD::ITRG::NOTRG, IOD::ISTATE::LOGIC_LOW},
 
     // ... and so on
 }};
 
-const std::map<std::string, size_t> boardPinNames = {
-    {"LED4", 0}, {"LED3", 1}, {"LED5", 2}, {"LED6", 3}
+/**
+ * @brief Maps board pin names to their corresponding index in ioPinConfiguratnionArray.
+ *
+ * This map allows name-based access to GPIO configurations. Each string key (e.g. "LD4")
+ * corresponds to an index in the ioPinConfiguratnionArray, which holds the actual pin setup.
+ *
+ * Example:
+ * @code
+ *      size_t index = boardPinNames.at("LED_RED");         // returns 2
+ *      const IOD& pin = ioPinConfiguratnionArray[index];   // access GPIO definition
+ *      // In one line to all pins (size )
+ *      GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinNamesMap);
+ * @endcode
+ */
+const std::map<std::string, size_t> pinNamesMap = {
+    {"LED_GREEN", 0}, {"LED_ORANGE", 1}, {"LED_RED", 2}, {"LED_BLUE", 3}};
 
-    // ... and so on
-};
-
-GpioManager<4> gpio(ioDefinitions, boardPinNames);
+GpioManager<4> gpioMannager(ioPinConfiguratnionArray, pinNamesMap);
 
 static void AppInit_cpp();
 
@@ -60,17 +71,18 @@ extern "C" void App_cpp(void)
 }
 
 /**
- * @brief  Heatbeat LDx Led Toggle
+ * @brief  Heatbeat Led Toggle every 500[ms]
  */
 extern "C" void HeartBeat_SysTick(void)
 {
-    static uint32_t ticks = 0;
-    auto            led4  = gpio.get("LED4");
+    static uint32_t ticks = 0u;
 
-    if (ticks++ >= 500) // Toggle every 500ms
+    auto ledHeartBeat = gpioMannager.get("LED_GREEN");
+
+    if (ticks++ >= 500)
     {
         ticks = 0;
-        led4.toggle();
+        ledHeartBeat.toggle();
     }
 }
 
@@ -79,7 +91,16 @@ extern "C" void HeartBeat_SysTick(void)
  */
 static void AppInit_cpp()
 {
-    hal_ConfigGpio(ioDefinitions);
+    hal_ConfigGpio(ioPinConfiguratnionArray);
 
     /** Any initialization code can be added here */
+}
+
+/**
+ * @warning WARN-10 Provide a stub to silence the warning:
+ *          libc_a-getentropyr.o: _getentropy is not implemented and will always fail
+ */
+extern "C" int _getentropy(void* buffer, size_t length)
+{
+    return -1; // It will override the weak symbol from libc.a
 }

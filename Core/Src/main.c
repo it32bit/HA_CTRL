@@ -54,7 +54,7 @@ int main(void)
     /* Call the C++ application entry point with infinite loop */
     App_cpp();
 
-    /* We should never get here as App_cpp() contains an infinite loop */
+    /* Execution should never reach here because App_cpp() runs an infinite loop. */
     for (;;)
     {
         ;
@@ -89,8 +89,7 @@ static void SystemClock_Config(void)
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
     /** Initializes the RCC Oscillators according to the specified parameters
-   * in the RCC_OscInitTypeDef structure.
-   */
+    in the RCC_OscInitTypeDef structure. */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
@@ -105,8 +104,7 @@ static void SystemClock_Config(void)
         Error_Handler();
     }
 
-    /** Initializes the CPU, AHB and APB buses clocks
-   */
+    /** Initializes the CPU, AHB and APB buses clocks */
     RCC_ClkInitStruct.ClockType =
         RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
