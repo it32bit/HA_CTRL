@@ -1,0 +1,26 @@
+# .clang-format for STM32 embedded C/C++ projects
+
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AllowShortFunctionsOnASingleLine: Inline
+BreakBeforeBraces: Allman
+ColumnLimit: 100
+SortIncludes: false
+IncludeBlocks: Preserve
+PointerAlignment: Left
+SpaceBeforeParens: ControlStatements
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignTrailingComments: true
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+IndentCaseLabels: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: None
+ReflowComments: false
+SeparateDefinitionBlocks: Always
+UseCRLF: false
