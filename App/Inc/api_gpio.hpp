@@ -21,26 +21,34 @@ extern const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray;
 extern const std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SIZE>
     pinLabelDefArray;
 
-
 /**
  * Simple PIN controller class
  */
 class PinController
 {
   public:
-    PinController(const IOD& io) : ioPort(io.GPIO) { ioPin = getGpioPinMask(io.PinNb); }
+    PinController(const IOD& io) : ioPort(io.GPIO) { ioPinMask = getGpioPinMask(io.PinNb); }
 
-    PinController(GPIO_TypeDef* port, uint16_t pin) : ioPort(port) { ioPin = getGpioPinMask(pin); }
+    PinController(GPIO_TypeDef* port, uint16_t pin) : ioPort(port)
+    {
+        ioPinMask = getGpioPinMask(pin);
+    }
 
-    void toggle() const { LL_GPIO_TogglePin(ioPort, ioPin); }
+    void toggle() const { LL_GPIO_TogglePin(ioPort, ioPinMask); }
 
-    void on() { LL_GPIO_SetOutputPin(ioPort, ioPin); }
+    void on() const { LL_GPIO_SetOutputPin(ioPort, ioPinMask); }
 
-    void off() { LL_GPIO_ResetOutputPin(ioPort, ioPin); }
+    void off() const { LL_GPIO_ResetOutputPin(ioPort, ioPinMask); }
+
+    bool readInputPin() const
+    {
+        uint32_t ioInput = uint32_t(LL_GPIO_ReadInputPort(ioPort) & ioPinMask);
+        return static_cast<bool>(ioInput);
+    }
 
   private:
     GPIO_TypeDef* ioPort;
-    uint32_t      ioPin;
+    uint32_t      ioPinMask;
 };
 
 template <size_t N> class GpioDispatcher

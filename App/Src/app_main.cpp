@@ -20,6 +20,8 @@ extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;
  */
 static void AppInit_cpp();
 
+static uint32_t b1 = 0u;
+
 /**
  * Main application entry point for C++ code
  */
@@ -28,9 +30,12 @@ extern "C" void App_cpp(void)
     /** Initialization code for C++ application can be added here */
     AppInit_cpp();
 
+    auto button = ioDispatcher.get("BUTTON");
+
     /** Main loop */
     for (;;)
     {
+        b1 = button.readInputPin();
     }
 }
 
@@ -76,9 +81,10 @@ extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     if (GPIO_Pin == GPIO_PIN_0)
     {
         static uint32_t lastPress = 0;
-        uint32_t        now       = HAL_GetTick(); // milliseconds since startup
 
-        if (now - lastPress > 200) // debounce threshold in ms
+        uint32_t now = HAL_GetTick(); // milliseconds since startup
+
+        if (now - lastPress > 50) // debounce threshold in ms
         {
             lastPress = now;
             UserButton_Handler();
