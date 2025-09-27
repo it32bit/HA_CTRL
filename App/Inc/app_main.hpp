@@ -14,6 +14,37 @@
 #define __APP_MAIN_HPP
 
 #ifdef __cplusplus
+
+class Debouncer
+{
+  public:
+    Debouncer(uint32_t debounceMs) : debounceTime(debounceMs), lastTick(0), locked(false) {}
+
+    bool shouldTrigger()
+    {
+        uint32_t now = HAL_GetTick();
+
+        if (now - lastTick > debounceTime)
+        {
+            lastTick = now;
+            locked   = false;
+        }
+
+        if (locked == false)
+        {
+            locked = true;
+            return true;
+        }
+
+        return false;
+    }
+
+  private:
+    uint32_t debounceTime;
+    uint32_t lastTick;
+    bool     locked;
+};
+
 extern "C"
 {
 #endif

@@ -25,15 +25,18 @@
 extern "C"
 {
 #endif
+#include "stm32f4xx_ll_exti.h"
 
-  void NMI_Handler(void);
-  void HardFault_Handler(void);
-  void MemManage_Handler(void);
-  void BusFault_Handler(void);
-  void UsageFault_Handler(void);
-  void DebugMon_Handler(void);
+    void EXTI0_Callback(uint16_t gpioPinMask);
 
-  void SysTick_Handler(void);
+    void NMI_Handler(void);
+    void HardFault_Handler(void);
+    void MemManage_Handler(void);
+    void BusFault_Handler(void);
+    void UsageFault_Handler(void);
+    void DebugMon_Handler(void);
+
+    void SysTick_Handler(void);
 
 #ifdef __cplusplus
 }

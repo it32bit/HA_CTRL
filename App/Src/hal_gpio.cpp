@@ -4,7 +4,7 @@
 
 static constexpr bool clockEnable(const GPIO_TypeDef* port);
 
-static bool configGpioInterrupt(const IOD& io, uint32_t priority);
+static bool configGpioInterrupt(const IOD& io);
 
 /**
  * @section Inline hal_gpio
@@ -72,7 +72,13 @@ bool hal_ConfigGpio(const IOD& io)
     }
     else if ((io.Moder == IOD::MODER::INPUT) && (io.Exti == IOD::GEXTI::IT))
     {
+        auto irq = getExtiIrqFromPin[static_cast<std::size_t>(io.PinNb)]();
+        __HAL_RCC_SYSCFG_CLK_ENABLE();
+
         configGpioInterrupt(io);
+        NVIC_ClearPendingIRQ(irq);
+        NVIC_SetPriority(irq, io.IPriority);
+        NVIC_EnableIRQ(irq);
     }
     return true;
 }
@@ -97,10 +103,6 @@ bool hal_ConfigGpio(const IOD& io)
  */
 static bool configGpioInterrupt(const IOD& io)
 {
-    auto irq = getExtiIrqFromPin[static_cast<std::size_t>(io.PinNb)]();
-
-    __HAL_RCC_SYSCFG_CLK_ENABLE();
-
     EXTI->EMR &= ~(getGpioPinMask(io.PinNb)); // Disable Event
     EXTI->IMR |= getGpioPinMask(io.PinNb);    // Enable IT
 
@@ -138,13 +140,11 @@ static bool configGpioInterrupt(const IOD& io)
     {
         return false;
     }
-
-    NVIC_ClearPendingIRQ(irq);
-    NVIC_SetPriority(irq, io.IPriority);
-    NVIC_EnableIRQ(irq);
-
     return true;
 }
+
+
+
 
 /**
  * @brief Perypheral GPIO Clock Enable

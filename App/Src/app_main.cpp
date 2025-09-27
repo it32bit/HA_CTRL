@@ -19,6 +19,7 @@ extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;
  *          AppInit_cpp
  */
 static void AppInit_cpp();
+static void UserButton_Handler();
 
 static uint32_t b1 = 0u;
 
@@ -49,8 +50,6 @@ static void AppInit_cpp()
     /** Any initialization code can be added here */
 }
 
-static void UserButton_Handler();
-
 static void UserButton_Handler()
 {
     auto ledButton = ioDispatcher.get("LED_BLUE");
@@ -76,17 +75,14 @@ extern "C" void HeartBeat_SysTick(void)
 /**
  * @brief  Callback function for Externall Interrupt on Gpio
  */
-extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+extern "C" void EXTI0_Callback(uint16_t GPIO_Pin)
 {
+    static Debouncer debounceUserButton(200); // 200 ms debounce
+
     if (GPIO_Pin == GPIO_PIN_0)
     {
-        static uint32_t lastPress = 0;
-
-        uint32_t now = HAL_GetTick(); // milliseconds since startup
-
-        if (now - lastPress > 50) // debounce threshold in ms
+        if (debounceUserButton.shouldTrigger())
         {
-            lastPress = now;
             UserButton_Handler();
         }
     }

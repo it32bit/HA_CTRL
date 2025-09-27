@@ -108,5 +108,9 @@ void SysTick_Handler(void)
  */
 void EXTI0_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+    if (LL_EXTI_IsActiveFlag_0_31(GPIO_PIN_0) != RESET)
+    {
+        LL_EXTI_ClearFlag_0_31(GPIO_PIN_0);
+        EXTI0_Callback(GPIO_PIN_0);
+    }
 }
