@@ -41,6 +41,12 @@ const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray = {{
     // B1 - user button
     {GPIOA, 0, IOD::MODER::INPUT, 0, IOD::TYPE::NORMAL, IOD::SPEED::LOW, IOD::PUPDR::PULLDOWN,
      IOD::GEXTI::IT, IOD::ITRG::RISING, IOD::ISTATE::DONT_CARE, 15u},
+    // UART2-TX
+    {GPIOA, 2, IOD::MODER::ALT, GPIO_AF7_USART2, IOD::TYPE::NORMAL, IOD::SPEED::VERYHIGH,
+     IOD::PUPDR::NO, IOD::GEXTI::IT, IOD::ITRG::RISING, IOD::ISTATE::DONT_CARE, 15u},
+    // UART2-RX
+    {GPIOA, 3, IOD::MODER::ALT, GPIO_AF7_USART2, IOD::TYPE::NORMAL, IOD::SPEED::VERYHIGH,
+     IOD::PUPDR::NO, IOD::GEXTI::IT, IOD::ITRG::RISING, IOD::ISTATE::DONT_CARE, 15u},
 }};
 
 /**
@@ -59,4 +65,10 @@ const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray = {{
  * @endcode
  */
 constexpr std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SIZE> pinLabelDefArray =
-    {{{"LED_GREEN", 0}, {"LED_ORANGE", 1}, {"LED_RED", 2}, {"LED_BLUE", 3}, {"BUTTON", 4}}};
+    {{{"LED_GREEN", 0},
+      {"LED_ORANGE", 1},
+      {"LED_RED", 2},
+      {"LED_BLUE", 3},
+      {"BUTTON", 4},
+      {"UART2_TX", 5},
+      {"UART2_RX", 6}}};

@@ -270,3 +270,67 @@ Use std::string_view when:
  -You’re working with string literals or static strings.
  -You want fast, read-only access.
  -You’re building constexpr data structures.
+
+## INFO-14 `ls -l /dev/ft232`
+
+Create a new file:
+
+```bash
+ sudo nano /etc/udev/rules.d/99-ft232.rules
+```
+
+```C
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ft232"
+```
+
+```C
+SUBSYSTEM=="tty", ATTRS{serial}=="FTxxxxxxxx", SYMLINK+="ft232"
+```
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+ls -l /dev/ft232
+
+lrwxrwxrwx 1 root root 7 Sep 28 17:48 /dev/ft232 -> ttyUSB0
+```
+
+## INFO-16 printf()
+
+Size without redirection, uart2_send_string("string")
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        2104 B       128 KB      1.61%
+           FLASH:        6744 B         1 MB      0.64%
+******** Print size information:
+   text    data     bss     dec     hex filename
+   6652      92    2012    8756    2234 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+Size when redirection _write for printf("string"):
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4216 B       128 KB      3.22%
+           FLASH:       30428 B         1 MB      2.90%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  28588    1832    2384   32804    8024 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+Size when redirection _write for std::cout << "string" :
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:       10248 B       128 KB      7.82%
+           FLASH:      338472 B         1 MB     32.28%
+******** Print size information:
+   text    data     bss     dec     hex filename
+ 336376    2088    8160  346624   54a00 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+

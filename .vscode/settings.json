@@ -28,7 +28,9 @@
         "typeinfo": "cpp",
         "stm32f4xx_it.h": "c",
         "stm32f4xx_hal_cortex.h": "c",
-        "stm32f4xx_ll_gpio.h": "c"
+        "stm32f4xx_ll_gpio.h": "c",
+        "streambuf": "cpp",
+        "iostream": "cpp"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.profiles.linux": {

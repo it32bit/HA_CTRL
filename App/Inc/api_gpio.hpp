@@ -15,7 +15,7 @@
 #include "hal_gpio.hpp"
 #include <string_view>
 
-constexpr size_t PIN_CONFIG_ARRAY_SIZE = 5;
+constexpr size_t PIN_CONFIG_ARRAY_SIZE = 7;
 
 extern const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray;
 extern const std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SIZE>

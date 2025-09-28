@@ -11,6 +11,8 @@
  */
 #include "api_gpio.hpp"
 #include "app_main.hpp"
+#include <stdio.h>
+// #include <iostream>
 
 extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;
 
@@ -46,6 +48,7 @@ extern "C" void App_cpp(void)
 static void AppInit_cpp()
 {
     hal_ConfigGpio(ioPinConfigDefArray);
+    Init_Uart2();
 
     /** Any initialization code can be added here */
 }
@@ -54,6 +57,10 @@ static void UserButton_Handler()
 {
     auto ledButton = ioDispatcher.get("LED_BLUE");
     ledButton.toggle();
+
+    uart2_send_string("HA-CTRL: Hello!\n\r");
+    printf("HA-CTRL: printf()!\n\r");
+    // std::cout << "HA-CTRL: C++ Hello!\n\r";
 }
 
 /**

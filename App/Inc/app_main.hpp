@@ -45,6 +45,9 @@ class Debouncer
     bool     locked;
 };
 
+extern void Init_Uart2(void);
+extern void uart2_send_string(const char* str);
+
 extern "C"
 {
 #endif
