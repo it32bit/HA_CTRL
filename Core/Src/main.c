@@ -118,4 +118,7 @@ static void SystemClock_Config(void)
     }
 }
 
-
+int _getentropy(void* buffer, size_t length)
+{
+    return -1; // always fail, It will override the weak symbol from libc.a
+}
