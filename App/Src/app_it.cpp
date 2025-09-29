@@ -50,6 +50,6 @@ extern "C" void EXTI0_Callback(uint16_t GPIO_Pin)
 {
     if (GPIO_Pin == GPIO_PIN_0)
     {
-        exti0_Subject.notifyObservers();
+        exti0_Subject.notifyObserversWhenStable();
     }
 }

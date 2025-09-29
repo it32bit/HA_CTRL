@@ -29,6 +29,4 @@ class Subject
     std::list<Observer*> observers;
 };
 
-
-
 #endif // _DESIGN_PATTERNS_

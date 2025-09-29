@@ -22,8 +22,8 @@ auto getFilename = []() -> const char*
     return filename ? filename + 1 : path;
 };
 
-UserButtonManager::UserButtonManager(Subject& subject, uint32_t debounceMs)
-    : subject_(subject), debouncer_(debounceMs)
+UserButtonManager::UserButtonManager(Subject& subject)
+    : subject_(subject)
 {
     subject_.registerObserver(this);
 }
@@ -35,15 +35,15 @@ void UserButtonManager::notify() const
 
 void UserButtonManager::process()
 {
-    if (pending_ && debouncer_.shouldTrigger())
+    if (pending_)
     {
         pending_ = false;
         printf("[%s:%d]\n\r", getFilename(), __LINE__);
     }
 }
 
-LedManager::LedManager(Subject& subject, uint32_t debounceMs, const PinController& led)
-    : subject_(subject), debouncer_(debounceMs), led_(led)
+LedManager::LedManager(Subject& subject, const PinController& led)
+    : subject_(subject), led_(led)
 {
     subject_.registerObserver(this);
 }
@@ -55,21 +55,20 @@ void LedManager::notify() const
 
 void LedManager::process()
 {
-    if (pending_ && debouncer_.shouldTrigger())
+    if (pending_)
     {
+        pending_ = false;
         led_.toggle();
     }
 }
-
-Subject           exti0_Subject;
-UserButtonManager usrButton(exti0_Subject, 200u);
-LedManager        ledManager(exti0_Subject, 200u, ioDispatcher.get("LED_BLUE"));
 
 /**
  * @brief Static declaration
  *          AppInit_cpp
  */
 static void AppInit_cpp();
+
+SubjectWithDebouce exti0_Subject{200u};
 
 /**
  * Main application entry point for C++ code
@@ -78,6 +77,9 @@ extern "C" void App_cpp(void)
 {
     /** Initialization code for C++ application can be added here */
     AppInit_cpp();
+
+    UserButtonManager usrButton(exti0_Subject);
+    LedManager        ledManager(exti0_Subject, ioDispatcher.get("LED_BLUE"));
 
     printf("HA-CTRL:\n\r Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
            FIRMWARE_VERSION.minor);

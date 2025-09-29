@@ -13,8 +13,6 @@ typedef struct
 
 constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 1};
 
-extern Subject exti0_Subject;
-
 class Debouncer
 {
   public:
@@ -27,29 +25,46 @@ class Debouncer
     bool     locked;
 };
 
+class SubjectWithDebouce : public Subject
+{
+  public:
+    SubjectWithDebouce(uint32_t debounceMs) : debouncer_(debounceMs) {}
+
+    void notifyObserversWhenStable()
+    {
+        if (debouncer_.shouldTrigger() == true)
+        {
+            Subject::notifyObservers();
+        }
+    }
+
+  private:
+    Debouncer debouncer_;
+};
+
+extern SubjectWithDebouce exti0_Subject;
+
 class UserButtonManager : public Observer
 {
   public:
-    UserButtonManager(Subject& subject, uint32_t debounceMs);
+    UserButtonManager(Subject& subject);
     void notify() const override;
     void process();
 
   private:
     Subject&     subject_;
     mutable bool pending_ = false;
-    Debouncer    debouncer_;
 };
 
 class LedManager : public Observer
 {
   public:
-    LedManager(Subject& subject, uint32_t debounceMs, const PinController& led);
+    LedManager(Subject& subject, const PinController& led);
     void notify() const override;
     void process();
 
   private:
     Subject&      subject_;
-    Debouncer     debouncer_;
     PinController led_;
     mutable bool  pending_ = false;
 };
