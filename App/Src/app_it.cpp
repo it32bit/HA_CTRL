@@ -1,40 +1,31 @@
 #include <cstdint>
 #include <stdio.h>
+
+#include "patterns.hpp"
+#include "app.hpp"
 #include "app_it.hpp"
 #include "api_gpio.hpp"
-#include "hal_gpio.hpp"
 
-static void UserButton_Handler();
+Debouncer::Debouncer(uint32_t debounceMs) : debounceTime(debounceMs), lastTick(0), locked(false) {}
 
-class Debouncer
+bool Debouncer::shouldTrigger()
 {
-  public:
-    Debouncer(uint32_t debounceMs) : debounceTime(debounceMs), lastTick(0), locked(false) {}
+    uint32_t now = HAL_GetTick();
 
-    bool shouldTrigger()
+    if (now - lastTick > debounceTime)
     {
-        uint32_t now = HAL_GetTick();
-
-        if (now - lastTick > debounceTime)
-        {
-            lastTick = now;
-            locked   = false;
-        }
-
-        if (locked == false)
-        {
-            locked = true;
-            return true;
-        }
-
-        return false;
+        lastTick = now;
+        locked   = false;
     }
 
-  private:
-    uint32_t debounceTime;
-    uint32_t lastTick;
-    bool     locked;
-};
+    if (!locked)
+    {
+        locked = true;
+        return true;
+    }
+
+    return false;
+}
 
 /**
  * @brief  Heatbeat Led Toggle every 500[ms]
@@ -57,21 +48,8 @@ extern "C" void HeartBeat_SysTick(void)
  */
 extern "C" void EXTI0_Callback(uint16_t GPIO_Pin)
 {
-    static Debouncer debounceUserButton(200); // 200 ms debounce
-
     if (GPIO_Pin == GPIO_PIN_0)
     {
-        if (debounceUserButton.shouldTrigger())
-        {
-            UserButton_Handler();
-        }
+        exti0_Subject.notifyObservers();
     }
-}
-
-static void UserButton_Handler()
-{
-    auto ledButton = ioDispatcher.get("LED_BLUE");
-    ledButton.toggle();
-
-    printf("[%s:%d]\n\r", __FILE_NAME__, __LINE__);
 }

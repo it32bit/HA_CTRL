@@ -341,3 +341,29 @@ to the top of the editor while scrolling so you always know what scope you're in
 ```json
 "editor.stickyScroll.enabled": true,
 ```
+
+## INFO-18 Size after serialDebug
+
+```bash
+[20/20] Linking CXX executable ~/repos/ha-ctrl/bin/ha-ctrl.elf
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4216 B       128 KB      3.22%
+           FLASH:       30380 B         1 MB      2.90%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  28540    1832    2384   32756    7ff4 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+## INFO-18 Size after Observer pattern
+
+```bash
+[20/20] Linking CXX executable ~/repos/ha-ctrl/bin/ha-ctrl.elf
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4320 B       128 KB      3.30%
+           FLASH:       80000 B         1 MB      7.63%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  78144    1848    2472   82464   14220 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
