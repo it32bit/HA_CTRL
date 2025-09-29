@@ -12,8 +12,8 @@
 #ifndef __API_GPIO_HPP
 #define __API_GPIO_HPP
 
-#include "hal_gpio.hpp"
 #include <string_view>
+#include "hal_gpio.hpp"
 
 constexpr size_t PIN_CONFIG_ARRAY_SIZE = 7;
 
@@ -80,5 +80,7 @@ template <size_t N> class GpioDispatcher
     const std::array<IOD, N>&                                 ioDefCfg;
     const std::array<std::pair<std::string_view, size_t>, N>& pinLabelArray;
 };
+
+extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;
 
 #endif /* __API_GPIO_HPP */

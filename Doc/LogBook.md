@@ -295,7 +295,7 @@ ls -l /dev/ft232
 lrwxrwxrwx 1 root root 7 Sep 28 17:48 /dev/ft232 -> ttyUSB0
 ```
 
-## INFO-16 printf()
+## INFO-16 Size comparation of using: `uart_send_string()`, `printf()` and `std::cout << "Text"`
 
 Size without redirection, uart2_send_string("string")
 
@@ -333,4 +333,11 @@ Memory region         Used Size  Region Size  %age Used
  336376    2088    8160  346624   54a00 ~/repos/ha-ctrl/bin/ha-ctrl.elf
 ```
 
+## INFO-17 VS Code stickyScroll
 
+It keeps function headers, #ifdef blocks, or bracketed sections "stuck"
+to the top of the editor while scrolling so you always know what scope you're in.
+
+```json
+"editor.stickyScroll.enabled": true,
+```

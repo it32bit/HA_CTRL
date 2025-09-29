@@ -3,6 +3,7 @@
     "editor.formatOnSave": true,
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
+    "editor.stickyScroll.enabled": false,
     "files.eol": "\n",
     "files.trimTrailingWhitespace": true,
     "files.autoSave": "afterDelay",

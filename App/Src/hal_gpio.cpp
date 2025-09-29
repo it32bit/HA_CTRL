@@ -1,5 +1,4 @@
 #include "hal_gpio.hpp"
-#include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_exti.h"
 
 static constexpr bool clockEnable(const GPIO_TypeDef* port);

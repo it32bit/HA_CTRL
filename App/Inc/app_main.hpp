@@ -14,45 +14,10 @@
 #define __APP_MAIN_HPP
 
 #ifdef __cplusplus
-
-class Debouncer
-{
-  public:
-    Debouncer(uint32_t debounceMs) : debounceTime(debounceMs), lastTick(0), locked(false) {}
-
-    bool shouldTrigger()
-    {
-        uint32_t now = HAL_GetTick();
-
-        if (now - lastTick > debounceTime)
-        {
-            lastTick = now;
-            locked   = false;
-        }
-
-        if (locked == false)
-        {
-            locked = true;
-            return true;
-        }
-
-        return false;
-    }
-
-  private:
-    uint32_t debounceTime;
-    uint32_t lastTick;
-    bool     locked;
-};
-
-extern void Init_Uart2(void);
-extern void uart2_send_string(const char* str);
-
 extern "C"
 {
 #endif
 
-    void HeartBeat_SysTick(void);
     void App_cpp(void);
 
 #ifdef __cplusplus

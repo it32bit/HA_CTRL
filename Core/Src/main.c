@@ -58,7 +58,6 @@ int main(void)
     /* Execution should never reach here because App_cpp() runs an infinite loop. */
     for (;;)
     {
-        ;
     }
 }
 
@@ -119,24 +118,4 @@ static void SystemClock_Config(void)
     }
 }
 
-void uart2_send_char(char c)
-{
-    while (!(USART2->SR & USART_SR_TXE))
-        ; // Wait until TX buffer is empty
-    USART2->DR = c;
-}
 
-int _write(int file, char* ptr, int len)
-{
-    for (int i = 0; i < len; i++)
-    {
-        uart2_send_char(ptr[i]);
-    }
-    return len;
-}
-
-// int __io_putchar(int ch)
-// {
-//     uart2_send_char(ch);
-//     return ch;
-// }

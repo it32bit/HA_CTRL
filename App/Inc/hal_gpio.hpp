@@ -92,7 +92,7 @@ using IOD = struct GPIOStuct
 /**
  * @brief Lower-level hal_ConfigGpio(def) function to handle individual GPIO setup.
  */
-bool hal_ConfigGpio(const IOD& def);
+extern bool hal_ConfigGpio(const IOD& def);
 
 /**
  * @section Template hal_gpio.hpp

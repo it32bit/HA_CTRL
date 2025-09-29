@@ -1,6 +1,8 @@
-#include "stm32f4xx.h"        // CMSIS core
-#include "stm32f4xx_ll_rcc.h" // LL RCC macros
-#include <stdio.h>
+#include "api_debug.hpp"
+#include "stm32f4xx.h"
+#include "stm32f4xx_ll_rcc.h"
+
+static uint32_t getAPB1ClockFreq(void);
 
 void uart2_send_char_cpp(char c)
 {
@@ -15,9 +17,23 @@ void uart2_send_string(const char* str)
         uart2_send_char_cpp(*str++);
 }
 
-static uint32_t getAPB1ClockFreq(void);
+void uart2_send_char(char c)
+{
+    while (!(USART2->SR & USART_SR_TXE))
+        ; // Wait until TX buffer is empty
+    USART2->DR = c;
+}
 
-void Init_Uart2(void)
+extern "C" int _write(int file, char* ptr, int len)
+{
+    for (int i = 0; i < len; i++)
+    {
+        uart2_send_char(ptr[i]);
+    }
+    return len;
+}
+
+void serialDebuger_Init(void)
 {
     __HAL_RCC_USART2_CLK_ENABLE();
 
@@ -31,7 +47,6 @@ void Init_Uart2(void)
 }
 
 extern "C" uint32_t LL_RCC_GetSysClkSource(void);
-extern "C" uint32_t LL_RCC_GetAPB1Prescaler(void);
 
 static uint32_t getAPB1ClockFreq(void)
 {
