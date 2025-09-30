@@ -53,7 +53,7 @@ int main(void)
     HAL_Init();
 
     /* Call the C++ application entry point with infinite loop */
-    App_cpp();
+    App();
 
     /* Execution should never reach here because App_cpp() runs an infinite loop. */
     for (;;)

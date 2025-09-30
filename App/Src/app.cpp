@@ -15,6 +15,9 @@
 #include "api_debug.hpp"
 #include <cstring>
 
+/**
+ * @brief Lambda getFilename
+ */
 auto getFilename = []() -> const char*
 {
     const char* path     = __FILE__;
@@ -22,43 +25,49 @@ auto getFilename = []() -> const char*
     return filename ? filename + 1 : path;
 };
 
-UserButtonManager::UserButtonManager(Subject& subject)
-    : subject_(subject)
+UserButtonManager::UserButtonManager(Subject& t_subject, uint32_t t_pin_mask)
+    : m_subject(t_subject), m_pin_mask(t_pin_mask)
 {
-    subject_.registerObserver(this);
+    m_subject.registerObserver(this);
 }
 
-void UserButtonManager::notify() const
+void UserButtonManager::notify(uint32_t t_pin_mask) const
 {
-    pending_ = true;
+    if (t_pin_mask & m_pin_mask)
+    {
+        m_pending = true;
+    }
 }
 
 void UserButtonManager::process()
 {
-    if (pending_)
+    if (m_pending)
     {
-        pending_ = false;
-        printf("[%s:%d]\n\r", getFilename(), __LINE__);
+        m_pending = false;
+        printf("[%s:%d]:%d\n\r", getFilename(), __LINE__, static_cast<int>(++m_press_counter));
     }
 }
 
-LedManager::LedManager(Subject& subject, const PinController& led)
-    : subject_(subject), led_(led)
+LedManager::LedManager(Subject& subject, uint32_t ledMask, const PinController& led)
+    : m_subject(subject), m_pin_mask(ledMask), m_led(led)
 {
-    subject_.registerObserver(this);
+    m_subject.registerObserver(this);
 }
 
-void LedManager::notify() const
+void LedManager::notify(uint32_t mask) const
 {
-    pending_ = true;
+    if (mask & m_pin_mask)
+    {
+        m_pending = true;
+    }
 }
 
 void LedManager::process()
 {
-    if (pending_)
+    if (m_pending)
     {
-        pending_ = false;
-        led_.toggle();
+        m_pending = false;
+        m_led.toggle();
     }
 }
 
@@ -66,39 +75,44 @@ void LedManager::process()
  * @brief Static declaration
  *          AppInit_cpp
  */
-static void AppInit_cpp();
-
-SubjectWithDebouce exti0_Subject{200u};
+static void AppInit();
+static void AppIntroduction();
 
 /**
  * Main application entry point for C++ code
  */
-extern "C" void App_cpp(void)
+extern "C" void App(void)
 {
     /** Initialization code for C++ application can be added here */
-    AppInit_cpp();
+    AppInit();
 
-    UserButtonManager usrButton(exti0_Subject);
-    LedManager        ledManager(exti0_Subject, ioDispatcher.get("LED_BLUE"));
+    UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
+    LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
 
-    printf("HA-CTRL:\n\r Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
-           FIRMWARE_VERSION.minor);
+    AppIntroduction();
 
     /** App Main loop */
     for (;;)
     {
         usrButton.process();
-        ledManager.process();
+        usrLed.process();
     }
 }
 
 /**
  * Initialization function for C++ application
  */
-static void AppInit_cpp()
+static void AppInit()
 {
-    hal_ConfigGpio(ioPinConfigDefArray);
-    serialDebuger_Init();
+    gpioConfig(ioPinConfigDefArray);
+
+    debugInit();
 
     /** Any initialization code can be added here */
+}
+
+static void AppIntroduction()
+{
+    printf("HA-CTRL:\n\r Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
+           FIRMWARE_VERSION.minor);
 }

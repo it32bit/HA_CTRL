@@ -28,18 +28,18 @@ class Debouncer
 class SubjectWithDebouce : public Subject
 {
   public:
-    SubjectWithDebouce(uint32_t debounceMs) : debouncer_(debounceMs) {}
+    explicit SubjectWithDebouce(uint32_t t_debounce_ms) : m_debouncer(t_debounce_ms) {}
 
-    void notifyObserversWhenStable()
+    void notifyObserversWhenStable(uint32_t mask)
     {
-        if (debouncer_.shouldTrigger() == true)
+        if (m_debouncer.shouldTrigger() == true)
         {
-            Subject::notifyObservers();
+            Subject::notifyObservers(mask);
         }
     }
 
   private:
-    Debouncer debouncer_;
+    Debouncer m_debouncer;
 };
 
 extern SubjectWithDebouce exti0_Subject;
@@ -47,26 +47,29 @@ extern SubjectWithDebouce exti0_Subject;
 class UserButtonManager : public Observer
 {
   public:
-    UserButtonManager(Subject& subject);
-    void notify() const override;
+    UserButtonManager(Subject& t_subject, uint32_t t_pin_mask);
+    void notify(uint32_t mask) const override;
     void process();
 
   private:
-    Subject&     subject_;
-    mutable bool pending_ = false;
+    Subject&              m_subject;
+    uint32_t              m_pin_mask = -1;
+    mutable volatile bool m_pending  = false;
+    uint32_t              m_press_counter{0};
 };
 
 class LedManager : public Observer
 {
   public:
-    LedManager(Subject& subject, const PinController& led);
-    void notify() const override;
+    LedManager(Subject& t_subject, uint32_t t_pin_mask, const PinController& t_led);
+    void notify(uint32_t mask) const override;
     void process();
 
   private:
-    Subject&      subject_;
-    PinController led_;
-    mutable bool  pending_ = false;
+    Subject&              m_subject;
+    uint32_t              m_pin_mask = -1;
+    PinController         m_led;
+    mutable volatile bool m_pending{false};
 };
 
 #endif // APP_HPP__

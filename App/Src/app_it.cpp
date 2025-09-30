@@ -6,6 +6,14 @@
 #include "app_it.hpp"
 #include "api_gpio.hpp"
 
+/**
+ * @brief Global Object Instance of SubjectWithDebouce
+ */
+SubjectWithDebouce exti0_Subject{200u};
+
+/**
+ * @brief Class Debouncer
+ */
 Debouncer::Debouncer(uint32_t debounceMs) : debounceTime(debounceMs), lastTick(0), locked(false) {}
 
 bool Debouncer::shouldTrigger()
@@ -44,12 +52,9 @@ extern "C" void HeartBeat_SysTick(void)
 }
 
 /**
- * @brief  Callback function for Externall Interrupt on Gpio
+ * @brief Callback function for Externall Interrupt on Gpio
  */
 extern "C" void EXTI0_Callback(uint16_t GPIO_Pin)
 {
-    if (GPIO_Pin == GPIO_PIN_0)
-    {
-        exti0_Subject.notifyObserversWhenStable();
-    }
+    exti0_Subject.notifyObserversWhenStable(GPIO_Pin);
 }

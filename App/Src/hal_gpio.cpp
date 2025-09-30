@@ -43,9 +43,9 @@ inline std::array<irqType, 16> getExtiIrqFromPin = {
     exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10};
 
 /**
- * @brief Lower-level hal_ConfigGpio(def) function to handle individual GPIO setup.
+ * @brief Lower-level gpioConfig(def) function to handle individual GPIO setup.
  */
-bool hal_ConfigGpio(const IOD& io)
+bool gpioConfig(const IOD& io)
 {
     clockEnable(io.GPIO);
 

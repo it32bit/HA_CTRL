@@ -7,7 +7,7 @@
 class Observer
 {
   public:
-    virtual void notify() const = 0;
+    virtual void notify(uint32_t t_mask) const = 0;
 
     virtual ~Observer() = default;
 };
@@ -15,18 +15,20 @@ class Observer
 class Subject
 {
   public:
-    void registerObserver(Observer* observer) { observers.push_back(observer); }
+    void registerObserver(Observer* t_observer) { m_observers.push_back(t_observer); }
 
-    void unregisterObserver(Observer* observer) { observers.remove(observer); }
+    void unregisterObserver(Observer* t_observer) { m_observers.remove(t_observer); }
 
-    void notifyObservers() const
+    void notifyObservers(uint32_t t_data) const
     {
-        for (auto observer : observers)
-            observer->notify();
+        for (auto observer : m_observers)
+        {
+            observer->notify(t_data);
+        }
     }
 
   private:
-    std::list<Observer*> observers;
+    std::list<Observer*> m_observers;
 };
 
 #endif // _DESIGN_PATTERNS_

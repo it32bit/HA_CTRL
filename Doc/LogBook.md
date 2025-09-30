@@ -367,3 +367,92 @@ Memory region         Used Size  Region Size  %age Used
    text    data     bss     dec     hex filename
   78144    1848    2472   82464   14220 ~/repos/ha-ctrl/bin/ha-ctrl.elf
 ```
+
+## Common C++ Naming Conventions
+
+Types start with upper case: `MyClass`.
+Functions and variables start with lower case: `myMethod`.
+Constants are all upper case: `const double PI=3.14159265358979323;`.
+
+C++ Standard Library use these guidelines:
+
+Macro names use upper case with underscores: `INT_MAX`.
+Template parameter names use Pascal case: `InputIterator`.
+All other names use snake case: `unordered_map`.
+
+## Distinguish Private Object Data
+
+Name private data with a `m_` prefix to distinguish it from public data. `m_` stands for "member" data.
+
+## Distinguish Function Parameters
+
+The most important thing is consistency within your codebase; this is one possibility to help with consistency.
+
+Name function parameters with an `t_` prefix. `t_` can be thought of as "the", but the meaning is arbitrary. The point is to distinguish function parameters from other variables in scope while giving us a consistent naming strategy.
+
+```cpp
+struct Size
+{
+  int width;
+  int height;
+
+  Size(int t_width, int t_height) : width(t_width), height(t_height) {}
+};
+
+// This version might make sense for thread safety or something,
+// but more to the point, sometimes we need to hide data, sometimes we don't.
+class PrivateSize
+{
+  public:
+    int width() const { return m_width; }
+    int height() const { return m_height; }
+    PrivateSize(int t_width, int t_height) : m_width(t_width), m_height(t_height) {}
+
+  private:
+    int m_width;
+    int m_height;
+};
+```
+
+## Never Use `using namespace` in a Header File
+
+This causes the namespace you are `using` to be pulled into the namespace of all files that include the header file.
+It pollutes the namespace and it may lead to name collisions in the future.
+Writing `using namespace` in an implementation file is fine though.
+
+## Include Guards
+
+Header files must contain a distinctly-named include guard to avoid problems with including the same header multiple times and to prevent conflicts with headers from other projects.
+
+You may also consider using the `#pragma once` directive instead which is quasi-standard across many compilers.
+It's short and makes the intent clear.
+
+### GCC
+
+`-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic` - use these and consider the following (see descriptions below)
+
+`-pedantic` - Warn on language extensions
+`-Wall -Wextra` reasonable and standard
+`-Wshadow` warn the user if a variable declaration shadows one from a parent context
+`-Wnon-virtual-dtor` warn the user if a class with virtual functions has a non-virtual destructor. This helps catch hard to track down memory errors
+`-Wold-style-cast` warn for c-style casts
+`-Wcast-align` warn for potential performance problem casts
+`-Wunused` warn on anything being unused
+`-Woverloaded-virtual` warn if you overload (not override) a virtual function
+`-Wpedantic` (all versions of GCC, Clang >= 3.2) warn if non-standard C++ is used
+`-Wconversion` warn on type conversions that may lose data
+`-Wsign-conversion` (Clang all versions, GCC >= 4.3) warn on sign conversions
+`-Wmisleading-indentation` (only in GCC >= 6.0) warn if indentation implies blocks where blocks do not exist
+`-Wduplicated-cond` (only in GCC >= 6.0) warn if `if` / `else` chain has duplicated conditions
+`-Wduplicated-branches` (only in GCC >= 7.0) warn if `if` / `else` branches have duplicated code
+`-Wlogical-op` (only in GCC) warn about logical operations being used where bitwise were probably wanted
+`-Wnull-dereference` (only in GCC >= 6.0) warn if a null dereference is detected
+`-Wuseless-cast` (only in GCC >= 4.8) warn if you perform a cast to the same type
+`-Wdouble-promotion` (GCC >= 4.6, Clang >= 3.8) warn if `float` is implicitly promoted to `double`
+`-Wformat=2` warn on security issues around functions that format output (i.e., `printf`)
+`-Wlifetime` (only special branch of Clang currently) shows object lifetime issues
+`-Wimplicit-fallthrough` Warns when case statements fall-through. (Included with `-Wextra` in GCC, not in clang)
+
+Consider using `-Weverything` and disabling the few warnings you need to on Clang
+
+`-Weffc++` warning mode can be too noisy, but if it works for your project, use it also.

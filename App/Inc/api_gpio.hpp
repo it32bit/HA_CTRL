@@ -27,46 +27,46 @@ extern const std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SI
 class PinController
 {
   public:
-    PinController(const IOD& io) : ioPort(io.GPIO) { ioPinMask = getGpioPinMask(io.PinNb); }
+    PinController(const IOD& t_io) : m_io_port(t_io.GPIO) { m_io_pin_mask = getGpioPinMask(t_io.PinNb); }
 
-    PinController(GPIO_TypeDef* port, uint16_t pin) : ioPort(port)
+    PinController(GPIO_TypeDef* t_port, uint16_t t_pin) : m_io_port(t_port)
     {
-        ioPinMask = getGpioPinMask(pin);
+        m_io_pin_mask = getGpioPinMask(t_pin);
     }
 
-    void toggle() const { LL_GPIO_TogglePin(ioPort, ioPinMask); }
+    void toggle() const { LL_GPIO_TogglePin(m_io_port, m_io_pin_mask); }
 
-    void on() const { LL_GPIO_SetOutputPin(ioPort, ioPinMask); }
+    void on() const { LL_GPIO_SetOutputPin(m_io_port, m_io_pin_mask); }
 
-    void off() const { LL_GPIO_ResetOutputPin(ioPort, ioPinMask); }
+    void off() const { LL_GPIO_ResetOutputPin(m_io_port, m_io_pin_mask); }
 
     bool readInputPin() const
     {
-        uint32_t ioInput = uint32_t(LL_GPIO_ReadInputPort(ioPort) & ioPinMask);
+        uint32_t ioInput = uint32_t(LL_GPIO_ReadInputPort(m_io_port) & m_io_pin_mask);
         return static_cast<bool>(ioInput);
     }
 
   private:
-    GPIO_TypeDef* ioPort;
-    uint32_t      ioPinMask;
+    GPIO_TypeDef* m_io_port;
+    uint32_t      m_io_pin_mask;
 };
 
 template <size_t N> class GpioDispatcher
 {
   public:
-    GpioDispatcher(const std::array<IOD, N>&                                 ioDefs,
-                   const std::array<std::pair<std::string_view, size_t>, N>& nameDefs)
-        : ioDefCfg(ioDefs), pinLabelArray(nameDefs)
+    GpioDispatcher(const std::array<IOD, N>&                                 t_io_defs,
+                   const std::array<std::pair<std::string_view, size_t>, N>& t_pin_name_defs)
+        : m_io_defs(t_io_defs), m_pin_name_array(t_pin_name_defs)
     {
     }
 
-    PinController get(std::string_view pinLabel) const
+    PinController get(std::string_view t_pin_name) const
     {
-        for (const auto& entry : pinLabelArray)
+        for (const auto& entry : m_pin_name_array)
         {
-            if (entry.first == pinLabel)
+            if (entry.first == t_pin_name)
             {
-                return PinController(ioDefCfg[static_cast<int>(entry.second)]);
+                return PinController(m_io_defs[static_cast<int>(entry.second)]);
             }
         }
 
@@ -77,8 +77,8 @@ template <size_t N> class GpioDispatcher
     }
 
   private:
-    const std::array<IOD, N>&                                 ioDefCfg;
-    const std::array<std::pair<std::string_view, size_t>, N>& pinLabelArray;
+    const std::array<IOD, N>&                                 m_io_defs;
+    const std::array<std::pair<std::string_view, size_t>, N>& m_pin_name_array;
 };
 
 extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;

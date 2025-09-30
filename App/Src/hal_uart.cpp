@@ -33,7 +33,7 @@ extern "C" int _write(int file, char* ptr, int len)
     return len;
 }
 
-void serialDebuger_Init(void)
+void debugInit(void)
 {
     __HAL_RCC_USART2_CLK_ENABLE();
 

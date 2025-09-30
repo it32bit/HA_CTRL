@@ -3,6 +3,6 @@
 
 #include <stdio.h>
 
-void serialDebuger_Init(void);
+void debugInit(void);
 
 #endif //API_DEBUG_HPP
