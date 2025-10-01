@@ -3,6 +3,7 @@
 
 #include <string>
 #include <array>
+#include <functional>
 
 template <class T, size_t TSize, size_t TObserverCount>
 class CircularBuffer
@@ -10,8 +11,8 @@ class CircularBuffer
   public:
     static CircularBuffer& instance()
     {
-        static CircularBuffer buffer;
-        return buffer;
+        static CircularBuffer circularBuffer;
+        return circularBuffer;
     }
 
     bool push(const T t_item)
@@ -75,10 +76,12 @@ class CircularBuffer
         return TSize; // Return array size
     }
 
-    void registerObserver(void (*callback)(T))
+    void registerObserver(std::function<void(T)> callback)
     {
         observers[m_observer_count++] = callback; // Add new observer
     }
+
+    auto getData() { return m_buff.data(); }
 
   private:
     CircularBuffer() = default;
@@ -93,7 +96,8 @@ class CircularBuffer
 
     static constexpr size_t MaxObservers{TObserverCount};
 
-    void (*observers[MaxObservers])(T) = {};
+    // void (*observers[MaxObservers])(T) = {};
+    std::function<void(T)> observers[MaxObservers];
 
     void notifyObservers(T t_item)
     {

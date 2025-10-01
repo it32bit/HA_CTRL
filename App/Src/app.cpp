@@ -15,6 +15,7 @@
 #include "api_debug.hpp"
 #include "console.hpp"
 #include <cstring>
+#include <functional>
 
 /**
  * @brief Lambda getFilename
@@ -90,7 +91,9 @@ extern "C" void App(void)
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
 
-    CircularBuffer<uint8_t, CONSOLE_BUFFER_SIZE, 1>::instance().registerObserver(onByteReceived);
+    Console console;
+    auto    consoleCallback = std::bind(&Console::receivedData, &console, std::placeholders::_1);
+    ConsolObserver<uint8_t, 1>::instance().registerObserver(consoleCallback);
 
     AppIntroduction();
 
