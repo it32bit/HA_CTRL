@@ -32,7 +32,10 @@
         "stm32f4xx_ll_gpio.h": "c",
         "streambuf": "cpp",
         "iostream": "cpp",
-        "functional": "c"
+        "functional": "c",
+        "mutex": "cpp",
+        "atomic": "cpp",
+        "optional": "cpp"
     },
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.profiles.linux": {

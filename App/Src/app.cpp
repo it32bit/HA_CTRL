@@ -89,7 +89,8 @@ extern "C" void App(void)
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
-    UartBufferSingleton<CONSOLE_BUFFER_SIZE>::instance().registerObserver(onByteReceived);
+
+    CircularBuffer<uint8_t, CONSOLE_BUFFER_SIZE, 1>::instance().registerObserver(onByteReceived);
 
     AppIntroduction();
 

@@ -65,5 +65,5 @@ extern "C" void EXTI0_Callback(uint16_t GPIO_Pin)
  */
 extern "C" void USART2_Callback(uint32_t t_byte)
 {
-    UartBufferSingleton<CONSOLE_BUFFER_SIZE>::instance().push(static_cast<uint8_t>(t_byte));
+    CircularBuffer<uint8_t, CONSOLE_BUFFER_SIZE, 1>::instance().push(static_cast<uint8_t>(t_byte));
 }
