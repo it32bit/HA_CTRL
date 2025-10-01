@@ -27,7 +27,10 @@ extern const std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SI
 class PinController
 {
   public:
-    PinController(const IOD& t_io) : m_io_port(t_io.GPIO) { m_io_pin_mask = getGpioPinMask(t_io.PinNb); }
+    PinController(const IOD& t_io) : m_io_port(t_io.GPIO)
+    {
+        m_io_pin_mask = getGpioPinMask(t_io.PinNb);
+    }
 
     PinController(GPIO_TypeDef* t_port, uint16_t t_pin) : m_io_port(t_port)
     {
@@ -51,7 +54,8 @@ class PinController
     uint32_t      m_io_pin_mask;
 };
 
-template <size_t N> class GpioDispatcher
+template <size_t N>
+class GpioDispatcher
 {
   public:
     GpioDispatcher(const std::array<IOD, N>&                                 t_io_defs,

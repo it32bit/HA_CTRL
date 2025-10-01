@@ -8,7 +8,8 @@ constexpr size_t CONSOLE_BUFFER_SIZE{128};
 
 extern void onByteReceived(uint8_t byte);
 
-template <size_t Size> class UartBufferSingleton
+template <size_t Size>
+class UartBufferSingleton
 {
   public:
     static UartBufferSingleton& instance()

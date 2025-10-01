@@ -111,7 +111,8 @@ extern bool gpioConfig(const IOD& def);
  *          and configures each GPIO definition in the range [begin, end).
  *          It calls gpioConfig on each element individually.
  */
-template <typename Iter> bool gpioConfig(Iter begin, Iter end)
+template <typename Iter>
+bool gpioConfig(Iter begin, Iter end)
 {
     while (begin != end)
     {

@@ -142,9 +142,6 @@ static bool configGpioInterrupt(const IOD& io)
     return true;
 }
 
-
-
-
 /**
  * @brief Perypheral GPIO Clock Enable
  */
