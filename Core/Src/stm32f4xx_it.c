@@ -114,3 +114,15 @@ void EXTI0_IRQHandler(void)
         EXTI0_Callback(GPIO_PIN_0);
     }
 }
+
+/**
+ * @brief This function handles External Interrupts
+ */
+void USART2_IRQHandler(void)
+{
+    if (USART2->SR & USART_SR_RXNE)
+    {
+        volatile uint32_t data = USART2->DR; // Read clears RXNE
+        USART2_Callback(data);
+    }
+}

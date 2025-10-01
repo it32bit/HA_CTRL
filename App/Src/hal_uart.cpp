@@ -44,6 +44,10 @@ void debugInit(void)
 
     USART2->CR1 |= USART_CR1_TE; // Enable transmitter
     USART2->CR1 |= USART_CR1_UE; // Enable USART
+    USART2->CR1 |= USART_CR1_RE;
+    USART2->CR1 |= USART_CR1_RXNEIE;
+
+    NVIC_EnableIRQ(USART2_IRQn);
 }
 
 extern "C" uint32_t LL_RCC_GetSysClkSource(void);

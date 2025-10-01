@@ -5,6 +5,7 @@
 #include "app.hpp"
 #include "app_it.hpp"
 #include "api_gpio.hpp"
+#include "console.hpp"
 
 /**
  * @brief Global Object Instance of SubjectWithDebouce
@@ -57,4 +58,12 @@ extern "C" void HeartBeat_SysTick(void)
 extern "C" void EXTI0_Callback(uint16_t GPIO_Pin)
 {
     exti0_Subject.notifyObserversWhenStable(GPIO_Pin);
+}
+
+/**
+ * @brief Callback function for Externall Interrupt on Gpio
+ */
+extern "C" void USART2_Callback(uint32_t t_byte)
+{
+    UartBufferSingleton<CONSOLE_BUFFER_SIZE>::instance().push(static_cast<uint8_t>(t_byte));
 }

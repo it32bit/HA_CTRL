@@ -13,6 +13,7 @@
 #include "app.hpp"
 #include "api_gpio.hpp"
 #include "api_debug.hpp"
+#include "console.hpp"
 #include <cstring>
 
 /**
@@ -88,6 +89,7 @@ extern "C" void App(void)
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
+    UartBufferSingleton<CONSOLE_BUFFER_SIZE>::instance().registerObserver(onByteReceived);
 
     AppIntroduction();
 
