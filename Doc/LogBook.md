@@ -531,7 +531,7 @@ git init
 
 Now every new repo you git init will include this hook automatically.
 
-## INFO-21 Refactoring Observer Pattern for Embedded System
+## INFO-21 Refactoring Observer Pattern for Console
 
 Goal:
 
@@ -580,6 +580,49 @@ Code size for `uart2_Observers.notifyAll(...)` is the better approach in terms o
 - Compile-time safety
 - Flash residency
 - ISR compatibility
+
+Last Size `uart2_Observers(staticObservers, sizeof(staticObservers) / sizeof(staticObservers[0]));`
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4408 B       128 KB      3.36%
+           FLASH:       80880 B         1 MB      7.71%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  79024    1848    2560   83432   145e8 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+### Summary Size comparation for refactoring Observer Pattern for Console
+
+| Version / Call Style                                 | .text  | .data | .bss  | RAM Used | FLASH Used | Total Size | % RAM Used | % FLASH Used | Change vs. Old |
+|------------------------------------------------------|--------|-------|-------|----------|------------|------------|------------|---------------|----------------|
+| `consoleObserver.notify(...)`                        | 79584  | 1848  | 2448  | 4296 B   | 81440 B    | 83880 B    | 3.28%      | 7.77%         | —              |
+| `uart2_Observers.notifyAll(...)` (with std::array)   | 79008  | 1848  | 2560  | 4408 B   | 80864 B    | 83416 B    | 3.36%      | 7.71%         | −464 B total   |
+| `uart2_Observers(...)` (with raw array)              | 79024  | 1848  | 2560  | 4408 B   | 80880 B    | 83432 B    | 3.36%      | 7.71%         | −448 B total   |
+
+**Legend:**
+
+- `.text`: Executable code section stored in FLASH.
+- `.data`: Initialized global/static variables stored in RAM.
+- `.bss`: Uninitialized global/static variables stored in RAM.
+- **RAM Used** = `.data` + `.bss`
+- **FLASH Used** = `.text` + `.rodata` (not shown separately)
+- **Total Size** = `.text` + `.data` + `.bss`
+- **% RAM/FLASH Used**: Based on total available (128 KB RAM, 1 MB FLASH)
+- **Change vs. Old**: Difference compared to original `consoleObserver` version.
+
+`uart2_Observers(...)` (with raw array)`
+
+| Reason                       | Explanation                                                                                      |
+|------------------------------|--------------------------------------------------------------------------------------------------|
+| Zero RAM usage               | Uses raw `constexpr` array stored entirely in `.rodata`, avoiding `.bss` or `.data` allocations. |
+| FLASH-resident               | Observer list and metadata live in flash, reducing runtime memory footprint.                    |
+| Compile-time safety          | Observer list size and contents are resolved at compile time, preventing runtime errors.         |
+| ISR compatibility            | No dynamic memory, no virtual dispatch — safe for use inside interrupt service routines.         |
+| Minimal code size            | Smaller `.text` footprint compared to `std::array` or singleton-based dispatch.                  |
+| Transparent memory layout    | Easy to verify in `.map` file; no hidden allocations or runtime surprises.                      |
+| Simple and predictable       | Straightforward structure with no STL overhead, ideal for resource-constrained environments.     |
 
 ## Message to Merge-Request
 

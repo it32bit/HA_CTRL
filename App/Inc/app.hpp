@@ -74,7 +74,9 @@ class LedManager : public Observer
 
 void consoleNotify(uint8_t t_item);
 
-inline constexpr StaticObserverList<uint8_t, 1>
-    uart2_Observers({StaticObserver<uint8_t>{consoleNotify}});
+inline constexpr StaticObserver<uint8_t> staticObservers[] = {consoleNotify};
+
+inline constexpr StaticObserverList<uint8_t>
+    uart2_Observers(staticObservers, sizeof(staticObservers) / sizeof(staticObservers[0]));
 
 #endif // APP_HPP__

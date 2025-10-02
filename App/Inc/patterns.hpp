@@ -47,25 +47,30 @@ struct StaticObserver
     void (*onNotify)(T);
 };
 
-template <typename T, size_t N>
+template <typename T>
 class StaticObserverList
 {
   public:
-    constexpr StaticObserverList(std::array<StaticObserver<T>, N> t_obs) : m_observers(t_obs) {}
-
-    void notifyAll(T value) const
+    constexpr StaticObserverList(const StaticObserver<T>* t_obs, size_t t_count)
+        : m_observers(t_obs), m_size(t_count)
     {
-        for (const auto& obs : m_observers)
+    }
+
+    void notifyAll(T value) const noexcept
+    {
+        for (size_t i = 0; i < m_size; ++i)
         {
-            if (obs.onNotify)
+            if (m_observers[i].onNotify)
             {
-                obs.onNotify(value);
+                m_observers[i].onNotify(value);
             }
         }
     }
 
   private:
-    std::array<StaticObserver<T>, N> m_observers;
+    const StaticObserver<T>* m_observers;
+
+    size_t m_size;
 };
 
 #endif // _DESIGN_PATTERNS_
