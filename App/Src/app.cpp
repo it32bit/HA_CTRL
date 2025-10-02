@@ -80,6 +80,8 @@ void LedManager::process()
 static void AppInit();
 static void AppIntroduction();
 
+ObserverTemplate<uint8_t, 1> consoleObserver;
+
 /**
  * Main application entry point for C++ code
  */
@@ -92,8 +94,11 @@ extern "C" void App(void)
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
 
     Console console;
-    auto    consoleCallback = std::bind(&Console::receivedData, &console, std::placeholders::_1);
-    ConsolObserver<uint8_t, 1>::instance().registerObserver(consoleCallback);
+    // auto    consoleCallback = std::bind(&Console::receivedData, &console, std::placeholders::_1);
+    // ConsolObserver<uint8_t, 1>::instance().registerObserver(consoleCallback);
+    auto callback = [&](uint8_t byte) { console.receivedData(byte); };
+
+    consoleObserver.registerObserver(callback);
 
     AppIntroduction();
 

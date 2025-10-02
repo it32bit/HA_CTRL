@@ -65,5 +65,6 @@ extern "C" void EXTI0_Callback(uint16_t GPIO_Pin)
  */
 extern "C" void USART2_Callback(uint32_t t_byte)
 {
-    ConsolObserver<uint8_t, 1>::instance().notifyObservers(static_cast<uint8_t>(t_byte));
+    // ConsolObserver<uint8_t, 1>::instance().notifyObservers(static_cast<uint8_t>(t_byte));
+    consoleObserver.notify(static_cast<uint8_t>(t_byte));
 }

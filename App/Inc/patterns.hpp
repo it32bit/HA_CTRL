@@ -3,7 +3,7 @@
 
 #include <list>
 #include <array>
-#include <mutex>
+#include <functional>
 
 /**
  * @brief Design Patterns: Observer
@@ -38,50 +38,33 @@ class Subject
 };
 
 /**
- * @brief Design Patterns: SINGLETON
+ * @brief Design Patterns: Observer with Template
+ *
  */
-// class Singleton
-// {
-//   private:
-//     static Singleton* m_pinstance;
+template <typename T, size_t MaxObservers>
+class ObserverTemplate
+{
+  public:
+    void registerObserver(std::invocable<T> auto&& callback)
+    {
+        if (count < MaxObservers)
+        {
+            observers[count++] = std::forward<decltype(callback)>(callback);
+        }
+    }
 
-//   protected:
-//     std::string m_value;
+    void notify(T item)
+    {
+        for (size_t i = 0; i < count; ++i)
+        {
+            observers[i](item);
+        }
+    }
 
-//     Singleton(const std::string value) : m_value(value) {}
+  private:
+    std::array<std::function<void(T)>, MaxObservers> observers{};
 
-//     ~Singleton() {}
-
-//   public:
-//     Singleton(Singleton& other)  = delete;
-//     Singleton(Singleton&& other) = delete;
-
-//     void operator=(const Singleton&) = delete;
-//     void operator=(Singleton&&)      = delete;
-
-//     std::string value() const { return m_value; }
-
-//     /**
-//      * This is the static method that controls the access to the singleton
-//      * instance. On the first run, it creates a singleton object and places it
-//      * into the static field. On subsequent runs, it returns the client existing
-//      * object stored in the static field.
-//      */
-
-//     static Singleton* getInstance(const std::string& value)
-//     {
-//         if (m_pinstance == nullptr)
-//         {
-//             m_pinstance = new Singleton(value);
-//         }
-//         return m_pinstance;
-//     }
-
-//     /**
-//      * Finally, any singleton should define logic, which can be
-//      * executed on its instance.
-//      */
-//     void logic();
-// };
+    size_t count = 0;
+};
 
 #endif // _DESIGN_PATTERNS_

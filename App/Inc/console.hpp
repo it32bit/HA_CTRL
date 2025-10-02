@@ -2,94 +2,71 @@
 #define _CONSOLE_HPP_
 
 #include <cstdint>
-#include "circular_buffer.hpp"
 
 constexpr size_t CONSOLE_BUFFER_SIZE{128};
 constexpr size_t CONSOLE_COMMAND_SIZE{3};
 
-template <typename T>
-struct ConsoleCommandStructure
-{
-    size_t           number;
-    std::string_view name;
-    void (*handler)(T);
-    std::string_view description;
-};
+constexpr size_t MaxCommandNameLength = 16;
+constexpr size_t MaxCommandDescLength = 64;
 
 class Console
 {
   public:
-    void receivedData(uint8_t t_item) noexcept;
+    void receivedData(uint8_t byte) noexcept;
 
-    static void send(const char* msg) noexcept;
+    static void help(const char* param);
+    static void reset(const char* param);
+    static void echo(const char* param);
+    static void send(const char* msg);
 
   private:
-    static constexpr size_t        m_max_length{CONSOLE_BUFFER_SIZE};
-    std::array<char, m_max_length> m_buffer;
-    size_t                         m_head{};
+    static constexpr size_t MaxLength = CONSOLE_BUFFER_SIZE;
+
+    char   buffer[MaxLength]{};
+    size_t m_head = 0;
 
     void process(const char* line);
-
-    void setMessageToProcess() { m_buffer[m_head] = '\0'; }
-
-    bool isBufferFull() const noexcept { return m_head == m_max_length - 1; }
-
-    bool isBufferEmpty() const noexcept { return m_head == 0; }
-
-    bool isMessageEnded(const uint8_t t_item) const noexcept
-    {
-        if (t_item == '\r' || t_item == '\n')
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    bool push(const uint8_t t_item)
-    {
-        m_buffer[m_head++] = t_item;
-        return true;
-    }
-
-    void cleanMessage()
-    {
-        m_head      = 0;
-        m_buffer[0] = '\0';
-    }
+    void cleanMessage() noexcept;
+    void setMessageToProcess() noexcept;
+    bool isBufferFull() const noexcept;
+    bool isBufferEmpty() const noexcept;
+    bool isMessageEnded(uint8_t byte) const noexcept;
+    bool push(uint8_t byte) noexcept;
 };
 
-template <class T, size_t TObserverCount>
-class ConsolObserver
+/**
+ * @brief ConsoleCommand
+ * @note If it is used std::function<void(std::string_view)> handler;
+ *        Now as a handler it is able to use lambdas, member functions, or free functions.
+ *
+ * But: To create a constexpr-safe command table suitable for storing in flash memory
+ * (especially in embedded systems like STM32), we need to avoid runtime-managed types
+ * like std::function, std::vector, and even std::string_view
+ * if it's not used carefully.
+ *
+ * 1. Use raw function pointers instead of std::function
+ * 2. Use fixed-size C-style strings instead of std::string_view
+ * 3. Define a literal-friendly struct
+ * 4. Declare the command table as constexpr
+ */
+
+using CommandHandler = void (*)(const char*);
+
+struct ConsoleCommand
 {
-  public:
-    static ConsolObserver& instance()
-    {
-        static ConsolObserver consolObserver;
-        return consolObserver;
-    }
+    size_t         number;
+    char           name[MaxCommandNameLength];
+    CommandHandler handler;
+    char           description[MaxCommandDescLength];
+};
 
-    void registerObserver(std::function<void(T)> callback)
-    {
-        observers[m_observer_count++] = callback; // Add new observer
-    }
-
-    void notifyObservers(T t_item)
-    {
-        for (size_t i = 0; i < m_observer_count; ++i)
-        {
-            observers[i](t_item);
-        }
-    }
-
-  private:
-    ConsolObserver() = default;
-
-    size_t                  m_observer_count{};
-    static constexpr size_t MaxObservers{TObserverCount};
-    std::function<void(T)>  observers[MaxObservers];
+/**
+ * @note This is the modern C++20 way to share constexpr data across files.
+ */
+inline constexpr ConsoleCommand cmdConfigArray[CONSOLE_COMMAND_SIZE] = {
+    {0, "help",  &Console::help,  "Show available commands"},
+    {1, "reset", &Console::reset, "Reset the MCU"          },
+    {2, "echo",  &Console::echo,  "Echo a number back"     }
 };
 
 #endif // _CONSOLE_HPP_

@@ -51,28 +51,4 @@ const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray = {
      }
 };
 
-/**
- * @brief Compile-time pin name to their corresponding index in ioPinConfigDefArray.
- *
- * This pair allows name-based access to GPIO configurations. Each string key (e.g. "LED_GREEN")
- * corresponds to an index in the ioPinConfigDefArray, which holds the actual pin setup.
- *
- * Example:
- * @code
- *      size_t index = boardPinNames.at("LED_RED");         // returns 2
- *      const IOD& pin = ioPinConfigDefArray[index];   // access GPIO definition
- *
- *      // In one line configuration to all pins.
- *      GpioManager<4> gpioMannager(ioPinConfigDefArray, pinLabelDefArray);
- * @endcode
- */
-constexpr std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SIZE> pinLabelDefArray =
-    {
-        {{"LED_GREEN", 0},
-         {"LED_ORANGE", 1},
-         {"LED_RED", 2},
-         {"LED_BLUE", 3},
-         {"BUTTON", 4},
-         {"UART2_TX", 5},
-         {"UART2_RX", 6}}
-};
+

@@ -1,62 +1,39 @@
-#include <cstring>
-#include "console.hpp"
 #include "stm32f4xx.h"
+#include "console.hpp"
+#include <cstring>
+#include <cstdio>
 
-static void helpConsole(const char* t_msg);
-
-void Console::receivedData(uint8_t t_item) noexcept
+void Console::receivedData(uint8_t byte) noexcept
 {
     if (isBufferFull())
     {
         cleanMessage();
     }
 
-    if (isMessageEnded(t_item))
+    if (isMessageEnded(byte))
     {
         if (!isBufferEmpty())
         {
             setMessageToProcess();
-            process(m_buffer.data());
+            process(buffer);
             cleanMessage();
         }
     }
     else
     {
-        push(t_item);
+        push(byte);
     }
 }
-
-void Console::send(const char* msg) noexcept
-{
-    while (*msg)
-    {
-        while (!(USART2->SR & USART_SR_TXE))
-            ;
-        USART2->DR = *msg++;
-    }
-}
-
-// clang-format off
-constexpr std::array<ConsoleCommandStructure<const char*>, CONSOLE_COMMAND_SIZE> cmdConfigArray =
-{{
-    {0, "help",  helpConsole, "Show available commands"},
-    {1, "reset", nullptr, "Reset the MCU"          },
-    {2, "echo",  nullptr, "Echo a number back"     }
-}};
-// clang-format on
 
 void Console::process(const char* t_line)
 {
-    std::string_view input(t_line);
-
     for (const auto& cmd : cmdConfigArray)
     {
-        if (input.substr(0, cmd.name.size()) == cmd.name)
+        if (strncmp(t_line, cmd.name, strlen(cmd.name)) == 0)
         {
-            const char* param = t_line + cmd.name.size();
+            const char* param = t_line + strlen(cmd.name);
             while (*param == ' ')
-                ++param; // skip spaces
-
+                ++param;
             cmd.handler(param);
             return;
         }
@@ -65,26 +42,79 @@ void Console::process(const char* t_line)
     send("Unknown command\r\n");
 }
 
-static void helpConsole(const char* t_msg)
+void Console::send(const char* t_msg)
 {
-    std::string_view input(t_msg);
+    while (*t_msg)
+    {
+        while (!(USART2->SR & USART_SR_TXE))
+            ;
+        USART2->DR = *t_msg++;
+    }
+}
+
+bool Console::isBufferFull() const noexcept
+{
+    return m_head >= MaxLength - 1;
+}
+
+bool Console::isBufferEmpty() const noexcept
+{
+    return m_head == 0;
+}
+
+bool Console::isMessageEnded(uint8_t byte) const noexcept
+{
+    return byte == '\r' || byte == '\n';
+}
+
+bool Console::push(uint8_t byte) noexcept
+{
+    buffer[m_head++] = byte;
+    return true;
+}
+
+void Console::cleanMessage() noexcept
+{
+    m_head    = 0;
+    buffer[0] = '\0';
+}
+
+void Console::setMessageToProcess() noexcept
+{
+    buffer[m_head] = '\0';
+}
+
+void Console::help(const char* t_item)
+{
+    size_t item_size = std::strlen(t_item);
 
     for (const auto& cmd : cmdConfigArray)
     {
-        if (input.substr(0, cmd.name.size()) == cmd.name)
+        if (strncmp(t_item, cmd.name, strlen(cmd.name)) == 0)
         {
-            Console::send(cmd.name.data());
-            Console::send(" - ");
-            Console::send(cmd.description.data());
-            Console::send("\r\n");
+            send(cmd.name);
+            send(" - ");
+            send(cmd.description);
+            send("\r\n");
             break;
         }
-        else if (!input.size())
+        else if (!item_size)
         {
-            Console::send(cmd.name.data());
+            Console::send(cmd.name);
             Console::send(" - ");
-            Console::send(cmd.description.data());
+            Console::send(cmd.description);
             Console::send("\r\n");
         }
     }
+}
+
+void Console::reset(const char* t_item)
+{
+    NVIC_SystemReset();
+}
+
+void Console::echo(const char* t_item)
+{
+    send(t_item);
+    send("\r\n");
 }

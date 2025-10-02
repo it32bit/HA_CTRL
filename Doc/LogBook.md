@@ -469,3 +469,11 @@ Memory region         Used Size  Region Size  %age Used
    text    data     bss     dec     hex filename
   81468    1848    2472   85788   14f1c ~/repos/ha-ctrl/bin/ha-ctrl.elf
   ```
+
+### Summary of `constexpr`
+
+| Approach                     | Flash-safe | Multiple TU safe | constexpr       |
+|-----------------------------|------------|------------------|-----------------|
+| inline `constexpr` in header | ok     | ok           | ok          |
+| `extern const` + cpp define  | ok     | ok           | x          |
+| `extern constexpr`           | x     | x           | x *(invalid)*  |
