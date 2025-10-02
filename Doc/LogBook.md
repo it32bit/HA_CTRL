@@ -427,7 +427,7 @@ Header files must contain a distinctly-named include guard to avoid problems wit
 You may also consider using the `#pragma once` directive instead which is quasi-standard across many compilers.
 It's short and makes the intent clear.
 
-### GCC
+### GCC Fuses
 
 `-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic` - use these and consider the following (see descriptions below)
 
@@ -470,10 +470,132 @@ Memory region         Used Size  Region Size  %age Used
   81468    1848    2472   85788   14f1c ~/repos/ha-ctrl/bin/ha-ctrl.elf
   ```
 
-### Summary of `constexpr`
+## Summary of `constexpr`
 
 | Approach                     | Flash-safe | Multiple TU safe | constexpr       |
 |-----------------------------|------------|------------------|-----------------|
 | inline `constexpr` in header | ok     | ok           | ok          |
 | `extern const` + cpp define  | ok     | ok           | x          |
 | `extern constexpr`           | x     | x           | x *(invalid)*  |
+
+## INFO-19 GIT Local Hook
+
+Configure Git to prevent committing staged code without a commit message by using a commit-msg hook.
+
+```bash
+cd .git/hooks
+
+touch commit-msg
+chmod +x commit-msg
+
+#!/bin/sh
+if test -z "$1" || ! grep -q '[^[:space:]]' "$1"; then
+  echo "Commit message cannot be empty."
+  exit 1
+fi
+```
+
+What This Does
+
+- Reads the commit message from the temporary file Git creates.
+- Checks if it's empty or only whitespace.
+- If so, it blocks the commit and shows an error.
+
+## INFO-20 Git Global Hooks
+
+Use a Git Template (Native Git)
+
+This lets you share hooks across projects by setting up a global template.
+
+Step-by-step:
+
+```bash
+mkdir -p ~/.git-templates/hooks
+
+nano ~/.git-templates/hooks/commit-msg
+
+#!/bin/sh
+msg=$(cat "$1")
+if [ -z "$msg" ] || ! echo "$msg" | grep -q '[^[:space:]]'; then
+  echo "ommit message cannot be empty."
+  exit 1
+fi
+
+chmod +x ~/.git-templates/hooks/commit-msg
+
+git config --global init.templateDir ~/.git-templates
+
+cd your-project
+git init
+```
+
+Now every new repo you git init will include this hook automatically.
+
+## INFO-21 Refactoring Observer Pattern for Embedded System
+
+Goal:
+
+- Observers are registered at compile time
+- Notifications are fast and safe inside interrupts
+- Everything is constexpr-friendly and flash-resident
+
+Howto:
+
+- Define a Static Observer Interface
+- Create a Fixed Observer List
+
+Why This Is Embedded-Safe
+
+- No heap, no dynamic dispatch
+- No runtime registration
+- All data lives in .rodata (flash)
+- ISR-safe: fast, predictable, no blocking
+
+Old Size: `consoleObserver.notify(static_cast<uint8_t>(t_byte));`
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4296 B       128 KB      3.28%
+           FLASH:       81440 B         1 MB      7.77%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  79584    1848    2448   83880   147a8 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+New Size: `uart2_Observers.notifyAll(static_cast<uint8_t>(t_byte));`
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4408 B       128 KB      3.36%
+           FLASH:       80864 B         1 MB      7.71%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  79008    1848    2560   83416   145d8 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+Code size for `uart2_Observers.notifyAll(...)` is the better approach in terms of:
+
+- Compile-time safety
+- Flash residency
+- ISR compatibility
+
+## Message to Merge-Request
+
+Constexpr-safe command table for storing in flash memory, is to avoid runtime-managed types like std::function, std::vector, and std::string_view.
+
+This Is Flash-Safe
+All data is compile-time constant (constexpr) and stored in .rodata section
+No heap allocation (dynamic memory), no runtime-managed types
+Can be placed in .rodata or .text section of flash
+Ideal for embedded systems with strict memory constraints
+
+Console:
+A fixed-size character buffer
+A receivedData() method that handles input byte-by-byte
+Message termination detection (\r or \n)
+Integration with the process() function
+
+In C++, a constexpr variable must be fully defined at the point of declaration. You cannot declare a constexpr array with extern unless it's also immediately initialized — which defeats the purpose of extern.
+The Rule: constexpr variables are implicitly inline, and must be defined, not just declared.

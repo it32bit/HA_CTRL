@@ -72,4 +72,9 @@ class LedManager : public Observer
     mutable volatile bool m_pending{false};
 };
 
+void consoleNotify(uint8_t t_item);
+
+inline constexpr StaticObserverList<uint8_t, 1>
+    uart2_Observers({StaticObserver<uint8_t>{consoleNotify}});
+
 #endif // APP_HPP__

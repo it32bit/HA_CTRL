@@ -38,33 +38,34 @@ class Subject
 };
 
 /**
- * @brief Design Patterns: Observer with Template
- *
+ * @brief Design Pattern: Observer Static Interface
  */
-template <typename T, size_t MaxObservers>
-class ObserverTemplate
+
+template <typename T>
+struct StaticObserver
+{
+    void (*onNotify)(T);
+};
+
+template <typename T, size_t N>
+class StaticObserverList
 {
   public:
-    void registerObserver(std::invocable<T> auto&& callback)
-    {
-        if (count < MaxObservers)
-        {
-            observers[count++] = std::forward<decltype(callback)>(callback);
-        }
-    }
+    constexpr StaticObserverList(std::array<StaticObserver<T>, N> t_obs) : m_observers(t_obs) {}
 
-    void notify(T item)
+    void notifyAll(T value) const
     {
-        for (size_t i = 0; i < count; ++i)
+        for (const auto& obs : m_observers)
         {
-            observers[i](item);
+            if (obs.onNotify)
+            {
+                obs.onNotify(value);
+            }
         }
     }
 
   private:
-    std::array<std::function<void(T)>, MaxObservers> observers{};
-
-    size_t count = 0;
+    std::array<StaticObserver<T>, N> m_observers;
 };
 
 #endif // _DESIGN_PATTERNS_

@@ -3,8 +3,6 @@
 
 #ifdef __cplusplus
 
-extern ObserverTemplate<uint8_t, 1> consoleObserver;
-
 extern "C"
 {
 #endif

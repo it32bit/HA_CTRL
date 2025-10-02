@@ -80,7 +80,11 @@ void LedManager::process()
 static void AppInit();
 static void AppIntroduction();
 
-ObserverTemplate<uint8_t, 1> consoleObserver;
+/**
+ * @brief Global Objects
+ *          Console console
+ */
+Console console;
 
 /**
  * Main application entry point for C++ code
@@ -92,13 +96,6 @@ extern "C" void App(void)
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
-
-    Console console;
-    // auto    consoleCallback = std::bind(&Console::receivedData, &console, std::placeholders::_1);
-    // ConsolObserver<uint8_t, 1>::instance().registerObserver(consoleCallback);
-    auto callback = [&](uint8_t byte) { console.receivedData(byte); };
-
-    consoleObserver.registerObserver(callback);
 
     AppIntroduction();
 
@@ -126,4 +123,9 @@ static void AppIntroduction()
 {
     printf("HA-CTRL:\n\r Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
            FIRMWARE_VERSION.minor);
+}
+
+void consoleNotify(uint8_t t_item)
+{
+    console.receivedData(t_item);
 }
