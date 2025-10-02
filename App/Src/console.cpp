@@ -4,25 +4,27 @@
 
 void Console::receivedData(uint8_t t_item)
 {
-    if (t_item == '\r' || t_item == '\n')
+    if (isBufferFull())
     {
-        m_buffer[m_pos] = '\0';
-        processLine(m_buffer.data());
-        m_buffer[0] = '\0';
-        m_pos       = 0;
+        cleanMessage();
     }
-    else if (m_pos < m_max_length - 1)
+
+    if (isMessageEnded(t_item))
     {
-        m_buffer[m_pos++] = t_item;
+        if (!isBufferEmpty())
+        {
+            setMessageToProcess();
+            process(m_buffer.data());
+            cleanMessage();
+        }
     }
     else
     {
-        m_buffer[0] = '\0';
-        m_pos       = 0;
+        push(t_item);
     }
 }
 
-void Console::processLine(const char* line)
+void Console::process(const char* line)
 {
     if (strcmp(line, "help") == 0)
     {
@@ -44,7 +46,7 @@ void Console::processLine(const char* line)
     }
 }
 
-void Console::send(const char* msg)
+void Console::send(const char* msg) const noexcept
 {
     while (*msg)
     {
