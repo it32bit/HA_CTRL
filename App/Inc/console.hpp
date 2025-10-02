@@ -5,11 +5,23 @@
 #include "circular_buffer.hpp"
 
 constexpr size_t CONSOLE_BUFFER_SIZE{128};
+constexpr size_t CONSOLE_COMMAND_SIZE{3};
+
+template <typename T>
+struct ConsoleCommandStructure
+{
+    size_t           number;
+    std::string_view name;
+    void (*handler)(T);
+    std::string_view description;
+};
 
 class Console
 {
   public:
-    void receivedData(uint8_t t_item);
+    void receivedData(uint8_t t_item) noexcept;
+
+    static void send(const char* msg) noexcept;
 
   private:
     static constexpr size_t        m_max_length{CONSOLE_BUFFER_SIZE};
@@ -20,11 +32,9 @@ class Console
 
     void setMessageToProcess() { m_buffer[m_head] = '\0'; }
 
-    void send(const char* msg) const noexcept;
-
     bool isBufferFull() const noexcept { return m_head == m_max_length - 1; }
 
-    bool isBufferEmpty() const noexcept { return m_head == 0;}
+    bool isBufferEmpty() const noexcept { return m_head == 0; }
 
     bool isMessageEnded(const uint8_t t_item) const noexcept
     {

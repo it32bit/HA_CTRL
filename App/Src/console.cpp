@@ -2,7 +2,9 @@
 #include "console.hpp"
 #include "stm32f4xx.h"
 
-void Console::receivedData(uint8_t t_item)
+static void helpConsole(const char* t_msg);
+
+void Console::receivedData(uint8_t t_item) noexcept
 {
     if (isBufferFull())
     {
@@ -24,34 +26,65 @@ void Console::receivedData(uint8_t t_item)
     }
 }
 
-void Console::process(const char* line)
-{
-    if (strcmp(line, "help") == 0)
-    {
-        send("Available commands: help, echo, reset\r\n");
-    }
-    else if (strncmp(line, "echo ", 5) == 0)
-    {
-        send(line + 5);
-        send("\r\n");
-    }
-    else if (strcmp(line, "reset") == 0)
-    {
-        NVIC_SystemReset();
-    }
-    else
-    {
-        if (m_buffer[0] != '\0') // Prevention, double termination \n\r
-            send("Unknown command\r\n");
-    }
-}
-
-void Console::send(const char* msg) const noexcept
+void Console::send(const char* msg) noexcept
 {
     while (*msg)
     {
         while (!(USART2->SR & USART_SR_TXE))
             ;
         USART2->DR = *msg++;
+    }
+}
+
+// clang-format off
+constexpr std::array<ConsoleCommandStructure<const char*>, CONSOLE_COMMAND_SIZE> cmdConfigArray =
+{{
+    {0, "help",  helpConsole, "Show available commands"},
+    {1, "reset", nullptr, "Reset the MCU"          },
+    {2, "echo",  nullptr, "Echo a number back"     }
+}};
+// clang-format on
+
+void Console::process(const char* t_line)
+{
+    std::string_view input(t_line);
+
+    for (const auto& cmd : cmdConfigArray)
+    {
+        if (input.substr(0, cmd.name.size()) == cmd.name)
+        {
+            const char* param = t_line + cmd.name.size();
+            while (*param == ' ')
+                ++param; // skip spaces
+
+            cmd.handler(param);
+            return;
+        }
+    }
+
+    send("Unknown command\r\n");
+}
+
+static void helpConsole(const char* t_msg)
+{
+    std::string_view input(t_msg);
+
+    for (const auto& cmd : cmdConfigArray)
+    {
+        if (input.substr(0, cmd.name.size()) == cmd.name)
+        {
+            Console::send(cmd.name.data());
+            Console::send(" - ");
+            Console::send(cmd.description.data());
+            Console::send("\r\n");
+            break;
+        }
+        else if (!input.size())
+        {
+            Console::send(cmd.name.data());
+            Console::send(" - ");
+            Console::send(cmd.description.data());
+            Console::send("\r\n");
+        }
     }
 }

@@ -456,3 +456,16 @@ It's short and makes the intent clear.
 Consider using `-Weverything` and disabling the few warnings you need to on Clang
 
 `-Weffc++` warning mode can be too noisy, but if it works for your project, use it also.
+
+## INFO-18 Size after added Console Basic concept
+
+```bash
+[21/21] Linking CXX executable ~/repos/ha-ctrl/bin/ha-ctrl.elf
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4320 B       128 KB      3.30%
+           FLASH:       83324 B         1 MB      7.95%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  81468    1848    2472   85788   14f1c ~/repos/ha-ctrl/bin/ha-ctrl.elf
+  ```

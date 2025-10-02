@@ -45,6 +45,8 @@ AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 # Control of trailing comments. Always / Leave
 AlignTrailingComments: true
+# If not None, when using initialization for an array of structs aligns the fields into columns [Left/Right/None].
+AlignArrayOfStructures: Left
 # format braced lists as best suited for C++11 braced lists
 Cpp11BracedListStyle: true
 # Do not read the file to derive pointer alignment requirements. Uses PointerAlignment value.
