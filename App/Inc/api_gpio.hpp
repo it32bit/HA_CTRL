@@ -16,8 +16,15 @@
 #include "hal_gpio.hpp"
 
 constexpr size_t PIN_CONFIG_ARRAY_SIZE = 7;
+constexpr size_t PIN_NAME_MAX_LENGTH   = 18;
 
 extern const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray;
+
+struct PinNameStruct
+{
+    char   name[PIN_NAME_MAX_LENGTH];
+    size_t number;
+};
 
 /**
  * @brief Compile-time pin name to their corresponding index in ioPinConfigDefArray.
@@ -34,15 +41,14 @@ extern const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray;
  *      GpioManager<4> gpioMannager(ioPinConfigDefArray, pinLabelDefArray);
  * @endcode
  */
-inline constexpr std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SIZE>
-    pinLabelDefArray = {
-        {{"LED_GREEN", 0},
-         {"LED_ORANGE", 1},
-         {"LED_RED", 2},
-         {"LED_BLUE", 3},
-         {"BUTTON", 4},
-         {"UART2_TX", 5},
-         {"UART2_RX", 6}}
+inline constexpr PinNameStruct pinLabelDefArray[PIN_CONFIG_ARRAY_SIZE] = {
+    {"LED_GREEN",  0},
+    {"LED_ORANGE", 1},
+    {"LED_RED",    2},
+    {"LED_BLUE",   3},
+    {"BUTTON",     4},
+    {"UART2_TX",   5},
+    {"UART2_RX",   6}
 };
 
 /**
@@ -82,19 +88,20 @@ template <size_t N>
 class GpioDispatcher
 {
   public:
-    GpioDispatcher(const std::array<IOD, N>&                                 t_io_defs,
-                   const std::array<std::pair<std::string_view, size_t>, N>& t_pin_name_defs)
+    GpioDispatcher(const std::array<IOD, N>& t_io_defs,
+                   const PinNameStruct (&t_pin_name_defs)[PIN_CONFIG_ARRAY_SIZE])
         : m_io_defs(t_io_defs), m_pin_name_array(t_pin_name_defs)
     {
     }
 
-    PinController get(std::string_view t_pin_name) const
+    PinController get(const char* t_pin_name) const
     {
+        std::string_view pin_name{t_pin_name};
         for (const auto& entry : m_pin_name_array)
         {
-            if (entry.first == t_pin_name)
+            if (std::string_view(entry.name) == pin_name)
             {
-                return PinController(m_io_defs[static_cast<int>(entry.second)]);
+                return PinController(m_io_defs[static_cast<int>(entry.number)]);
             }
         }
 
@@ -105,8 +112,9 @@ class GpioDispatcher
     }
 
   private:
-    const std::array<IOD, N>&                                 m_io_defs;
-    const std::array<std::pair<std::string_view, size_t>, N>& m_pin_name_array;
+    const std::array<IOD, N>& m_io_defs;
+
+    const PinNameStruct (&m_pin_name_array)[PIN_CONFIG_ARRAY_SIZE];
 };
 
 extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;

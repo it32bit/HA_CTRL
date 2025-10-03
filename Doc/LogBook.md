@@ -722,12 +722,13 @@ Create a virtual environment
 python3 -m venv ~/venvs/clangtidy
 ```
 
-Activate it
+Activate virtual environment
+
 ```bash
 source ~/venvs/clangtidy/bin/activate
 ```
 
-Install the tool
+Install the tool on virtual environment
 
 ```bash
 (clangtidy) it32bit@it32bit:~$ python3 -m pip install clang-html

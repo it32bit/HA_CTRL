@@ -52,6 +52,7 @@ set(include_HEADERS_DIRS ${include_HEADERS_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
+	/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/lib/gcc/arm-none-eabi/13.3.1/include
 )
 
 set(include_c_DIRS ${include_c_DIRS}
