@@ -716,15 +716,38 @@ Optionaly: Exclude Files
 
 ## INFO-xx
 
-1. Create a virtual environment
+Create a virtual environment
+
+```bash
 python3 -m venv ~/venvs/clangtidy
+```
 
-2. Activate it
+Activate it
+```bash
 source ~/venvs/clangtidy/bin/activate
+```
 
-3. Install the tool
-pip install clang-tidy-report
+Install the tool
+
+```bash
+(clangtidy) it32bit@it32bit:~$ python3 -m pip install clang-html
+```
+
+In reported log there are lots of artefacts:
+
+- Progress headers (--- Running Clang-Tidy on ... ---)
+- Summary lines (2 warnings generated.)
+- Notes and errors without consistent formatting
+
+Clenup
 
 ```bash
 (clangtidy) it32bit@it32bit:~$
+find ./App -name '*.cpp' | xargs -I{} clang-tidy {} -p ./build/debug --quiet --extra-arg=-fno-color-diagnostics > ./clang-tidy-clean.log 2>&1
+```
+
+Generate the HTML Report
+
+```bash
+(clangtidy) it32bit@it32bit:~$ python3 -m clang_html ./clang-tidy-clean.log -o ./clang-tidy-report.html
 ```

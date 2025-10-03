@@ -49,6 +49,14 @@
             "problemMatcher": []
         },
         {
+            "label": "Clang-Tidy HTML",
+            "type": "shell",
+            "command": "${workspaceFolder}/Tools/clang-tidy-html.sh",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: LOG & HTML",
+            "problemMatcher": []
+        },
+        {
             "label": "Clean",
             "type": "cmake",
             "command": "build",

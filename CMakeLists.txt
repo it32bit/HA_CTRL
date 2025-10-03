@@ -193,7 +193,7 @@ if(ENABLE_CLANG_TIDY)
         message(STATUS "Clang-Tidy found: ${CLANG_TIDY_EXE}")
 
         # Define the output log file path in the build directory root.
-        set(CLANG_TIDY_LOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/clang-tidy-warn.log")
+        set(CLANG_TIDY_LOG_FILE "${CMAKE_BINARY_DIR}/clang-tidy-warn.log")
 
         # Define optional extra arguments for clang-tidy
         # Example: set(CLANG_TIDY_EXTRA_ARGS "-checks=bugprone-*,readability-*")
@@ -284,7 +284,7 @@ if(ENABLE_CLANG_TIDY)
 
         set(CLANG_TIDY_FULL_COMMAND_TEE "echo \"Running Clang-Tidy on ${APP_FILES_SPACE_SEPARATED} source(s). Output being mirrored to ${LOG_PATH_LITERAL}\" | tee \"${LOG_PATH_LITERAL}\";echo \"File processing started (check log for details)\" | tee -a \"${LOG_PATH_LITERAL}\";for file in ${APP_FILES_SPACE_SEPARATED}; do printf \"\\n--- Running Clang-Tidy on %s ---\\n\" \"\$file\" | tee -a \"${LOG_PATH_LITERAL}\";${CLANG_TIDY_EXE_LITERAL} ${CLANG_TIDY_ARGS_LITERAL} \"\$file\" 2>&1 | tee -a \"${LOG_PATH_LITERAL}\" || { printf \"Clang-Tidy failed on %s. See log for details.\\n\" \"\$file\" ; exit 1 ; } ; done")
 
-                # Ensure the custom target uses this clean variable.
+        # Ensure the custom target uses this clean variable.
         add_custom_target(clang_tidy_both
             COMMAND bash -c "${CLANG_TIDY_FULL_COMMAND_TEE}"
             VERBATIM
