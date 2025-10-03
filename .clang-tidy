@@ -1,0 +1,34 @@
+---
+Checks:          '
+  # --- ENABLE CORE CHECK GROUPS ---
+  # Enable C++ Core Guidelines, Bugprone, Performance, Readability, etc.
+  cppcoreguidelines-*,
+  -bugprone-*,
+  -performance-*,
+  -readability-*,
+  -hicpp-*,
+  -modernize-*,
+
+  # --- EXCLUDE SPECIFIC CHECKS (Noise/Embedded-Specific) ---
+  -cppcoreguidelines-pro-type-member-init,  # Initialization is often deferred/handled by hardware
+  -cppcoreguidelines-avoid-magic-numbers,  # Use CheckOptions to allow in specific files, but keep it active
+  -readability-identifier-naming,          # Move this to CheckOptions if you want to configure, or remove if not enforcing
+  -hicpp-no-array-decay,
+  -modernize-use-trailing-return-type,     # Style: not necessary for embedded C++20
+  -performance-for-range-copy,
+  -clang-diagnostic-unused-command-line-argument # Recommended exclusion for linker flags passed to clang-tidy
+'
+HeaderFilterRegex: '.*(App|Src)/.*' # Apply checks to all headers in your project '.*(App|Src)/.*'
+WarningsAsErrors:  ''
+FormatStyle:     file
+
+CheckOptions:
+  # Example: Configuring the naming convention for classes and structs (if 'readability-identifier-naming' is enabled above)
+  # - key:             readability-identifier-naming.ClassCase
+  #   value:           PascalCase
+  # - key:             readability-identifier-naming.StructCase
+  #   value:           PascalCase
+
+  # Example: Configuring MISRA-like checks for integer types
+  - key:             hicpp-avoid-c-arrays.IgnoreCharArrays
+    value:           1

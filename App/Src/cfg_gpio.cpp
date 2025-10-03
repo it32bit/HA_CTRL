@@ -50,5 +50,3 @@ const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray = {
          IOD::PUPDR::NO, IOD::GEXTI::IT, IOD::ITRG::RISING, IOD::ISTATE::DONT_CARE, 15u},
      }
 };
-
-

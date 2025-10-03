@@ -665,3 +665,66 @@ sudo rm -rf /usr/local/bin/clang-tidy
 ```
 
 find App/Src -name '*.cpp' | xargs -I{} clang-tidy {} -p build
+
+## INFO-22 Clang-Tidy Execution
+
+It was very hard to settings all together to be working.
+Check comments inside CMakeList.
+
+- Before start using first compile `CMakeList.txt` file:
+
+  ```bash
+  cmake -S . -B build/debug -G Ninja
+  ```
+
+- Start execution:
+
+  ```bash
+  cmake --build build/debug --target clang_tidy_log
+  ```
+
+In `CMakeList.txt` there is a target added `clang_tidy_log`
+it will execute clang-tidy on /App/* directory and create Log file
+`clang-tidy-warn.log` with all warnings/errors set in .clang-tidy.
+
+```bash
+~/repos/ha-ctrl/bin/clang-tidy-warn.log
+```
+
+## INFO-23 Extension - cs128.cs128-clang-tidy
+
+File → Preferences → Settings → Extensions → Clang-Tidy
+
+- clang-tidy.executable: /usr/bin/clang-tidy
+- clang-tidy.buildPath: /home/kojot/repos/ha-ctrl/build/debug
+- clang-tidy.lintOnSave: Enable
+
+Run Clang-Tidy in VSCode:
+
+- Open a .cpp file in /App
+- Save the file
+- Diagnostics will appear in the Problems tab and inline in the editor
+
+Optionaly: Exclude Files
+
+```json
+"clang-tidy.blacklist": [
+  ".*test.*",
+  ".*vendor.*"
+]
+```
+
+## INFO-xx
+
+1. Create a virtual environment
+python3 -m venv ~/venvs/clangtidy
+
+2. Activate it
+source ~/venvs/clangtidy/bin/activate
+
+3. Install the tool
+pip install clang-tidy-report
+
+```bash
+(clangtidy) it32bit@it32bit:~$
+```

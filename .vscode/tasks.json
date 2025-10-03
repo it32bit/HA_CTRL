@@ -13,6 +13,42 @@
             "problemMatcher": []
         },
         {
+            "label": "Clang-Tidy",
+            "type": "cmake",
+            "command": "build",
+            "targets": [
+                "clang_tidy_both"
+            ],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: Console and File",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clang-Tidy File",
+            "type": "cmake",
+            "command": "build",
+            "targets": [
+                "clang_tidy_log"
+            ],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: /bin/clang-tidy-warn.log",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clang-Tidy Consle",
+            "type": "cmake",
+            "command": "build",
+            "targets": [
+                "clang_tidy_console"
+            ],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: Console",
+            "problemMatcher": []
+        },
+        {
             "label": "Clean",
             "type": "cmake",
             "command": "build",
