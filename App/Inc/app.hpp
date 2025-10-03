@@ -1,7 +1,6 @@
 #ifndef APP_HPP__
 #define APP_HPP__
 
-#include <cstdint>
 #include "patterns.hpp"
 #include "api_gpio.hpp"
 

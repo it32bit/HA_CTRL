@@ -642,3 +642,26 @@ Integration with the process() function
 
 In C++, a constexpr variable must be fully defined at the point of declaration. You cannot declare a constexpr array with extern unless it's also immediately initialized — which defeats the purpose of extern.
 The Rule: constexpr variables are implicitly inline, and must be defined, not just declared.
+
+## INFO-22 Clang-Tidy is a command line tool that performs static analysis on C and C++ source code
+
+Install Clang-Tidy
+
+```bash
+sudo wget -qO /usr/local/bin/clang-tidy https://github.com/cpp-linter/clang-tools-static-binaries/releases/latest/download/clang-tidy-20_linux-amd64
+
+sudo chmod a+x /usr/local/bin/clang-tidy
+
+clang-tidy --version
+
+LLVM (http://llvm.org/):
+  LLVM version 20.1.0
+```
+
+Uninstall Clang-Tidy
+
+```bash
+sudo rm -rf /usr/local/bin/clang-tidy
+```
+
+find App/Src -name '*.cpp' | xargs -I{} clang-tidy {} -p build

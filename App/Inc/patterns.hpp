@@ -4,6 +4,7 @@
 #include <list>
 #include <array>
 #include <functional>
+#include <stdint.h>
 
 /**
  * @brief Design Patterns: Observer

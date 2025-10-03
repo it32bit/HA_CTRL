@@ -105,9 +105,10 @@
     "cortex-debug.variableUseNaturalFormat": false,
     "STM32VSCodeExtension.productFinder.executablePath": "/opt/stmMCUFinder/STMCUFinder",
     "STM32VSCodeExtension.cubeCLT.path": "/opt/stm32cubeclt_1.19.0",
-    "C_Cpp.clang_format_style": "file",
     "clang-format.executable": "/usr/bin/clang-format",
+    "C_Cpp.clang_format_style": "file",
     "[cpp]": {"editor.defaultFormatter": "xaver.clang-format"},
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "C_Cpp.errorSquiggles": "enabled"
+    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/src/build/compile_commands.json"
 }
