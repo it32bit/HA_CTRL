@@ -1,10 +1,10 @@
 #ifndef HAL_GPIO_HPP
 #define HAL_GPIO_HPP
 
-#include <array>
+#include <cstddef>
+#include <cstdint>
 #include <ranges>
-#include "stm32f4xx.h"
-#include "stm32f4xx_ll_gpio.h"
+#include "stm32f4xx_ll_gpio.h" // IWYU pragma: keep
 
 /**
  * @brief Input / Output Definition
@@ -84,9 +84,11 @@ using IOD = struct GPIOStuct
  *
  * @return Bitmask with the corresponding bit set, or 0 if out of range.
  */
+constexpr std::size_t HAL_GPIO_PIN_SHIFT_MAX = 15;
+
 [[nodiscard]] constexpr uint32_t getGpioPinMask(const uint_fast8_t pinNumber)
 {
-    return (pinNumber > 15u) ? 0u : (1u << pinNumber);
+    return (pinNumber > HAL_GPIO_PIN_SHIFT_MAX) ? 0U : (1U << pinNumber);
 }
 
 /**
@@ -136,9 +138,9 @@ template <typename T>
     requires std::ranges::range<T>
 bool gpioConfig(const T& iodef)
 {
-    for (auto& def : iodef)
+    for (auto& iopin : iodef)
     {
-        gpioConfig(def);
+        gpioConfig(iopin);
     }
     return true;
 }

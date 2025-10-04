@@ -12,7 +12,7 @@
 #ifndef __API_GPIO_HPP
 #define __API_GPIO_HPP
 
-#include <string_view>
+#include <cstring>
 #include "hal_gpio.hpp"
 
 constexpr size_t PIN_CONFIG_ARRAY_SIZE = 7;
@@ -96,12 +96,13 @@ class GpioDispatcher
 
     PinController get(const char* t_pin_name) const
     {
-        std::string_view pin_name{t_pin_name};
-        for (const auto& entry : m_pin_name_array)
+        size_t count = sizeof(m_pin_name_array) / sizeof(m_pin_name_array[0]);
+
+        for (size_t i = 0; i < count; ++i)
         {
-            if (std::string_view(entry.name) == pin_name)
+            if (strcmp(m_pin_name_array[i].name, t_pin_name) == 0)
             {
-                return PinController(m_io_defs[static_cast<int>(entry.number)]);
+                return PinController(m_io_defs[i]);
             }
         }
 

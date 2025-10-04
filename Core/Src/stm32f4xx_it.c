@@ -17,7 +17,6 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 #include "app_it.hpp"
 #include "stm32f4xx_it.h"
 

@@ -7,6 +7,8 @@ extern "C"
 {
 #endif
 
+#include <stdint.h>
+
     void HeartBeat_SysTick(void);
     void EXTI0_Callback(uint16_t GPIO_Pin);
 

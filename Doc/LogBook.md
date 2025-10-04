@@ -714,7 +714,7 @@ Optionaly: Exclude Files
 ]
 ```
 
-## INFO-xx
+## INFO-24
 
 Create a virtual environment
 
@@ -752,3 +752,19 @@ Generate the HTML Report
 ```bash
 (clangtidy) it32bit@it32bit:~$ python3 -m clang_html ./clang-tidy-clean.log -o ./clang-tidy-report.html
 ```
+
+## INFO-25 Clangd
+
+For better check clang-tidy: clangd was installed
+
+```bash
+clangd --version
+Ubuntu clangd version 18.1.3 (1ubuntu1)
+Features: linux+grpc
+Platform: x86_64-pc-linux-gnu
+```
+
+Extension for VS Code:
+
+- C/C++ - Disable
+- ClangD - Enabled

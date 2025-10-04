@@ -185,6 +185,12 @@ add_custom_target(clean-extra
 # =========================================================================
 option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" ON)
 
+set(include_clang_tidy ${include_clang_tidy}
+    ${include_HEADERS_DIRS}
+	/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/lib/gcc/arm-none-eabi/13.3.1/include
+	/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/arm-none-eabi/include/c++/13.3.1
+)
+
 if(ENABLE_CLANG_TIDY)
     # Find the clang-tidy executable
     find_program(CLANG_TIDY_EXE NAMES clang-tidy)
@@ -200,7 +206,7 @@ if(ENABLE_CLANG_TIDY)
         #set(CLANG_TIDY_EXTRA_ARGS "")
         # Combine ALL arguments (ADD the new -I flag for project headers)
         set(CLANG_TIDY_EXTRA_ARGS
-            "${ARM_TARGET_TRIPLE} --extra-arg=-I${include_HEADERS_DIRS} --extra-arg=-isystem${ARM_CXX_INCLUDE_PATH} --extra-arg=-isystem${ARM_CXX_TARGET_INCLUDE_PATH} --extra-arg=-isystem${ARM_BASE_INCLUDE_PATH} --extra-arg=-isystem${ARM_GCC_INTERNAL_INCLUDE_PATH}"
+            "${ARM_TARGET_TRIPLE} --extra-arg=-I${include_clang_tidy} --extra-arg=-isystem${ARM_CXX_INCLUDE_PATH} --extra-arg=-isystem${ARM_CXX_TARGET_INCLUDE_PATH} --extra-arg=-isystem${ARM_BASE_INCLUDE_PATH} --extra-arg=-isystem${ARM_GCC_INTERNAL_INCLUDE_PATH}"
         )
 
         # 1. Collect only the source files you want to check (adjust GLOB_RECURSE as needed)
