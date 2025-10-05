@@ -1,14 +1,15 @@
 #include "hal_gpio.hpp"
-#include "stm32f4xx_ll_exti.h"
+#include <stdint-gcc.h>
+#include <cstddef>
 
-static constexpr bool clockEnable(const GPIO_TypeDef* port);
+static bool clockEnable(const GPIO_TypeDef* port);
 
-static bool configGpioInterrupt(const IOD& io);
+static bool configGpioInterrupt(const IOD& t_io);
 
 /**
  * @section Inline hal_gpio
  */
-inline void setOutputNoop(GPIO_TypeDef*, uint32_t) {}
+inline void setOutputNoop(GPIO_TypeDef* gpio, uint32_t pin) {}
 
 inline void setOutputLow(GPIO_TypeDef* gpio, uint32_t pin)
 {
@@ -37,7 +38,9 @@ inline IRQn_Type exti_IRQ_15_10(void){ return EXTI15_10_IRQn; }
 // clang-format on
 using irqType = IRQn_Type (*)(void);
 
-inline std::array<irqType, 16> getExtiIrqFromPin = {
+constexpr size_t CONST_EXTI_IRQ_PIN_MAX = 16;
+
+inline std::array<irqType, CONST_EXTI_IRQ_PIN_MAX> getExtiIrqFromPin = {
     exti_IRQ_0,     exti_IRQ_1,     exti_IRQ_2,     exti_IRQ_3,    exti_IRQ_4,     exti_IRQ_9_5,
     exti_IRQ_9_5,   exti_IRQ_9_5,   exti_IRQ_9_5,   exti_IRQ_9_5,  exti_IRQ_15_10, exti_IRQ_15_10,
     exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10};
@@ -45,38 +48,42 @@ inline std::array<irqType, 16> getExtiIrqFromPin = {
 /**
  * @brief Lower-level gpioConfig(def) function to handle individual GPIO setup.
  */
-bool gpioConfig(const IOD& io)
+constexpr size_t CONST_AFP_PIN_0_7_IS_LOWER = 8;
+
+bool gpioConfig(const IOD& t_io)
 {
-    clockEnable(io.GPIO);
+    clockEnable(t_io.GPIO);
 
-    LL_GPIO_SetPinSpeed(io.GPIO, getGpioPinMask(io.PinNb), io.Speed);
-    LL_GPIO_SetPinOutputType(io.GPIO, getGpioPinMask(io.PinNb), io.Type);
-    LL_GPIO_SetPinPull(io.GPIO, getGpioPinMask(io.PinNb), io.Pupdr);
-    LL_GPIO_SetPinMode(io.GPIO, getGpioPinMask(io.PinNb), io.Moder);
+    LL_GPIO_SetPinSpeed(t_io.GPIO, getGpioPinMask(t_io.PinNb), t_io.Speed);
+    LL_GPIO_SetPinOutputType(t_io.GPIO, getGpioPinMask(t_io.PinNb), t_io.Type);
+    LL_GPIO_SetPinPull(t_io.GPIO, getGpioPinMask(t_io.PinNb), t_io.Pupdr);
+    LL_GPIO_SetPinMode(t_io.GPIO, getGpioPinMask(t_io.PinNb), t_io.Moder);
 
-    if (io.Moder == IOD::MODER::OUTPUT)
+    if (t_io.Moder == IOD::MODER::OUTPUT)
     {
-        setGpioAction[static_cast<std::size_t>(io.InitState)](io.GPIO, getGpioPinMask(io.PinNb));
+        setGpioAction[static_cast<std::size_t>(t_io.InitState)](t_io.GPIO,
+                                                                getGpioPinMask(t_io.PinNb));
     }
-    else if (io.Moder == IOD::MODER::ALT)
+    else if (t_io.Moder == IOD::MODER::ALT)
     {
-        if (io.PinNb < 8u)
+        if (t_io.PinNb < CONST_AFP_PIN_0_7_IS_LOWER)
         {
-            LL_GPIO_SetAFPin_0_7(io.GPIO, getGpioPinMask(io.PinNb), io.AltFunc);
+            LL_GPIO_SetAFPin_0_7(t_io.GPIO, getGpioPinMask(t_io.PinNb), t_io.AltFunc);
         }
         else
         {
-            LL_GPIO_SetAFPin_8_15(io.GPIO, getGpioPinMask(io.PinNb), io.AltFunc);
+            LL_GPIO_SetAFPin_8_15(t_io.GPIO, getGpioPinMask(t_io.PinNb), t_io.AltFunc);
         }
     }
-    else if ((io.Moder == IOD::MODER::INPUT) && (io.Exti == IOD::GEXTI::IT))
+    else if ((t_io.Moder == IOD::MODER::INPUT) && (t_io.Exti == IOD::GEXTI::IT))
     {
-        auto irq = getExtiIrqFromPin[static_cast<std::size_t>(io.PinNb)]();
-        __HAL_RCC_SYSCFG_CLK_ENABLE();
+        auto irq = getExtiIrqFromPin[static_cast<std::size_t>(t_io.PinNb)]();
 
-        configGpioInterrupt(io);
+        __HAL_RCC_SYSCFG_CLK_ENABLE(); // NOLINT
+
+        configGpioInterrupt(t_io);
         NVIC_ClearPendingIRQ(irq);
-        NVIC_SetPriority(irq, io.IPriority);
+        NVIC_SetPriority(irq, t_io.IPriority);
         NVIC_EnableIRQ(irq);
     }
     return true;
@@ -99,41 +106,43 @@ bool gpioConfig(const IOD& io)
  *
  * @see getExtiIrqFromPin
  * @see getGpioPinMask
+ *
+ * @note NOLINT: warning: avoid integer to pointer casts [performance-no-int-to-ptr]
  */
-static bool configGpioInterrupt(const IOD& io)
+static bool configGpioInterrupt(const IOD& t_io)
 {
-    EXTI->EMR &= ~(getGpioPinMask(io.PinNb)); // Disable Event
-    EXTI->IMR |= getGpioPinMask(io.PinNb);    // Enable IT
+    EXTI->EMR &= ~(getGpioPinMask(t_io.PinNb)); // Disable Event NOLINT
+    EXTI->IMR |= getGpioPinMask(t_io.PinNb);    // Enable IT     NOLINT
 
-    if (io.Exti == IOD::GEXTI::IT)
+    if (t_io.Exti == IOD::GEXTI::IT)
     {
-        EXTI->EMR &= ~(getGpioPinMask(io.PinNb)); // Disable Event
-        EXTI->IMR |= getGpioPinMask(io.PinNb);    // Enable IT
+        EXTI->EMR &= ~(getGpioPinMask(t_io.PinNb)); // NOLINT
+        EXTI->IMR |= getGpioPinMask(t_io.PinNb);    // NOLINT
     }
-    else if (io.Exti == IOD::GEXTI::EVT)
+    else if (t_io.Exti == IOD::GEXTI::EVT)
     {
-        EXTI->IMR &= ~(getGpioPinMask(io.PinNb)); // Disable IT
-        EXTI->EMR |= getGpioPinMask(io.PinNb);    // Enable Event
+        EXTI->IMR &= ~(getGpioPinMask(t_io.PinNb)); // NOLINT
+        EXTI->EMR |= getGpioPinMask(t_io.PinNb);    // NOLINT
     }
-    else if (io.Exti == IOD::GEXTI::NONE)
+    else if (t_io.Exti == IOD::GEXTI::NONE)
     {
         return false;
     }
 
-    if (io.Trg == IOD::ITRG::RISING)
+    if (t_io.Trg == IOD::ITRG::RISING)
     {
-        EXTI->RTSR |= getGpioPinMask(io.PinNb);
-        EXTI->FTSR &= ~(getGpioPinMask(io.PinNb));
+        EXTI->RTSR |= getGpioPinMask(t_io.PinNb);    // NOLINT
+        EXTI->FTSR &= ~(getGpioPinMask(t_io.PinNb)); // NOLINT
     }
-    else if (io.Trg == IOD::ITRG::FALLING)
+    else if (t_io.Trg == IOD::ITRG::FALLING)
     {
-        EXTI->RTSR &= ~(getGpioPinMask(io.PinNb));
-        EXTI->FTSR |= (getGpioPinMask(io.PinNb));
+        EXTI->RTSR &= ~(getGpioPinMask(t_io.PinNb)); // NOLINT
+        EXTI->FTSR |= (getGpioPinMask(t_io.PinNb));  // NOLINT
     }
-    else if (io.Trg == IOD::ITRG::RIS_FALL)
+    else if (t_io.Trg == IOD::ITRG::RIS_FALL)
     {
-        EXTI->RTSR |= getGpioPinMask(io.PinNb);
-        EXTI->FTSR |= getGpioPinMask(io.PinNb);
+        EXTI->RTSR |= getGpioPinMask(t_io.PinNb); // NOLINT
+        EXTI->FTSR |= getGpioPinMask(t_io.PinNb); // NOLINT
     }
     else
     {
@@ -144,44 +153,47 @@ static bool configGpioInterrupt(const IOD& io)
 
 /**
  * @brief Perypheral GPIO Clock Enable
+ *
+ * @note NOLINT: warning: avoid integer to pointer casts [performance-no-int-to-ptr]
  */
-static constexpr bool clockEnable(const GPIO_TypeDef* port)
+static bool
+clockEnable(const GPIO_TypeDef* port) // NOLINT clang-tidyreadability-function-cognitive-complexity
 {
-    if (port == GPIOA)
+    if (port == GPIOA) // NOLINT
     {
-        __HAL_RCC_GPIOA_CLK_ENABLE();
+        __HAL_RCC_GPIOA_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOB)
+    else if (port == GPIOB) // NOLINT
     {
-        __HAL_RCC_GPIOB_CLK_ENABLE();
+        __HAL_RCC_GPIOB_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOC)
+    else if (port == GPIOC) // NOLINT
     {
-        __HAL_RCC_GPIOC_CLK_ENABLE();
+        __HAL_RCC_GPIOC_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOD)
+    else if (port == GPIOD) // NOLINT
     {
-        __HAL_RCC_GPIOD_CLK_ENABLE();
+        __HAL_RCC_GPIOD_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOE)
+    else if (port == GPIOE) // NOLINT
     {
-        __HAL_RCC_GPIOE_CLK_ENABLE();
+        __HAL_RCC_GPIOE_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOF)
+    else if (port == GPIOF) // NOLINT
     {
-        __HAL_RCC_GPIOF_CLK_ENABLE();
+        __HAL_RCC_GPIOF_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOG)
+    else if (port == GPIOG) // NOLINT
     {
-        __HAL_RCC_GPIOG_CLK_ENABLE();
+        __HAL_RCC_GPIOG_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOH)
+    else if (port == GPIOH) // NOLINT
     {
-        __HAL_RCC_GPIOH_CLK_ENABLE();
+        __HAL_RCC_GPIOH_CLK_ENABLE(); // NOLINT
     }
-    else if (port == GPIOI)
+    else if (port == GPIOI) // NOLINT
     {
-        __HAL_RCC_GPIOI_CLK_ENABLE();
+        __HAL_RCC_GPIOI_CLK_ENABLE(); // NOLINT
     }
     else
     {

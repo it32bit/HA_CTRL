@@ -94,7 +94,7 @@ constexpr std::size_t HAL_GPIO_PIN_SHIFT_MAX = 15;
 /**
  * @brief Lower-level gpioConfig(def) function to handle individual GPIO setup.
  */
-extern bool gpioConfig(const IOD& def);
+extern bool gpioConfig(const IOD& t_io);
 
 /**
  * @section Template hal_gpio.hpp
@@ -136,9 +136,9 @@ bool gpioConfig(Iter begin, Iter end)
  */
 template <typename T>
     requires std::ranges::range<T>
-bool gpioConfig(const T& iodef)
+bool gpioConfig(const T& t_iodef)
 {
-    for (auto& iopin : iodef)
+    for (auto& iopin : t_iodef)
     {
         gpioConfig(iopin);
     }

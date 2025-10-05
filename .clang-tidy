@@ -32,3 +32,6 @@ CheckOptions:
   # Example: Configuring MISRA-like checks for integer types
   - key:             hicpp-avoid-c-arrays.IgnoreCharArrays
     value:           1
+
+# Suppressing Undesired Diagnostics
+# <https://clang.llvm.org/extra/clang-tidy/#suppressing-undesired-diagnostics>

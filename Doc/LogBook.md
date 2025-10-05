@@ -768,3 +768,23 @@ Extension for VS Code:
 
 - C/C++ - Disable
 - ClangD - Enabled
+
+## INFO-26 Clang-tidy Suppressing Undesired Diagnostics
+
+<https://clang.llvm.org/extra/clang-tidy/#suppressing-undesired-diagnostics>
+
+Example:
+
+```code
+badcode;  // NOLINT
+
+// NOLINTNEXTLINE
+badcode;
+
+// NOLINTBEGIN
+badcode;
+badcode;
+// NOLINTEND
+
+badcode; // NOLINT(cert-err-58-cpp)
+```
