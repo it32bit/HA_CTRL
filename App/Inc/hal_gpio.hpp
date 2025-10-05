@@ -2,7 +2,7 @@
 #define HAL_GPIO_HPP
 
 #include <cstddef>
-#include <cstdint>
+#include <stdint-gcc.h>
 #include <ranges>
 #include "stm32f4xx_ll_gpio.h" // IWYU pragma: keep
 

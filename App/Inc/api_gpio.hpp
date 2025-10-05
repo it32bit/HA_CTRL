@@ -12,7 +12,8 @@
 #ifndef __API_GPIO_HPP
 #define __API_GPIO_HPP
 
-#include <cstring>
+#include <string.h>
+#include <stdint-gcc.h>
 #include "hal_gpio.hpp"
 
 constexpr size_t PIN_CONFIG_ARRAY_SIZE = 7;

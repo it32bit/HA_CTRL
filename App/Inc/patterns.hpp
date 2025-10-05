@@ -2,9 +2,7 @@
 #define _DESIGN_PATTERNS_
 
 #include <list>
-#include <array>
-#include <functional>
-#include <stdint.h>
+#include <stdint-gcc.h>
 
 /**
  * @brief Design Patterns: Observer
@@ -28,7 +26,7 @@ class Subject
 
     void notifyObservers(uint32_t t_data) const
     {
-        for (auto observer : m_observers)
+        for (auto* observer : m_observers)
         {
             observer->notify(t_data);
         }

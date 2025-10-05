@@ -15,7 +15,7 @@
 #include "api_debug.hpp"
 #include "console.hpp"
 #include <cstring>
-#include <functional>
+#include <stdio.h>
 
 /**
  * @brief Lambda getFilename
@@ -23,8 +23,9 @@
 auto getFilename = []() -> const char*
 {
     const char* path     = __FILE__;
-    const char* filename = std::strrchr(path, '/');
-    return filename ? filename + 1 : path;
+    const char* filename = std::strrchr(const_cast<char*>(path), '/');
+    const char* ret      = (filename != nullptr) ? filename + 1 : path;
+    return ret;
 };
 
 UserButtonManager::UserButtonManager(Subject& t_subject, uint32_t t_pin_mask)
@@ -35,7 +36,7 @@ UserButtonManager::UserButtonManager(Subject& t_subject, uint32_t t_pin_mask)
 
 void UserButtonManager::notify(uint32_t t_pin_mask) const
 {
-    if (t_pin_mask & m_pin_mask)
+    if ((t_pin_mask & m_pin_mask) != 0)
     {
         m_pending = true;
     }
@@ -50,15 +51,15 @@ void UserButtonManager::process()
     }
 }
 
-LedManager::LedManager(Subject& subject, uint32_t ledMask, const PinController& led)
-    : m_subject(subject), m_pin_mask(ledMask), m_led(led)
+LedManager::LedManager(Subject& t_subject, uint32_t t_ledMask, const PinController& t_led)
+    : m_subject(t_subject), m_pin_mask(t_ledMask), m_led(t_led)
 {
     m_subject.registerObserver(this);
 }
 
 void LedManager::notify(uint32_t mask) const
 {
-    if (mask & m_pin_mask)
+    if ((mask & m_pin_mask) != 0)
     {
         m_pending = true;
     }

@@ -31,7 +31,7 @@ class SubjectWithDebouce : public Subject
 
     void notifyObserversWhenStable(uint32_t mask)
     {
-        if (m_debouncer.shouldTrigger() == true)
+        if (m_debouncer.shouldTrigger())
         {
             Subject::notifyObservers(mask);
         }
@@ -60,7 +60,7 @@ class UserButtonManager : public Observer
 class LedManager : public Observer
 {
   public:
-    LedManager(Subject& t_subject, uint32_t t_pin_mask, const PinController& t_led);
+    LedManager(Subject& t_subject, uint32_t t_ledMask, const PinController& t_led);
     void notify(uint32_t mask) const override;
     void process();
 
