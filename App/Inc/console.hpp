@@ -1,10 +1,10 @@
 #ifndef _CONSOLE_HPP_
 #define _CONSOLE_HPP_
 
-#include <cstdint>
+#include <stdint-gcc.h>
 
 constexpr size_t CONSOLE_BUFFER_SIZE{128};
-constexpr size_t CONSOLE_COMMAND_SIZE{3};
+constexpr size_t CONSOLE_COMMAND_SIZE{4};
 
 constexpr size_t MaxCommandNameLength = 16;
 constexpr size_t MaxCommandDescLength = 64;
@@ -12,12 +12,13 @@ constexpr size_t MaxCommandDescLength = 64;
 class Console
 {
   public:
-    void receivedData(uint8_t byte) noexcept;
+    static void send(const char* param);
+    void        receivedData(uint8_t byte) noexcept;
 
     static void help(const char* param);
     static void reset(const char* param);
     static void echo(const char* param);
-    static void send(const char* msg);
+    static void temperature(const char* msg);
 
   private:
     static constexpr size_t MaxLength = CONSOLE_BUFFER_SIZE;
@@ -64,9 +65,10 @@ struct ConsoleCommand
  * @note This is the modern C++20 way to share constexpr data across files.
  */
 inline constexpr ConsoleCommand cmdConfigArray[CONSOLE_COMMAND_SIZE] = {
-    {0, "help",  &Console::help,  "Show available commands"},
-    {1, "reset", &Console::reset, "Reset the MCU"          },
-    {2, "echo",  &Console::echo,  "Echo a number back"     }
+    {0, "help",  &Console::help,        "Show available commands"},
+    {1, "reset", &Console::reset,       "Reset the MCU"          },
+    {2, "echo",  &Console::echo,        "Echo a number back"     },
+    {3, "temp",  &Console::temperature, "Get Temp from Tsensor"  },
 };
 
 #endif // _CONSOLE_HPP_

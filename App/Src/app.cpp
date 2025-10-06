@@ -13,6 +13,7 @@
 #include "app.hpp"
 #include "api_gpio.hpp"
 #include "api_debug.hpp"
+#include "hal_adc.hpp"
 #include "console.hpp"
 #include <cstring>
 #include <stdio.h>
@@ -114,6 +115,7 @@ extern "C" void App(void)
 static void AppInit()
 {
     gpioConfig(ioPinConfigDefArray);
+    ADC_Internal_Init();
 
     debugInit();
 

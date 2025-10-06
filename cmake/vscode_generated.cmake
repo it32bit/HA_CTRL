@@ -29,6 +29,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/disp_gpio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_gpio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_uart.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_adc.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/console.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
@@ -43,6 +44,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc_ex.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_exti.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_rcc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_utils.c
 )
 
 # Include directories

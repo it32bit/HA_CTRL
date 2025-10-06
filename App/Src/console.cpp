@@ -1,4 +1,5 @@
 #include "stm32f4xx.h"
+#include "hal_adc.hpp"
 #include "console.hpp"
 #include <cstring>
 #include <cstdio>
@@ -117,4 +118,10 @@ void Console::echo(const char* t_item)
 {
     send(t_item);
     send("\r\n");
+}
+
+void Console::temperature(const char* t_item)
+{
+    float temp = getTemperatureInCelcius();
+    printf("Temperature: %3.2f[*C] \r\n", temp);
 }
