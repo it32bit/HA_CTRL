@@ -136,7 +136,13 @@
             "group": "build",
             "problemMatcher": [],
             "detail": "CMake build task"
+        },
+        {
+            "label": "Build and Run Unit Tests",
+            "type": "shell",
+            "command": "cmake -S . -B build-tests -DBUILD_TESTING=ON && cmake --build build-tests && ./build-tests/tests/run_tests",
+            "group": "build",
+            "problemMatcher": []
         }
     ]
 }
-

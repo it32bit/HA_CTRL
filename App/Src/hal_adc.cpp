@@ -48,7 +48,7 @@ static float convert_to_celsius(uint16_t adc_data)
     return temperature;
 }
 
-float getTemperatureInCelcius()
+float getAdcTemp()
 {
     // Adc_Temperature_Start();
     // return convert_to_celsius(adc_rowData);

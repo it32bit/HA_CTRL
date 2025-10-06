@@ -122,6 +122,6 @@ void Console::echo(const char* t_item)
 
 void Console::temperature(const char* t_item)
 {
-    float temp = getTemperatureInCelcius();
+    float temp = getAdcTemp();
     printf("Temperature: %3.2f[*C] \r\n", temp);
 }

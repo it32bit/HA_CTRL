@@ -788,3 +788,19 @@ badcode;
 
 badcode; // NOLINT(cert-err-58-cpp)
 ```
+
+## INFO-27 CppUTest
+
+```bash
+cmake -S . -B build-tests -DBUILD_TESTING=ON
+cmake --build build-tests
+./build-tests/tests/run_tests
+```
+
+```bash
+rm -rf build-tests build-host
+cmake -DBUILD_TESTING=ON -B build
+cmake --build build
+./build/tests/run_tests
+
+```
