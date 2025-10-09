@@ -31,6 +31,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_uart.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_adc.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/console.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/watchdog.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/sysmem.c

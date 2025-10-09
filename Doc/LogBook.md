@@ -791,6 +791,8 @@ badcode; // NOLINT(cert-err-58-cpp)
 
 ## INFO-27 CppUTest
 
+Clone CppUTest:
+
 ```bash
 cmake -S . -B build-tests -DBUILD_TESTING=ON
 cmake --build build-tests
@@ -798,9 +800,62 @@ cmake --build build-tests
 ```
 
 ```bash
+~/repos/ha-ctrl/extern/git clone https://github.com/cpputest/cpputest.git
+~/repos/ha-ctrl
+├── App/
+├── Core/
+├── Drivers/
+├── Startup/
+├── tests/               <-- New: test code lives here
+│   ├── CMakeLists.txt   <-- Builds the test runner
+│   ├── main.cpp         <-- Entry point
+│   └── test_hal_adc.cpp <-- Your unit test
+├── extern/              <-- CppUTest
+│   └── cpputest/
+├── CMakeLists.txt       <-- Top-level
+
 rm -rf build-tests build-host
 cmake -DBUILD_TESTING=ON -B build
 cmake --build build
 ./build/tests/run_tests
-
 ```
+
+## INFO-28 Adc Internal Temperature Sensor
+
+Code size after Temperature Sensor added
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4416 B       128 KB      3.37%
+           FLASH:       81640 B         1 MB      7.79%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  79784    1848    2568   84200   148e8 ~/repos/ha-ctrl/bin/ha-ctrl.elf
+```
+
+## INFO-29 Watchdog
+
+The independent watchdog software start is configured in
+only a few steps.
+
+- The first step is to write the Key register with value
+0x0000 CCCC which starts the watchdog.
+- Then remove the independent watchdog register
+protection by writing 0x0000 5555 to unlock the key.
+- Set the independent watchdog prescaler in the
+IWDG_PR register by selecting the prescaler divider
+feeding the counter clock.
+- Write the reload register (IWDG_RLR) to define the
+value to be loaded in the watchdog counter.
+After accessing the previous registers, it is necessary to wait
+for the IWDG_SR bits to be reset in order to confirm that the
+registers have been updated.
+- Two options are now available: enable or disable the
+8
+independent watchdog window option.
+- To enable the window option, write the window
+value in the IWDG_WINR register.
+- Otherwise, refresh the counter by a writing 0x0000
+AAAA in the Key register to disable the window
+option.

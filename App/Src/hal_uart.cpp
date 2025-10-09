@@ -1,3 +1,4 @@
+#include <stdint-gcc.h>
 #include "api_debug.hpp"
 #include "stm32f4xx.h"
 #include "stm32f4xx_ll_rcc.h"
@@ -7,20 +8,24 @@ static uint32_t getAPB1ClockFreq(void);
 void uart2_send_char_cpp(char c)
 {
     while (!(USART2->SR & USART_SR_TXE))
-        ; // Wait until TX buffer is empty
+    {
+    }; // Wait until TX buffer is empty
     USART2->DR = c;
 }
 
 void uart2_send_string(const char* str)
 {
-    while (*str)
+    while (*str != '\0')
+    {
         uart2_send_char_cpp(*str++);
+    }
 }
 
 void uart2_send_char(char c)
 {
     while (!(USART2->SR & USART_SR_TXE))
-        ; // Wait until TX buffer is empty
+    {
+    }; // Wait until TX buffer is empty
     USART2->DR = c;
 }
 

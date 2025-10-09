@@ -50,9 +50,6 @@ static float convert_to_celsius(uint16_t adc_data)
 
 float getAdcTemp()
 {
-    // Adc_Temperature_Start();
-    // return convert_to_celsius(adc_rowData);
-
     ADC_Read_Internal();
 
     return convert_to_celsius(temp_raw);

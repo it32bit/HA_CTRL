@@ -15,6 +15,7 @@
 #include "api_debug.hpp"
 #include "hal_adc.hpp"
 #include "console.hpp"
+#include "watchdog.hpp"
 #include <cstring>
 #include <stdio.h>
 
@@ -88,6 +89,13 @@ static void AppIntroduction();
  */
 Console console;
 
+Watchdog watchdog(100);
+
+extern "C" void WatchdogFeed(void)
+{
+    watchdog.feed();
+}
+
 /**
  * Main application entry point for C++ code
  */
@@ -95,6 +103,8 @@ extern "C" void App(void)
 {
     /** Initialization code for C++ application can be added here */
     AppInit();
+
+    WatchdogFeed();
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
@@ -106,6 +116,8 @@ extern "C" void App(void)
     {
         usrButton.process();
         usrLed.process();
+
+        WatchdogFeed();
     }
 }
 

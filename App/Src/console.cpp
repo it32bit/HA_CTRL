@@ -125,3 +125,10 @@ void Console::temperature(const char* t_item)
     float temp = getAdcTemp();
     printf("Temperature: %3.2f[*C] \r\n", temp);
 }
+
+void Console::watchdogTest(const char* t_item)
+{
+    while (1)
+    {
+    };
+}
