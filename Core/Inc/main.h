@@ -26,6 +26,8 @@ extern "C"
 #include "stm32f4xx_hal.h"
 
     void Error_Handler(void);
+    void uart2_send_char(char c);
+    int  _write(int file, char* ptr, int len);
 
 #ifdef __cplusplus
 }

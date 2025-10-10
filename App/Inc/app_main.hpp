@@ -18,8 +18,7 @@ extern "C"
 {
 #endif
 
-    void HeartBeat_SysTick(void);
-    void App_cpp(void);
+    void App(void);
 
 #ifdef __cplusplus
 }

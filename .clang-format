@@ -1,26 +1,61 @@
 # .clang-format for STM32 embedded C/C++ projects
-
+# <https://clang.llvm.org/docs/ClangFormatStyleOptions.html>
+#
+# Line ending style (\n or \r\n) to use.
+##LineEnding: LE_LF
+# The style used for all options not specifically set in the configuration.
 BasedOnStyle: LLVM
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
-AllowShortFunctionsOnASingleLine: Inline
-BreakBeforeBraces: Allman
-ColumnLimit: 100
-SortIncludes: false
-IncludeBlocks: Preserve
-PointerAlignment: Left
-SpaceBeforeParens: ControlStatements
-SpacesInAngles: false
-SpacesInCStyleCastParentheses: false
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
-AlignTrailingComments: true
-Cpp11BracedListStyle: true
-DerivePointerAlignment: false
-IndentCaseLabels: true
-KeepEmptyLinesAtTheStartOfBlocks: false
-NamespaceIndentation: None
-ReflowComments: false
-SeparateDefinitionBlocks: Always
+# use \n for line breaks
 UseCRLF: false
+# The brace breaking style to use. Configuration: Allman - Always break before braces.
+BreakBeforeBraces: Allman
+# Use tabs whenever we need to fill whitespace that spans at least from one tab stop to the next one.
+UseTab: Never
+# The number of columns used for tab stops.
+TabWidth: 4
+# Number of columns to use for indentation
+IndentWidth: 4
+# Max Width of a line when formatting
+ColumnLimit: 100
+# The extra indent or outdent of access modifiers (e.g., public)
+AccessModifierOffset: -2
+# Indents preprocessor directives before the hash.
+IndentPPDirectives: BeforeHash
+# Short functions are not contracted into a single line
+AllowShortFunctionsOnASingleLine: Inline
+# Always break after a template declaration
+AlwaysBreakTemplateDeclarations: Yes
+#Specifies the use of empty lines to separate definition blocks, including classes, structs, enums, and functions.
+SeparateDefinitionBlocks: Always
+# Include sorting is alphabetical and case insensitive
+SortIncludes: false
+# Sort each #include block separately (blocks of includes are separated by empty lines)
+IncludeBlocks: Preserve
+# align pointers: int* ptr
+PointerAlignment: Left
+# space between an item and following parens
+SpaceBeforeParens: ControlStatements
+# Remove spaces within <> : <int>
+SpacesInAngles: false
+# Do not add spaces in C-style cast parens
+SpacesInCStyleCastParentheses: false
+# Align equals signs of consecutive assignments
+AlignConsecutiveAssignments: true
+# Align the variable names of consecutive declarations
+AlignConsecutiveDeclarations: true
+# Control of trailing comments. Always / Leave
+AlignTrailingComments: true
+# If not None, when using initialization for an array of structs aligns the fields into columns [Left/Right/None].
+AlignArrayOfStructures: Left
+# format braced lists as best suited for C++11 braced lists
+Cpp11BracedListStyle: true
+# Do not read the file to derive pointer alignment requirements. Uses PointerAlignment value.
+DerivePointerAlignment: false
+# Do indent case labels within a switch block
+IndentCaseLabels: true
+# Remove empty lines at the start of a block
+KeepEmptyLinesAtTheStartOfBlocks: false
+# Don’t indent namespaces
+NamespaceIndentation: None
+# Clang-format will attempt to reflow long comments
+ReflowComments:  false

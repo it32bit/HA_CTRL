@@ -1,4 +1,8 @@
-build/
+build*/
 bin/
+extern/
 *.pdf
 *.txt
+*.log
+*.html
+clangd*

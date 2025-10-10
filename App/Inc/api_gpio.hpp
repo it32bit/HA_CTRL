@@ -12,15 +12,45 @@
 #ifndef __API_GPIO_HPP
 #define __API_GPIO_HPP
 
+#include <string.h>
+#include <stdint-gcc.h>
 #include "hal_gpio.hpp"
-#include <string_view>
 
-constexpr size_t PIN_CONFIG_ARRAY_SIZE = 5;
+constexpr size_t PIN_CONFIG_ARRAY_SIZE = 7;
+constexpr size_t PIN_NAME_MAX_LENGTH   = 18;
 
 extern const std::array<IOD, PIN_CONFIG_ARRAY_SIZE> ioPinConfigDefArray;
-extern const std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SIZE>
-    pinLabelDefArray;
 
+struct PinNameStruct
+{
+    char   name[PIN_NAME_MAX_LENGTH];
+    size_t number;
+};
+
+/**
+ * @brief Compile-time pin name to their corresponding index in ioPinConfigDefArray.
+ *
+ * This pair allows name-based access to GPIO configurations. Each string key (e.g. "LED_GREEN")
+ * corresponds to an index in the ioPinConfigDefArray, which holds the actual pin setup.
+ *
+ * Example:
+ * @code
+ *      size_t index = boardPinNames.at("LED_RED");    // returns 2
+ *      const IOD& pin = ioPinConfigDefArray[index];   // access GPIO definition
+ *
+ *      // In one line configuration to all pins.
+ *      GpioManager<4> gpioMannager(ioPinConfigDefArray, pinLabelDefArray);
+ * @endcode
+ */
+inline constexpr PinNameStruct pinLabelDefArray[PIN_CONFIG_ARRAY_SIZE] = {
+    {"LED_GREEN",  0},
+    {"LED_ORANGE", 1},
+    {"LED_RED",    2},
+    {"LED_BLUE",   3},
+    {"BUTTON",     4},
+    {"UART2_TX",   5},
+    {"UART2_RX",   6}
+};
 
 /**
  * Simple PIN controller class
@@ -28,37 +58,52 @@ extern const std::array<std::pair<std::string_view, size_t>, PIN_CONFIG_ARRAY_SI
 class PinController
 {
   public:
-    PinController(const IOD& io) : ioPort(io.GPIO) { ioPin = getGpioPinMask(io.PinNb); }
+    PinController(const IOD& t_io) : m_io_port(t_io.GPIO)
+    {
+        m_io_pin_mask = getGpioPinMask(t_io.PinNb);
+    }
 
-    PinController(GPIO_TypeDef* port, uint16_t pin) : ioPort(port) { ioPin = getGpioPinMask(pin); }
+    PinController(GPIO_TypeDef* t_port, uint16_t t_pin) : m_io_port(t_port)
+    {
+        m_io_pin_mask = getGpioPinMask(t_pin);
+    }
 
-    void toggle() const { LL_GPIO_TogglePin(ioPort, ioPin); }
+    void toggle() const { LL_GPIO_TogglePin(m_io_port, m_io_pin_mask); }
 
-    void on() { LL_GPIO_SetOutputPin(ioPort, ioPin); }
+    void on() const { LL_GPIO_SetOutputPin(m_io_port, m_io_pin_mask); }
 
-    void off() { LL_GPIO_ResetOutputPin(ioPort, ioPin); }
+    void off() const { LL_GPIO_ResetOutputPin(m_io_port, m_io_pin_mask); }
+
+    bool readInputPin() const
+    {
+        uint32_t ioInput = uint32_t(LL_GPIO_ReadInputPort(m_io_port) & m_io_pin_mask);
+        return static_cast<bool>(ioInput);
+    }
 
   private:
-    GPIO_TypeDef* ioPort;
-    uint32_t      ioPin;
+    GPIO_TypeDef* m_io_port;
+    uint32_t      m_io_pin_mask;
 };
 
-template <size_t N> class GpioDispatcher
+template <size_t N>
+class GpioDispatcher
 {
   public:
-    GpioDispatcher(const std::array<IOD, N>&                                 ioDefs,
-                   const std::array<std::pair<std::string_view, size_t>, N>& nameDefs)
-        : ioDefCfg(ioDefs), pinLabelArray(nameDefs)
+    GpioDispatcher(const std::array<IOD, N>& t_io_defs,
+                   const PinNameStruct (&t_pin_name_defs)[PIN_CONFIG_ARRAY_SIZE])
+        : m_io_defs(t_io_defs), m_pin_name_array(t_pin_name_defs)
     {
     }
 
-    PinController get(std::string_view pinLabel) const
+    PinController get(const char* t_pin_name) const
     {
-        for (const auto& entry : pinLabelArray)
+        size_t count = sizeof(m_pin_name_array) / sizeof(m_pin_name_array[0]);
+
+        for (size_t i = 0; i < count; ++i)
         {
-            if (entry.first == pinLabel)
+            if (strcmp(m_pin_name_array[i].name, t_pin_name) == 0)
             {
-                return PinController(ioDefCfg[static_cast<int>(entry.second)]);
+                return PinController(m_io_defs[i]);
             }
         }
 
@@ -69,8 +114,11 @@ template <size_t N> class GpioDispatcher
     }
 
   private:
-    const std::array<IOD, N>&                                 ioDefCfg;
-    const std::array<std::pair<std::string_view, size_t>, N>& pinLabelArray;
+    const std::array<IOD, N>& m_io_defs;
+
+    const PinNameStruct (&m_pin_name_array)[PIN_CONFIG_ARRAY_SIZE];
 };
+
+extern GpioDispatcher<PIN_CONFIG_ARRAY_SIZE> ioDispatcher;
 
 #endif /* __API_GPIO_HPP */

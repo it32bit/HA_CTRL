@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include "main.h"
 #include "app_main.hpp"
+#include <unistd.h>
 
 /**
  * @brief System Clock Configuration
@@ -52,12 +53,11 @@ int main(void)
     HAL_Init();
 
     /* Call the C++ application entry point with infinite loop */
-    App_cpp();
+    App();
 
     /* Execution should never reach here because App_cpp() runs an infinite loop. */
     for (;;)
     {
-        ;
     }
 }
 
@@ -116,4 +116,9 @@ static void SystemClock_Config(void)
     {
         Error_Handler();
     }
+}
+
+int _getentropy(void* buffer, size_t length)
+{
+    return -1; // always fail, It will override the weak symbol from libc.a
 }

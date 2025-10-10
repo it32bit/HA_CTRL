@@ -13,6 +13,50 @@
             "problemMatcher": []
         },
         {
+            "label": "Clang-Tidy",
+            "type": "cmake",
+            "command": "build",
+            "targets": [
+                "clang_tidy_both"
+            ],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: Console and File",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clang-Tidy File",
+            "type": "cmake",
+            "command": "build",
+            "targets": [
+                "clang_tidy_log"
+            ],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: /bin/clang-tidy-warn.log",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clang-Tidy Consle",
+            "type": "cmake",
+            "command": "build",
+            "targets": [
+                "clang_tidy_console"
+            ],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: Console",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clang-Tidy HTML",
+            "type": "shell",
+            "command": "${workspaceFolder}/Tools/clang-tidy-html.sh",
+            "group": "build",
+            "detail": "Static Analysis Tool Output: LOG & HTML",
+            "problemMatcher": []
+        },
+        {
             "label": "Clean",
             "type": "cmake",
             "command": "build",
@@ -92,7 +136,13 @@
             "group": "build",
             "problemMatcher": [],
             "detail": "CMake build task"
+        },
+        {
+            "label": "Build and Run Unit Tests",
+            "type": "shell",
+            "command": "cmake -S . -B build-tests -DBUILD_TESTING=ON && cmake --build build-tests && ./build-tests/tests/run_tests",
+            "group": "build",
+            "problemMatcher": []
         }
     ]
 }
-

@@ -23,10 +23,15 @@ set(linker_script_SRC ${linker_script_SRC}
 # Sources
 set(sources_SRCS ${sources_SRCS}
 
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/app_main.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_gpio.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/app.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/app_it.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/cfg_gpio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/disp_gpio.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_gpio.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_uart.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_adc.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/console.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/watchdog.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/sysmem.c
@@ -38,6 +43,9 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_gpio.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_cortex.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc_ex.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_exti.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_rcc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_utils.c
 )
 
 # Include directories
@@ -47,6 +55,7 @@ set(include_HEADERS_DIRS ${include_HEADERS_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
+
 )
 
 set(include_c_DIRS ${include_c_DIRS}
@@ -56,6 +65,7 @@ set(include_c_DIRS ${include_c_DIRS}
 set(include_cxx_DIRS ${include_cxx_DIRS}
 	${include_HEADERS_DIRS}
 )
+
 set(include_asm_DIRS ${include_asm_DIRS}
 
 )
@@ -87,4 +97,5 @@ set(compiler_OPTS ${compiler_OPTS})
 # Linker options
 set(linker_OPTS ${linker_OPTS})
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Generating compile_command.jsn
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compilation commands into compile_commands.json")
