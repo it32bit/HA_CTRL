@@ -124,6 +124,7 @@
     "clangd.arguments": [
         "--compile-commands-dir=build/debug",
     ],
+    "clangd.enable": false,
     "clangd.enableCodeCompletion": true,
     "clangd.detectExtensionConflicts": true,
     "C_Cpp.clang_format_style": "file",

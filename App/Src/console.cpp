@@ -1,8 +1,8 @@
-#include "stm32f4xx.h"
 #include "hal_adc.hpp"
 #include "console.hpp"
 #include <cstring>
 #include <cstdio>
+#include "stm32f4xx_ll_usart.h"
 
 void Console::receivedData(uint8_t byte) noexcept
 {
@@ -45,10 +45,11 @@ void Console::process(const char* t_line)
 
 void Console::send(const char* t_msg)
 {
-    while (*t_msg)
+    while (*t_msg != '\0')
     {
         while (!(USART2->SR & USART_SR_TXE))
-            ;
+        {
+        };
         USART2->DR = *t_msg++;
     }
 }

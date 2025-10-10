@@ -147,7 +147,7 @@ add_custom_target(clean-extra
 # =========================================================================
 # Clang-Tidy (only runs when building firmware)
 # =========================================================================
-option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" ON)
+option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" OFF)
 
 if(ENABLE_CLANG_TIDY AND NOT BUILD_TESTING)
     # Keep your full clang-tidy logic here (unchanged)...

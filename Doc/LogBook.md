@@ -645,6 +645,10 @@ The Rule: constexpr variables are implicitly inline, and must be defined, not ju
 
 ## INFO-22 Clang-Tidy is a command line tool that performs static analysis on C and C++ source code
 
+Extension: ms-vscode.cpptools (C/C++) need to be DISABED and then
+Extension: llvm-vs-code-extensions.vscode-clangd need to be ENABLED
+MakeFileList.txt: option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" ON) <-- need to be ON
+
 Install Clang-Tidy
 
 ```bash
@@ -714,7 +718,7 @@ Optionaly: Exclude Files
 ]
 ```
 
-## INFO-24
+## INFO-24 How genetate clang-tidy html summary
 
 Create a virtual environment
 
@@ -852,7 +856,6 @@ After accessing the previous registers, it is necessary to wait
 for the IWDG_SR bits to be reset in order to confirm that the
 registers have been updated.
 - Two options are now available: enable or disable the
-8
 independent watchdog window option.
 - To enable the window option, write the window
 value in the IWDG_WINR register.
