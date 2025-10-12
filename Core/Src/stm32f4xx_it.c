@@ -18,7 +18,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "app_it.hpp"
+#include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
+#include "stm32f4xx_ll_exti.h"
 
 /******************************************************************************/
 /*           Cortex-M4 Processor Interruption and Exception Handlers          */

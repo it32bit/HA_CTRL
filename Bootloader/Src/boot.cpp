@@ -41,7 +41,7 @@ static void SystemClock_Config(void);
 static void JumpToApp();
 static void Error_Boot_Handler();
 
-int main()
+extern "C" int main(void)
 {
     uint32_t bootloop = 0;
     SystemClock_Config();
@@ -65,13 +65,25 @@ static void JumpToApp()
     // Set vector table offset
     SCB->VTOR = APP_ADDRESS;
 
+    // Ensure all memory accesses are completed
+    __DSB();
+    __ISB();
+
     // Set main stack pointer
     __set_MSP(app_stack);
+
+    // Disable SysTick
+    // SysTick->CTRL = 0;
 
     // Function pointer to app reset handler
     void (*app_entry)(void) = (void (*)(void))app_reset_handler;
 
     app_entry();
+
+    // Should never return here
+    for (;;)
+    {
+    };
 }
 
 static void SystemClock_Config(void)

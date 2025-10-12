@@ -22,6 +22,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/App/Src/hal_adc.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/console.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/watchdog.cpp
+	${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
 	${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
@@ -41,36 +42,6 @@ set(sources_SRCS ${sources_SRCS}
 set(include_HEADERS_DIRS ${include_HEADERS_DIRS}
 	${CMAKE_SOURCE_DIR}/Core/Inc
 )
-
-# Filter only bootloader-related sources
-set(bootloader_sources "")
-
-foreach(src ${sources_SRCS})
-    if(src MATCHES ".*/Bootloader/.*")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Core/Src/system_stm32f4xx.c")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Startup/startup_stm32f407vgtx.s")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
-        list(APPEND bootloader_sources ${src})
-    endif()
-endforeach()
-
-# Filter only app-related sources
-set(app_sources "")
-
-foreach(src ${sources_SRCS})
-    if(src MATCHES ".*/App/.*")
-        list(APPEND app_sources ${src})
-    elseif(src MATCHES ".*/Core/Src/system_stm32f4xx.c")
-        list(APPEND app_sources ${src})
-    elseif(src MATCHES ".*/Startup/startup_stm32f407vgtx.s")
-        list(APPEND app_sources ${src})
-    elseif(src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
-        list(APPEND app_sources ${src})
-    endif()
-endforeach()
 
 set(include_c_DIRS ${include_c_DIRS}
     ${include_HEADERS_DIRS}

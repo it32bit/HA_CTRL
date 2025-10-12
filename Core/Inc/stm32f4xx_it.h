@@ -25,7 +25,6 @@
 extern "C"
 {
 #endif
-#include "stm32f4xx_ll_exti.h"
 
     void NMI_Handler(void);
     void HardFault_Handler(void);
