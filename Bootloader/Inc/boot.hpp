@@ -3,8 +3,7 @@
 
 #ifdef __cplusplus
 
-    #define APP_ADDRESS 0x08004000
-    #define VTOR (*(volatile uint32_t*)0xE000ED08)
+    constexpr uint32_t APP_ADDRESS = 0x08004000;
 
 extern "C"
 {

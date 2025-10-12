@@ -37,10 +37,12 @@ message("Build type: ${CMAKE_BUILD_TYPE}")
 # Output Directory
 # =========================================================================
 set(CMAKE_BINARY_DIR_BIN ${CMAKE_SOURCE_DIR}/bin)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
 
 # =========================================================================
 # Add Subdirectories (Targets: Bootloader and App)
 # =========================================================================
+# NOTE: Pass sources_SRCS variable to subdirectories expicitly if needed.
 add_subdirectory(Bootloader)
 add_subdirectory(App)
 
@@ -193,3 +195,11 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     add_subdirectory(extern/cpputest)
     add_subdirectory(tests)
 endif()
+
+# =========================================================================
+# Additional notes and setup for sources_SRCS variable
+# =========================================================================
+# To pass the sources_SRCS from vscode_generated.cmake into subdirectories
+# (App, Bootloader), just rely on the include of vscode_generated.cmake
+# in App/CMakeLists.txt and Bootloader/CMakeLists.txt files.:
+#    include("${CMAKE_SOURCE_DIR}/cmake/vscode_generated.cmake")

@@ -11,56 +11,35 @@ set(cpu_PARAMS ${cpu_PARAMS}
 	-mfloat-abi=hard
 )
 
-# Linker script
-set(app_linker_script_SRC ${app_linker_script_SRC}
-    ${CMAKE_CURRENT_SOURCE_DIR}/App/app_FLASH.ld
-)
-set(boot_linker_script_SRC ${boot_linker_script_SRC}
-    ${CMAKE_CURRENT_SOURCE_DIR}/Bootloader/boot_FLASH.ld
-)
-
 # Sources
 set(sources_SRCS ${sources_SRCS}
-
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/app.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/app_it.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/cfg_gpio.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/disp_gpio.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_gpio.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_uart.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_adc.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/console.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/watchdog.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/sysmem.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_gpio.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_cortex.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc_ex.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_exti.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_rcc.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_utils.c
+	${CMAKE_SOURCE_DIR}/App/Src/app.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/cfg_gpio.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/disp_gpio.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/hal_gpio.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/hal_uart.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/hal_adc.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/console.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/watchdog.cpp
+	${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
+	${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
+	${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
+	${CMAKE_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
+	${CMAKE_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal.c
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc.c
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_gpio.c
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_cortex.c
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc_ex.c
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_exti.c
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_rcc.c
+	${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_utils.c
 )
 
 # Include directories
 set(include_HEADERS_DIRS ${include_HEADERS_DIRS}
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS
-
-)
-
-add_library(stm32_hal_includes INTERFACE)
-target_include_directories(stm32_hal_includes INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
-	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
+	${CMAKE_SOURCE_DIR}/Core/Inc
 )
 
 # Filter only bootloader-related sources

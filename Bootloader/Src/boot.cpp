@@ -1,3 +1,14 @@
+/**
+ ******************************************************************************
+ * @file           : boot.c
+ * @author         : it32bit
+ * @brief          : Bootloader: Main program body
+ ******************************************************************************
+ * This software is licensed under the MIT License.
+ * Provided "as is", without warranty of any kind.
+ * The author is not liable for any damages resulting from its use.
+ ******************************************************************************
+ */
 #include <stdint.h>
 #include "stm32f407xx.h"
 #include "stm32f4xx_hal.h"
@@ -48,11 +59,14 @@ static void JumpToApp()
     uint32_t app_stack         = *(volatile uint32_t*)(APP_ADDRESS);
     uint32_t app_reset_handler = *(volatile uint32_t*)(APP_ADDRESS + 4);
 
-    // Set main stack pointer
-    __set_MSP(app_stack);
+    // Disable interrupts
+    __disable_irq();
 
     // Set vector table offset
-    VTOR = APP_ADDRESS;
+    SCB->VTOR = APP_ADDRESS;
+
+    // Set main stack pointer
+    __set_MSP(app_stack);
 
     // Function pointer to app reset handler
     void (*app_entry)(void) = (void (*)(void))app_reset_handler;
