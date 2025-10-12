@@ -6,18 +6,17 @@ cmake_minimum_required(VERSION 3.22)
 # Core MCU flags, CPU, instruction set and FPU setup
 set(cpu_PARAMS ${cpu_PARAMS}
     -mthumb
-
-    # Other parameters
-    # -mcpu, -mfloat, -mfloat-abi, ...
     -mcpu=cortex-m4
 	-mfpu=fpv4-sp-d16
 	-mfloat-abi=hard
-
 )
 
 # Linker script
-set(linker_script_SRC ${linker_script_SRC}
-    ${CMAKE_CURRENT_SOURCE_DIR}/stm32f407vgtx_FLASH.ld
+set(app_linker_script_SRC ${app_linker_script_SRC}
+    ${CMAKE_CURRENT_SOURCE_DIR}/App/app_FLASH.ld
+)
+set(boot_linker_script_SRC ${boot_linker_script_SRC}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Bootloader/boot_FLASH.ld
 )
 
 # Sources
@@ -32,7 +31,6 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/hal_adc.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/console.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/App/Src/watchdog.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
@@ -50,13 +48,50 @@ set(sources_SRCS ${sources_SRCS}
 
 # Include directories
 set(include_HEADERS_DIRS ${include_HEADERS_DIRS}
-	${CMAKE_CURRENT_SOURCE_DIR}/App/Inc
 	${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
 	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS
 
 )
+
+add_library(stm32_hal_includes INTERFACE)
+target_include_directories(stm32_hal_includes INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Core/Include
+	${CMAKE_CURRENT_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
+)
+
+# Filter only bootloader-related sources
+set(bootloader_sources "")
+
+foreach(src ${sources_SRCS})
+    if(src MATCHES ".*/Bootloader/.*")
+        list(APPEND bootloader_sources ${src})
+    elseif(src MATCHES ".*/Core/Src/system_stm32f4xx.c")
+        list(APPEND bootloader_sources ${src})
+    elseif(src MATCHES ".*/Startup/startup_stm32f407vgtx.s")
+        list(APPEND bootloader_sources ${src})
+    elseif(src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
+        list(APPEND bootloader_sources ${src})
+    endif()
+endforeach()
+
+# Filter only app-related sources
+set(app_sources "")
+
+foreach(src ${sources_SRCS})
+    if(src MATCHES ".*/App/.*")
+        list(APPEND app_sources ${src})
+    elseif(src MATCHES ".*/Core/Src/system_stm32f4xx.c")
+        list(APPEND app_sources ${src})
+    elseif(src MATCHES ".*/Startup/startup_stm32f407vgtx.s")
+        list(APPEND app_sources ${src})
+    elseif(src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
+        list(APPEND app_sources ${src})
+    endif()
+endforeach()
 
 set(include_c_DIRS ${include_c_DIRS}
     ${include_HEADERS_DIRS}

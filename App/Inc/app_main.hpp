@@ -18,7 +18,7 @@ extern "C"
 {
 #endif
 
-    void App(void);
+    //void App(void);
 
 #ifdef __cplusplus
 }

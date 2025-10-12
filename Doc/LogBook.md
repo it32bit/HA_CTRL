@@ -862,3 +862,34 @@ value in the IWDG_WINR register.
 - Otherwise, refresh the counter by a writing 0x0000
 AAAA in the Key register to disable the window
 option.
+
+## INFO-30 Bootloader
+
+### Goal
+
+- Bootloader: Initializes first, handles flashing or fallback behavior, and jumps to the App.
+- Application: Your existing App code, but adjusted to start at an offset
+- Replace the default main.c with my own boot.cpp (custom bootloader).
+- Remove unnecessary inclusion of Core/Src/main.c.
+- Keep Clang-Tidy, CppUTest, and clean-extra features.
+- Ensure proper CMAKE_MODULE_PATH logic.
+- Maintain clarity and portability.
+
+### Directory Tree
+
+├── App
+├── Bootloader                <-- NEW
+│   ├── Inc
+│   ├── Src
+│   ├── bootloader.ld         <-- Linker script for bootloader
+│   └── main.cpp              <-- Bootloader entry point
+├── bin
+├── Core
+├── Drivers
+├── Startup
+│   └── startup_stm32f407vgtx.s
+├── stm32f407vgtx_FLASH.ld
+├── app_flash.ld              <-- NEW: linker script for App
+├── CMakeLists.txt
+├── CMakePresets.json
+└── ...

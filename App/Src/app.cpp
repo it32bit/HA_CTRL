@@ -18,6 +18,7 @@
 #include "watchdog.hpp"
 #include <cstring>
 #include <stdio.h>
+#include "stm32f4xx_hal.h"
 
 /**
  * @brief Lambda getFilename
@@ -99,8 +100,9 @@ extern "C" void WatchdogFeed(void)
 /**
  * Main application entry point for C++ code
  */
-extern "C" void App(void)
+extern "C" int main(void)
 {
+    HAL_Init();
     /** Initialization code for C++ application can be added here */
     AppInit();
 
