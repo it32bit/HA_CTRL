@@ -13,7 +13,6 @@ set(cpu_PARAMS ${cpu_PARAMS}
 
 # Sources
 set(sources_SRCS ${sources_SRCS}
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_gpio.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/app.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/cfg_gpio.cpp
@@ -23,6 +22,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/App/Src/console.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/watchdog.cpp
 	${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
+	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_gpio.cpp
 	${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
@@ -40,7 +40,7 @@ set(sources_SRCS ${sources_SRCS}
 
 # Include directories
 set(include_HEADERS_DIRS ${include_HEADERS_DIRS}
-	${CMAKE_SOURCE_DIR}/Core/Inc
+
 )
 
 set(include_c_DIRS ${include_c_DIRS}

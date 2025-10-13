@@ -36,7 +36,7 @@ message("Build type: ${CMAKE_BUILD_TYPE}")
 # =========================================================================
 # Output Directory
 # =========================================================================
-set(CMAKE_BINARY_DIR_BIN ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_BINARY_DIR_BIN ${CMAKE_BINARY_DIR}/../bin)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
 
 # =========================================================================

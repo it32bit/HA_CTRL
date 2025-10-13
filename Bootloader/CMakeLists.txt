@@ -56,6 +56,8 @@ target_include_directories(${BOOT_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Bootloader/Inc
+    ${CMAKE_SOURCE_DIR}/Platform/Interface
+    ${CMAKE_SOURCE_DIR}/Platform/STM32F4/Inc
 )
 
 # Compiler defines
