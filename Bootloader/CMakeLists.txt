@@ -18,6 +18,8 @@ foreach(src ${sources_SRCS})
         list(APPEND bootloader_sources ${src})
     elseif(src MATCHES ".*/Core/Src/system_stm32f4xx.c")
         list(APPEND bootloader_sources ${src})
+    elseif(src MATCHES ".*/Core/Src/syscall.c")
+        list(APPEND bootloader_sources ${src})
     elseif(src MATCHES ".*/Startup/startup_stm32f407vgtx.s")
         list(APPEND bootloader_sources ${src})
     elseif(src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
@@ -27,7 +29,7 @@ endforeach()
 
 message(STATUS "Building target ${BOOT_TARGET} with sources:")
 foreach(file IN LISTS bootloader_sources)
-    message(STATUS "+ ${file}")
+    message(STATUS "> ${file}")
 endforeach()
 
 # Create executable first

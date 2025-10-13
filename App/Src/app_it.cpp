@@ -39,7 +39,7 @@ bool Debouncer::shouldTrigger()
 /**
  * @brief  Heatbeat Led Toggle every 500[ms]
  */
-extern "C" void HeartBeat_SysTick(void)
+extern "C" void SysTick_HeartBeat(void)
 {
     static uint32_t ticks = 0u;
 

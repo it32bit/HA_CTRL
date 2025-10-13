@@ -17,7 +17,6 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "app_it.hpp"
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 #include "stm32f4xx_ll_exti.h"
@@ -101,7 +100,7 @@ void DebugMon_Handler(void)
 void SysTick_Handler(void)
 {
     HAL_IncTick(); // Required if using HAL
-    HeartBeat_SysTick();
+    SysTick_HeartBeat();
 }
 
 /**

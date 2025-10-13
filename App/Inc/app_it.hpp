@@ -8,8 +8,7 @@ extern "C"
 
 #include <stdint-gcc.h>
 
-    void HeartBeat_SysTick(void);
-    void EXTI0_Callback(uint16_t GPIO_Pin);
+
 
 #ifdef __cplusplus
 }

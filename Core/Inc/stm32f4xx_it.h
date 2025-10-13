@@ -25,18 +25,18 @@
 extern "C"
 {
 #endif
-
+// Handler declarations
     void NMI_Handler(void);
     void HardFault_Handler(void);
     void MemManage_Handler(void);
     void BusFault_Handler(void);
     void UsageFault_Handler(void);
     void DebugMon_Handler(void);
-
     void SysTick_Handler(void);
+// Callbacks
     void EXTI0_Callback(uint16_t gpioPinMask);
     void USART2_Callback(uint8_t t_byte);
-
+    void SysTick_HeartBeat(void);
 #ifdef __cplusplus
 }
 #endif

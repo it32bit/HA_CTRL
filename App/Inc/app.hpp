@@ -10,7 +10,7 @@ typedef struct
     uint8_t minor;
 } firmwareVersionS;
 
-constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 1};
+constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 2};
 
 class Debouncer
 {

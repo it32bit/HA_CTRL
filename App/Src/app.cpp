@@ -106,7 +106,7 @@ void LedManager::process()
  *          AppInit_cpp
  */
 static void AppInit();
-static void AppIntroduction();
+static void AppIntro();
 
 /**
  * @brief Global Objects
@@ -137,7 +137,7 @@ extern "C" int main(void)
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
 
-    AppIntroduction();
+    AppIntro();
 
     // Enable global interrupts
     __enable_irq();
@@ -165,9 +165,9 @@ static void AppInit()
     /** Any initialization code can be added here */
 }
 
-static void AppIntroduction()
+static void AppIntro()
 {
-    printf("HA-CTRL:\n\r Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
+    printf("HA-CTRL-APP\t Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
            FIRMWARE_VERSION.minor);
 }
 
