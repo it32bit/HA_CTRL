@@ -17,12 +17,12 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/cfg_gpio.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/disp_gpio.cpp
-	${CMAKE_SOURCE_DIR}/App/Src/hal_uart.cpp
-	${CMAKE_SOURCE_DIR}/App/Src/hal_adc.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/console.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/watchdog.cpp
 	${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_gpio.cpp
+	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_uart.cpp
+	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_adc.cpp
 	${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c

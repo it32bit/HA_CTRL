@@ -91,17 +91,6 @@
         "variant": "cpp",
         "app_it.hpp": "cpp"
     },
-    "terminal.integrated.defaultProfile.linux": "bash",
-    "terminal.integrated.profiles.linux": {
-        "bash": {
-            "path": "/bin/bash"
-        },
-        "zsh": {
-            "path": "/usr/bin/zsh"
-        }
-    },
-    "cmake.configureOnOpen": true,
-    "cmake.useCMakePresets": "always",
     "cortex-debug.stlinkPath": "/opt/stm32cubeclt_1.19.0/STLink-gdb-server/bin/ST-LINK_gdbserver",
     "cortex-debug.armToolchainPath": "/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin",
     "cortex-debug.armToolchainPath.linux": null,
@@ -125,5 +114,9 @@
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.default.compileCommands": "${workspaceFolder}/src/build/compile_commands.json",
+    "C_Cpp.intelliSenseEngine": "default",
+    "cmake.useCMakePresets": "always",
+    "cmake.options.statusBarVisibility": "visible",
+    "cmake.configureOnOpen": true,
     "cmake.sourceDirectory": "/home/kojot/repos/ha-ctrl"
 }
