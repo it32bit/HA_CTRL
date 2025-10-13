@@ -16,6 +16,8 @@ set(bootloader_sources "")
 foreach(src ${sources_SRCS})
     if(src MATCHES ".*/Bootloader/.*")
         list(APPEND bootloader_sources ${src})
+    elseif(src MATCHES ".*/Platform/STM32F4/Src/.*")
+        list(APPEND app_sources ${src})
     elseif(src MATCHES ".*/Core/Src/system_stm32f4xx.c")
         list(APPEND bootloader_sources ${src})
     elseif(src MATCHES ".*/Core/Src/syscall.c")
@@ -35,6 +37,11 @@ endforeach()
 # Create executable first
 add_executable(${BOOT_TARGET}
     ${bootloader_sources}
+)
+
+# Link with PlatformSTM32F4 HAL wrapper library
+target_link_libraries(${BOOT_TARGET} PRIVATE
+    PlatformSTM32F4
 )
 
 # Set output directory for ELF, BIN, and HEX files

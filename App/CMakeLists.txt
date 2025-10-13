@@ -10,12 +10,13 @@ set(app_linker_script_SRC ${app_linker_script_SRC}
     ${CMAKE_SOURCE_DIR}/App/app_FLASH.ld
 )
 
-
 # Filter only app-related sources
 set(app_sources "")
 
 foreach(src ${sources_SRCS})
     if(src MATCHES ".*/App/.*")
+        list(APPEND app_sources ${src})
+    elseif(src MATCHES ".*/Platform/STM32F4/Src/.*")
         list(APPEND app_sources ${src})
     elseif(src MATCHES ".*/Core/Src/.*")
         list(APPEND app_sources ${src})
@@ -34,6 +35,11 @@ endforeach()
 # Create executable first
 add_executable(${APP_TARGET}
     ${app_sources}
+)
+
+# Link with PlatformSTM32F4 HAL wrapper library
+target_link_libraries(${APP_TARGET} PRIVATE
+    PlatformSTM32F4
 )
 
 # Set output directory for ELF, BIN, and HEX files

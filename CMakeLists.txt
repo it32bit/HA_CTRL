@@ -25,7 +25,7 @@ if(NOT BUILD_TESTING)
     include("cmake/gcc-arm-none-eabi.cmake")
 
     # Load auto-generated sources, includes, and flags
-    include("cmake/vscode_generated.cmake")
+    # vscode_generated.cmake" included in subdirectories boot and app
 
     # Remove default main.c (don't build it)
     list(REMOVE_ITEM sources_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c")
@@ -38,6 +38,11 @@ message("Build type: ${CMAKE_BUILD_TYPE}")
 # =========================================================================
 set(CMAKE_BINARY_DIR_BIN ${CMAKE_SOURCE_DIR}/bin)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
+
+# =========================================================================
+# Platform-Specific Settings
+# =========================================================================
+add_subdirectory(Platform/STM32F4)
 
 # =========================================================================
 # Add Subdirectories (Targets: Bootloader and App)

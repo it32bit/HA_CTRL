@@ -893,3 +893,24 @@ option.
 ├── CMakeLists.txt
 ├── CMakePresets.json
 └── ...
+
+## Info-31 Platform
+
+Structure like below is future-proof and it allows to:
+
+- write platform-agnostic application code,
+- easily swap to another MCU by switching the Platform/XYZ folder,
+- and test against mocks or stubs using the interfaces.
+
+```bash
+Platform/
+├── Interface/
+│   ├── IGpio.hpp
+│   └── ...
+├── STM32F4/
+│   ├── Inc/
+│   │   └── hal_gpio.hpp
+│   ├── Src/
+│   │   └── hal_gpio.cpp
+│   └── CMakeLists.txt
+```
