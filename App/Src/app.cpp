@@ -103,9 +103,7 @@ void LedManager::process()
 
 /**
  * @brief Static declaration
- *          AppInit_cpp
  */
-static void AppInit();
 static void AppIntro();
 
 /**
@@ -127,11 +125,13 @@ extern "C" void WatchdogFeed(void)
 extern "C" int main(void)
 {
     SystemClock_Config();
-
     HAL_Init();
-    /** Initialization code for C++ application can be added here */
-    AppInit();
 
+    /** Initialization code for C++ application can be added here */
+    gpioConfig(ioPinConfigDefArray);
+    ADC_Internal_Init();
+
+    debugInit();
     WatchdogFeed();
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
@@ -152,18 +152,6 @@ extern "C" int main(void)
     }
 }
 
-/**
- * Initialization function for C++ application
- */
-static void AppInit()
-{
-    gpioConfig(ioPinConfigDefArray);
-    ADC_Internal_Init();
-
-    debugInit();
-
-    /** Any initialization code can be added here */
-}
 
 static void AppIntro()
 {

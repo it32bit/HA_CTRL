@@ -10,9 +10,9 @@
  ******************************************************************************
  */
 #include <stdint.h>
-#include "stm32f407xx.h"
 #include "stm32f4xx_hal.h"
 #include "boot.hpp"
+#include "api_gpio.hpp"
 
 /**
  * @brief System Clock Configuration
@@ -43,14 +43,17 @@ static void Error_Boot_Handler();
 
 extern "C" int main(void)
 {
-    uint32_t bootloop = 0;
     SystemClock_Config();
+
+    gpioConfig(ioPinConfigDefArray);
+
+    PinController ledOrange = ioDispatcher.get("LED_ORANGE");
+    ledOrange.on();
 
     JumpToApp();
 
     while (1)
     {
-        ++bootloop;
     };
 }
 

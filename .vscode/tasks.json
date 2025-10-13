@@ -70,7 +70,7 @@
         "-c",
         "port=SWD",
         "-d",
-        "${workspaceFolder}/bin/ha-ctrl-boot.elf",
+        "${workspaceFolder}/build/bin/ha-ctrl-boot.elf",
         "-hardRst",
         "-rst",
         "--start"
@@ -86,7 +86,7 @@
         "-c",
         "port=SWD",
         "-d",
-        "${workspaceFolder}/bin/ha-ctrl-app.elf",
+        "${workspaceFolder}/build/bin/ha-ctrl-app.elf",
         "-hardRst",
         "-rst",
         "--start"

@@ -13,7 +13,7 @@
             "device": "STM32F407VGTx",
             "interface": "swd",
             "runToEntryPoint": "main",
-            "executable": "${workspaceFolder}/bin/ha-ctrl-boot.elf",
+            "executable": "${workspaceFolder}/build/bin/ha-ctrl-boot.elf",
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32F407.svd",
             "v1": false,
             "serverpath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
@@ -39,7 +39,7 @@
             "device": "STM32F407VGTx",
             "interface": "swd",
             "runToEntryPoint": "main",
-            "executable": "${workspaceFolder}/bin/ha-ctrl-app.elf",
+            "executable": "${workspaceFolder}/build/bin/ha-ctrl-app.elf",
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32F407.svd",
             "v1": false,
             "serverpath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
@@ -66,7 +66,7 @@
             "interface": "swd",
             "gdbTarget": "localhost:50000",
             "runToEntryPoint": "main",
-            "executable": "${workspaceFolder}/bin/ha-ctrl-app.elf", // or bootloader ELF if attaching to that
+            "executable": "${workspaceFolder}/build/bin/ha-ctrl-app.elf", // or bootloader ELF if attaching to that
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32F407.svd",
             "serverpath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
             "stm32cubeprogrammer": "${config:STM32VSCodeExtension.cubeCLT.path}/STM32CubeProgrammer/bin",
