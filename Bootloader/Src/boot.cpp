@@ -12,7 +12,8 @@
 #include <stdint.h>
 #include "stm32f4xx_hal.h"
 #include "boot.hpp"
-#include "api_gpio.hpp"
+
+#include "gpio_manager_stm32.hpp"
 
 /**
  * @brief System Clock Configuration
@@ -41,14 +42,20 @@ static void SystemClock_Config(void);
 static void JumpToApp();
 static void Error_Boot_Handler();
 
+static GpioManager gpioManager;
+
 extern "C" int main(void)
 {
     SystemClock_Config();
 
-    gpioConfig(ioPinConfigDefArray);
+    gpioManager.initialize(gpioPinConfigs);
 
-    PinController ledOrange = ioDispatcher.get("LED_ORANGE");
-    ledOrange.on();
+    IGPIOPin* led = gpioManager.getPin("LD3_OR");
+
+    if (led != nullptr)
+    {
+        led->set();
+    }
 
     JumpToApp();
 
@@ -140,4 +147,11 @@ void Error_Boot_Handler(void)
     {
         ++loop;
     }
+}
+
+extern "C" int _getentropy(void* buffer, size_t length) __attribute__((weak));
+
+int _getentropy(void* buffer, size_t length)
+{
+    return -1; // Always fail, as expected
 }

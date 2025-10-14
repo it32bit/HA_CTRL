@@ -1,5 +1,5 @@
 /**
- * @file pin_config.hpp
+ * @file pil_pin_config.hpp
  *
  * @author it32bit
  *
@@ -30,40 +30,45 @@
 
 #include <cstdint>
 #include <string_view>
+#include <stdint-gcc.h>
 
 struct PinConfig
 {
-    enum class Mode
+    enum Mode : uint32_t
     {
-        Input,
-        Output,
-        Alternate,
-        Analog
+        Input     = 0,
+        Output    = 1,
+        Alternate = 2,
+        Analog    = 3
     };
-    enum class Pull
+
+    enum Pull : uint32_t
     {
-        PullNone,
-        PullUp,
-        PullDown
+        PullNone = 0,
+        PullUp   = 1,
+        PullDown = 2
     };
-    enum class Type
+
+    enum Type : uint32_t
     {
-        PushPull,
-        OpenDrain
+        PushPull  = 0,
+        OpenDrain = 1
     };
-    enum class Speed
+
+    enum Speed : uint32_t
     {
-        Low,
-        Medium,
-        High,
-        VeryHigh
+        Low      = 0,
+        Medium   = 1,
+        High     = 2,
+        VeryHigh = 3
     };
-    enum class InterruptTrigger
+
+    enum InterruptTrigger : uint32_t
     {
-        None,
-        Rising,
-        Falling,
-        RisingFalling
+        None          = 0,
+        Rising        = 1,
+        Falling       = 2,
+        RisingFalling = 3
     };
 
     enum PortIndex : uint8_t
@@ -84,6 +89,13 @@ struct PinConfig
         Port4 = 4
     };
 
+    enum InterruptExti : uint32_t
+    {
+        ExtiNone = 0,
+        ExtiIT   = 1,
+        ExtiEVT  = 2
+    };
+
     std::string_view name;
     uint8_t          portIndex;
     uint16_t         pinNumber; // Pin number within the port (0-15) for SMT32 or (0-32) for ESP32
@@ -91,9 +103,10 @@ struct PinConfig
     Pull             pull;      // None, Up, Down
     Type             type;
     Speed            speed;
-    InterruptTrigger interrupt;         // Interrupt trigger type, if applicable
-    uint8_t          alternateFunction; // Alternate function number (0-15), 0 = none.
-    uint8_t          priority;          // NVIC priority (optional)
+    InterruptExti    iExti;       // Interrupt or Event line, if applicable
+    InterruptTrigger iTrigger;    // Interrupt trigger type, if applicable
+    uint32_t         altFunction; // Alternate function number (0-15), 0 = none.
+    uint32_t         iPriority;   // NVIC priority (optional)
 };
 
 #endif // _PIN_CONFIG_HPP_

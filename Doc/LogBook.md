@@ -913,4 +913,91 @@ Platform/
 │   ├── Src/
 │   │   └── hal_gpio.cpp
 │   └── CMakeLists.txt
+
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        2080 B       128 KB      1.59%
+           FLASH:        5980 B        16 KB     36.50%
+   text    data     bss     dec     hex filename
+   5888      92    1988    7968    1f20 /ha-ctrl-boot.elf
+
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4416 B       128 KB      3.37%
+           FLASH:       81876 B      1008 KB      7.93%
+   text    data     bss     dec     hex filename
+  80020    1848    2568   84436   149d4 /ha-ctrl-app.elf
+build finished successfully.
+```
+
+## Info-32 Modularization of my Custom GPIO Driver
+
+This approach ensures that both bootloader and application code can share
+the same pin configuration definitions without duplicating code or
+introducing hardware dependencies in this common header.
+
+1.Pure Abstract GPIO Interface in /Interface
+
+- Abstract interfaces allow you to hide hardware details behind these classes.
+- Both bootloader and app will depend only on this header.
+- No HAL or hardware headers leak here.
+
+2.Implement a GPIO manager (e.g., GpioManager_STM32) that uses the PinConfig array to initialize pins.
+
+3.Ensure both bootloader and application code can use the GPIO manager to access pins by name.
+
+4.Test the implementation on the target hardware (e.g., STM32F4). This file should not include any HAL or hardware-specific headers.
+
+### Summary
+
+- Interface-based abstraction in /Interface/
+- STM32-specific implementation in /Platform/STM32F4/
+- App and bootloader can both depend on pil_gpio.hpp and pil_pin_config.hpp
+- Clean and portable GPIO layer now decoupled from HAL
+
+## ISSUE-33
+
+`--specs=nano.specs` provides to disabling `_sbrk()` - a function used by malloc() and other heap-related operations to allocate memory, we can stub or disable dynamic memory allocation or write `_sbrk()` implementation in syscall.c
+
+```C
+// Add this to your project (e.g., in syscall.c or minimal_syscalls.c):
+extern "C" {
+  caddr_t _sbrk(int incr) {
+    extern char _end; // Defined by the linker
+    static char* heap_end;
+    char* prev_heap_end;
+
+    if (heap_end == 0) {
+      heap_end = &_end;
+    }
+
+    prev_heap_end = heap_end;
+    heap_end += incr;
+
+    return (caddr_t)prev_heap_end;
+  }
+}
+```
+
+## ISSUE-34
+
+`--specs=nosys.specs` provides to the `_getentropy` warning and huge increase of flash size.
+
+```C
+extern "C" int _getentropy(void* buffer, size_t length) __attribute__((weak));
+int _getentropy(void* buffer, size_t length) {
+    return -1; // Always fail, as expected
+}
+```
+
+## Info-35 Memory Usage Bootloader new GPIO Driver from /Platform
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4272 B       128 KB      3.26%
+           FLASH:       75008 B       128 KB     57.23%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  73144    1856    2416   77416   12e68 ha-ctrl-boot.elf
 ```

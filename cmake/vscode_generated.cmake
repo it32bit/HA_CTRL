@@ -17,8 +17,9 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/console.cpp
 	${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/cfg_gpio.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/disp_gpio.cpp
+	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_manager_stm32.cpp
+	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_pin_stm32.cpp
+	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_hal_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/watchdog.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_gpio.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_uart.cpp
