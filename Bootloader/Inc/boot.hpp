@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 
-    constexpr uint32_t APP_ADDRESS = 0x08004000;
+
 
 extern "C"
 {

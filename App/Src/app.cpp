@@ -132,15 +132,23 @@ extern "C" int main(void)
     HAL_Init();
 
     /** Initialization code for C++ application can be added here */
-    //gpioManager.initialize(gpioPinConfigs);
+    gpioManager.initialize(gpioPinConfigs);
+    auto userButton = gpioManager.getPin("BUTTON");
+
+    auto led = gpioManager.getPin("LD_BLU");
+
+    if (led)
+    {
+        led->set();
+    }
 
     ADC_Internal_Init();
 
     debugInit();
     WatchdogFeed();
 
-    //UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
-    //LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpioManager.getPin("LD_GRE"));
+    UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
+    LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpioManager.getPin("LD_GRE"));
 
     AppIntro();
 
@@ -150,8 +158,8 @@ extern "C" int main(void)
     /** App Main loop */
     for (;;)
     {
-        // usrButton.process();
-        // usrLed.process();
+        usrButton.process();
+        usrLed.process();
 
         WatchdogFeed();
     }

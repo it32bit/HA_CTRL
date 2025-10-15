@@ -50,6 +50,9 @@ MEMORY
   FLASH  (rx) : ORIGIN = 0x8000000,  LENGTH = 128K
 }
 
+/* Jump-To-APP: symbol for vector table */
+APP_ADDRESS = 0x08020000;
+
 /* Sections */
 SECTIONS
 {

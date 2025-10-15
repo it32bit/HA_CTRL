@@ -1099,3 +1099,85 @@ This ensures:
 - Uses -std=gnu++20 instead of -std=c++20
 - May break portability or introduce subtle bugs on other toolchains
 - Sometimes needed for low-level tricks or legacy code.
+
+## Info-39 Keyword `constinit`
+
+### Use constinit for
+
+- Global managers (like gpioManagerBoot)
+- Configuration tables
+- Static buffers
+- Anything that must be initialized before main() without runtime cost
+
+```Cpp
+struct GpioManager {
+    constexpr GpioManager() = default;
+    void init();
+};
+constinit GpioManager gpioManagerBoot;  // compile-time guaranteed
+```
+
+|Declaration                            | Behavior                                                      |
+|---------------------------------------|---------------------------------------------------------------|
+|GpioManager gpioManagerBoot;           | May be initialized at runtime (even if constructor is trivial)|
+|constinit GpioManager gpioManagerBoot; | Must be initialized at compile time — compiler enforces this  |
+
+### Use `constinit` in Embedded Global Scope
+
+- Ensures deterministic startup — no hidden runtime initialization
+- Avoids static initialization order fiasco across translation units
+- Guarantees zero-cost initialization for trivial types
+- Safer than relying on constexpr alone, because constinit works with mutable objects
+
+### Common Misunderstanding
+
+- `constinit` not equal `const`
+- You can modify a constinit object after startup
+- It’s about how it's initialized, not whether it's mutable
+
+## INFO-40 Boot Size after removeing dynamic memory allocation
+
+Flash reduction from ~72k to 5.4k for:
+
+```Cpp
+constexpr auto* buttonCfg = findPinConfig("BUTTON");
+GpioPin_STM32*buttonPin = GpioPin_STM32::createStatic(*buttonCfg);
+buttonPin->set();
+```
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        3880 B       128 KB      2.96%
+           FLASH:        6928 B       128 KB      5.29%
+******** Print size information:
+   text    data     bss     dec     hex filename
+   5404    1524    2356    9284    2444 ha-ctrl-boot.elf
+build finished successfully.
+```
+
+```Cpp
+static GpioManager gpio;
+gpio.initialize(gpioPinConfigs);
+auto red = gpio.getPin("LD_RED");
+red->toggle();
+```
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4384 B       128 KB      3.34%
+           FLASH:       17528 B       128 KB     13.37%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  15488    2032    2352   19872    4da0 ha-ctrl-boot.elf
+
+
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4600 B       128 KB      3.51%
+           FLASH:       82744 B       896 KB      9.02%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  80696    2040    2560   85296   14d30 ha-ctrl-app.elf
+```
