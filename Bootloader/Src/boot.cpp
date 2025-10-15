@@ -42,15 +42,15 @@ static void SystemClock_Config(void);
 static void JumpToApp();
 static void Error_Boot_Handler();
 
-static GpioManager gpioManager;
+GpioManager gpioManagerBoot;
 
 extern "C" int main(void)
 {
     SystemClock_Config();
 
-    gpioManager.initialize(gpioPinConfigs);
+    gpioManagerBoot.initialize(gpioPinConfigs);
 
-    IGPIOPin* led = gpioManager.getPin("LD3_OR");
+    IGPIOPin* led = gpioManagerBoot.getPin("LD_ORA");
 
     if (led != nullptr)
     {

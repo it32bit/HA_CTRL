@@ -10,7 +10,8 @@
  ******************************************************************************
  */
 #include "app.hpp"
-#include "api_gpio.hpp"
+#include "gpio_manager_stm32.hpp"
+
 #include "api_debug.hpp"
 #include "hal_adc.hpp"
 #include "console.hpp"
@@ -19,6 +20,7 @@
 #include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx.h"
+
 /**
  * @brief System Clock Configuration
  * @retval None
@@ -78,8 +80,8 @@ void UserButtonManager::process()
     }
 }
 
-LedManager::LedManager(Subject& t_subject, uint32_t t_ledMask, const PinController& t_led)
-    : m_subject(t_subject), m_pin_mask(t_ledMask), m_led(t_led)
+LedManager::LedManager(Subject& t_subject, uint32_t t_ledMask, IGPIOPin* t_led)
+    : m_subject(t_subject), m_pin_mask(t_ledMask), m_ledPtr(t_led)
 {
     m_subject.registerObserver(this);
 }
@@ -97,7 +99,7 @@ void LedManager::process()
     if (m_pending)
     {
         m_pending = false;
-        m_led.toggle();
+        // m_ledPtr->toggle();
     }
 }
 
@@ -119,6 +121,8 @@ extern "C" void WatchdogFeed(void)
     watchdog.feed();
 }
 
+GpioManager gpioManager;
+
 /**
  * Main application entry point for C++ code
  */
@@ -128,14 +132,15 @@ extern "C" int main(void)
     HAL_Init();
 
     /** Initialization code for C++ application can be added here */
-    gpioConfig(ioPinConfigDefArray);
+    //gpioManager.initialize(gpioPinConfigs);
+
     ADC_Internal_Init();
 
     debugInit();
     WatchdogFeed();
 
-    UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
-    LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
+    //UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
+    //LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpioManager.getPin("LD_GRE"));
 
     AppIntro();
 
@@ -145,13 +150,12 @@ extern "C" int main(void)
     /** App Main loop */
     for (;;)
     {
-        usrButton.process();
-        usrLed.process();
+        // usrButton.process();
+        // usrLed.process();
 
         WatchdogFeed();
     }
 }
-
 
 static void AppIntro()
 {
@@ -162,11 +166,6 @@ static void AppIntro()
 void consoleNotify(uint8_t t_item)
 {
     console.receivedData(t_item);
-}
-
-extern "C" int _getentropy(void* buffer, size_t length)
-{
-    return -1; // always fail, It will override the weak symbol from libc.a
 }
 
 static void Error_App_Handler(void);
@@ -222,4 +221,11 @@ static void Error_App_Handler(void)
     {
         ++loop;
     }
+}
+
+extern "C" int _getentropy(void* buffer, size_t length) __attribute__((weak));
+
+int _getentropy(void* buffer, size_t length)
+{
+    return -1; // Always fail, as expected
 }

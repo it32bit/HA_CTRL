@@ -1,5 +1,5 @@
-#ifndef IGPIO_HPP
-#define IGPIO_HPP
+#ifndef PIL_GPIO_HPP
+#define PIL_GPIO_HPP
 
 #include <cstdint>
 #include <string_view>
@@ -26,4 +26,4 @@ class IGPIOManager
     virtual IGPIOPin* getPin(std::string_view pinName) = 0;
 };
 
-#endif // IGPIO_HPP
+#endif // PIL_GPIO_HPP

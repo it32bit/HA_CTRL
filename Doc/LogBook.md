@@ -1001,3 +1001,101 @@ Memory region         Used Size  Region Size  %age Used
    text    data     bss     dec     hex filename
   73144    1856    2416   77416   12e68 ha-ctrl-boot.elf
 ```
+
+## INFO-36 GPIO getPortFromIndex - refactoring
+
+| Better solution       | Description |
+|-----------------------|-------------------------------------------------------------------------------|
+| `constexpr`           | Enables compile-time evaluation when possible, ideal for embedded systems. |
+| `constexpr std::array`| Ensures the array is evaluated at compile time, reducing runtime overhead. |
+|`noexcept`             | Signals that the function won't throw, improving optimization and safety. |
+|`gpioPortsStm32.size()`| Avoids manual sizeof math, improving readability and correctness. |
+
+```C
+constexpr std::array<GPIO_TypeDef*, 9> gpioPortsStm32 = {
+    GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, GPIOI
+};
+
+constexpr GPIO_TypeDef* getPortStm32FromIndex(uint8_t index) noexcept {
+    return index < gpioPortsStm32.size() ? gpioPortsStm32[index] : nullptr;
+}
+```
+
+### Hybrid: Constexpr with std::span
+
+```Cpp
+constexpr auto defaultPorts = std::to_array({GPIOA, GPIOB, GPIOC});
+std::span<GPIO_TypeDef* const> activePorts = defaultPorts;
+```
+
+## Info-37 Comparation: constexpr vs std::span
+
+`constexpr` vs `std::span` in Embedded C++
+
+| Feature                                     | `constexpr` | `std::span`
+|---------------------------------------------|-----------|-----------
+| Compile-time only                           | Yes       | No
+| Runtime flexibility                         | No        | Yes
+| Memory safety                               | Yes       | Yes
+| Works with dynamic data                     | No        | Yes
+| Ideal for fixed hardware tables             | Yes       | Yes
+| Ideal for testing, mocks, or runtime config | No        | Yes
+
+### `std::span` Is More Flexible
+
+```Cpp
+constexpr auto defaultPorts = std::to_array({GPIOA, GPIOB, GPIOC});
+std::span<GPIO_TypeDef* const> activePorts = defaultPorts;
+
+GPIO_TypeDef* getPortFromIndex(uint8_t index, std::span<GPIO_TypeDef* const> ports) {
+    return index < ports.size() ? ports[index] : nullptr;
+}
+```
+
+#### Safe Views Without Ownership
+
+`std::span` doesn’t own memory — it just views it. That’s perfect for embedded systems where memory ownership is tightly controlled.
+
+#### Runtime Configurability - can pass different port tables at runtime — useful for
+
+- Unit testing with mocks
+- Supporting multiple STM32 families
+- Dynamic reconfiguration
+
+#### Container-Agnostic Works with
+
+- std::array
+- std::vector
+- raw C arrays
+
+## Info-38 `CMAKE_CXX_EXTENSIONS` flag in CMake
+
+The `CMAKE_CXX_EXTENSIONS` flag in CMake controls whether compiler is allowed to use non-standard language extensions when compiling C++ code.
+
+### Best practice for Embedded C++ project
+
+```CMake
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+```
+
+This ensures:
+
+- Using modern C++ features
+- Code is portable and standards-compliant
+- Avoid vendor lock-in or hidden behaviors
+
+### `set(CMAKE_CXX_EXTENSIONS OFF)` - Strict Standard Compliance
+
+- Forces the compiler to use pure C++ (e.g., -std=c++20)
+- Disables vendor-specific extensions, like GNU extensions (-std=gnu++20)
+- Ensures portability across compilers and platforms
+- Ideal for embedded systems, safety-critical code, and cross-platform libraries
+
+### `set(CMAKE_CXX_EXTENSIONS ON)` - Enable Compiler Extensions
+
+- Allows compiler-specific features (e.g., GCC’s typeof, asm, etc.)
+- Uses -std=gnu++20 instead of -std=c++20
+- May break portability or introduce subtle bugs on other toolchains
+- Sometimes needed for low-level tricks or legacy code.

@@ -21,7 +21,6 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_pin_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_hal_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/watchdog.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_gpio.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_uart.cpp
 	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_adc.cpp
 	${CMAKE_SOURCE_DIR}/Core/Src/syscall.c

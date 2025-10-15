@@ -1,10 +1,10 @@
 #include <cstdint>
 #include <stdio.h>
-
+#include "gpio_manager_stm32.hpp"
 #include "patterns.hpp"
 #include "app.hpp"
 #include "app_it.hpp"
-#include "api_gpio.hpp"
+#include "stm32f4xx_hal.h"
 #include "console.hpp"
 
 /**
@@ -43,12 +43,12 @@ extern "C" void SysTick_HeartBeat(void)
 {
     static uint32_t ticks = 0u;
 
-    auto ledHeartBeat = ioDispatcher.get("LED_GREEN");
+    auto ledHeartBeat = gpioManager.getPin("LD_GRE");
 
     if (ticks++ >= 500)
     {
         ticks = 0;
-        ledHeartBeat.toggle();
+        ledHeartBeat->toggle();
     }
 }
 

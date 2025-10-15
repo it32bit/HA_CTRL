@@ -26,22 +26,18 @@ inline std::array<irqType, CONST_EXTI_IRQ_PIN_MAX> getExtiIrqFromPin = {
     exti_IRQ_9_5,   exti_IRQ_9_5,   exti_IRQ_9_5,   exti_IRQ_9_5,  exti_IRQ_15_10, exti_IRQ_15_10,
     exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10};
 
-static GPIO_TypeDef* getPortFromIndex(uint8_t index)
-{
-    static GPIO_TypeDef* ports[] = {GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, GPIOI};
-    if (index < sizeof(ports) / sizeof(ports[0]))
-        return ports[index];
-    return nullptr;
-}
+
 
 /**
  * @brief Lower-level gpioHalConfig(def) function to handle individual GPIO setup.
  */
-constexpr size_t CONST_AFP_PIN_0_7_IS_LOWER = 8;
+
 
 bool gpioHalConfig(const PinConfig& t_iodef)
 {
-    GPIO_TypeDef* port = getPortFromIndex(t_iodef.portIndex);
+    constexpr size_t CONST_AFP_PIN_0_7_IS_LOWER = 8;
+    
+    GPIO_TypeDef* port = getPortStm32FromIndex(t_iodef.portIndex);
 
     // Validate port and pin number
     if (port == nullptr || t_iodef.pinNumber > HAL_GPIO_PIN_SHIFT_MAX)

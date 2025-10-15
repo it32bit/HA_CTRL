@@ -24,26 +24,17 @@ static GPIO_TypeDef* portFromIndex(uint8_t index)
 
 constexpr size_t MAX_PORT_PINS_STM32 = 16; // Arbitrary limit to avoid excessive memory usage
 
-void GpioManager::initialize(const std::span<const PinConfig> configs)
+void GpioManager::initialize(const std::span<const PinConfig> t_configs)
 {
-    for (const auto& cfg : configs)
+    gpioHalConfig(t_configs);
+
+    for (const auto& cfg : t_configs)
     {
         GPIO_TypeDef* port = portFromIndex(cfg.portIndex);
-        if (port == nullptr || cfg.pinNumber >= MAX_PORT_PINS_STM32 || cfg.name.empty())
+        if (port != nullptr && cfg.pinNumber < MAX_PORT_PINS_STM32)
         {
-            // Invalid port index, pin number, or name
-            continue;
+            m_pins.push_back(std::make_unique<GpioPin_STM32>(cfg.name, port, cfg.pinNumber));
         }
-
-        // Configure hardware GPIO (HAL or LL)
-        if (gpioHalConfig(cfg) == false)
-        {
-            // Configuration failed
-            continue;
-        }
-
-        // Add to dispatch
-        m_pins.emplace_back(std::make_unique<GpioPin_STM32>(cfg.name, port, cfg.pinNumber));
     }
 }
 

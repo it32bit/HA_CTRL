@@ -71,7 +71,7 @@ struct PinConfig
         RisingFalling = 3
     };
 
-    enum PortIndex : uint8_t
+    enum PortStm32 : uint8_t
     {
         PortA = 0, // e.g., for STM32 and similar MCUs
         PortB = 1,
@@ -81,7 +81,11 @@ struct PinConfig
         PortF = 5,
         PortG = 6,
         PortH = 7,
-        PortI = 8,
+        PortI = 8
+    };
+
+    enum PortEsp32 : uint8_t
+    {
         Port0 = 0, // for ESP32 and similar MCUs
         Port1 = 1,
         Port2 = 2,
