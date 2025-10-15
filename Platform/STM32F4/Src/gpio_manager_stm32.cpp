@@ -9,41 +9,37 @@
  * The author is not liable for any damages resulting from its use.
  ******************************************************************************
  */
-#include "gpio_manager_stm32.hpp"
 #include "gpio_pin_stm32.hpp"
+#include "gpio_manager_stm32.hpp"
 #include "gpio_hal_stm32.hpp"
 
-// Helper to convert port index to actual GPIOx pointer
-static GPIO_TypeDef* portFromIndex(uint8_t index)
-{
-    static GPIO_TypeDef* ports[] = {GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, GPIOI};
-    if (index < sizeof(ports) / sizeof(ports[0]))
-        return ports[index];
-    return nullptr;
-}
-
-constexpr size_t MAX_PORT_PINS_STM32 = 16; // Arbitrary limit to avoid excessive memory usage
-
-void GpioManager::initialize(const std::span<const PinConfig> t_configs)
+void GpioManager::initialize(std::span<const PinConfig> t_configs)
 {
     gpioHalConfig(t_configs);
 
-    for (const auto& cfg : t_configs)
+    m_pinCount = std::min(t_configs.size(), PIN_CONFIG_ARRAY_SIZE);
+
+    for (std::size_t i = 0; i < m_pinCount; ++i)
     {
-        GPIO_TypeDef* port = portFromIndex(cfg.portIndex);
-        if (port != nullptr && cfg.pinNumber < MAX_PORT_PINS_STM32)
+        //static_assert(MAX_PORT_PINS_STM32 <= 16, "Too many pins for STM32 port");
+
+        if (t_configs[i].pinNumber < MAX_PORT_PINS_STM32)
         {
-            m_pins.push_back(std::make_unique<GpioPin_STM32>(cfg.name, port, cfg.pinNumber));
+            m_pins[i]       = GpioPin_STM32::createStatic(t_configs[i]);
+            m_configsRef[i] = &t_configs[i];
         }
     }
 }
 
 IGPIOPin* GpioManager::getPin(std::string_view name)
 {
-    for (auto& pin : m_pins)
+    for (std::size_t i = 0; i < m_pinCount; ++i)
     {
-        if (pin->name() == name)
-            return pin.get();
+        if (m_configsRef[i] && m_configsRef[i]->name == name)
+        {
+
+            return m_pins[i];
+        }
     }
     return nullptr;
 }

@@ -26,17 +26,14 @@ inline std::array<irqType, CONST_EXTI_IRQ_PIN_MAX> getExtiIrqFromPin = {
     exti_IRQ_9_5,   exti_IRQ_9_5,   exti_IRQ_9_5,   exti_IRQ_9_5,  exti_IRQ_15_10, exti_IRQ_15_10,
     exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10, exti_IRQ_15_10};
 
-
-
 /**
  * @brief Lower-level gpioHalConfig(def) function to handle individual GPIO setup.
  */
 
-
 bool gpioHalConfig(const PinConfig& t_iodef)
 {
     constexpr size_t CONST_AFP_PIN_0_7_IS_LOWER = 8;
-    
+
     GPIO_TypeDef* port = getPortStm32FromIndex(t_iodef.portIndex);
 
     // Validate port and pin number
@@ -68,8 +65,7 @@ bool gpioHalConfig(const PinConfig& t_iodef)
         }
     }
     else if ((t_iodef.mode == PinConfig::Mode::Input) &&
-             (t_iodef.iExti == PinConfig::InterruptExti::ExtiIT ||
-              t_iodef.iExti == PinConfig::InterruptExti::ExtiEVT))
+             (t_iodef.iExti != PinConfig::InterruptExti::ExtiNone))
     {
         auto irq = getExtiIrqFromPin[static_cast<std::size_t>(t_iodef.pinNumber)]();
 

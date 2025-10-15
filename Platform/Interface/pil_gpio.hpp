@@ -24,6 +24,8 @@ class IGPIOManager
 
     // Get a pin controller by name. Return nullptr if not found.
     virtual IGPIOPin* getPin(std::string_view pinName) = 0;
+
+    // std::optional<IGPIOPin*> getPin(std::string_view t_name);
 };
 
 #endif // PIL_GPIO_HPP

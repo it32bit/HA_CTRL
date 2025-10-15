@@ -13,7 +13,7 @@
 #include "stm32f4xx_hal.h"
 #include "boot.hpp"
 
-#include "gpio_manager_stm32.hpp"
+#include "gpio_config_stm32.hpp"
 
 /**
  * @brief System Clock Configuration
@@ -42,20 +42,15 @@ static void SystemClock_Config(void);
 static void JumpToApp();
 static void Error_Boot_Handler();
 
-GpioManager gpioManagerBoot;
+constexpr const PinConfig* redCfg = findPinConfig("LD_RED");
+GpioPin_STM32*             redLed = GpioPin_STM32::createStatic(*redCfg);
+
 
 extern "C" int main(void)
 {
     SystemClock_Config();
 
-    gpioManagerBoot.initialize(gpioPinConfigs);
-
-    IGPIOPin* led = gpioManagerBoot.getPin("LD_ORA");
-
-    if (led != nullptr)
-    {
-        led->set();
-    }
+    redLed->set();
 
     JumpToApp();
 

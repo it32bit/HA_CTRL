@@ -11,23 +11,22 @@
  *
  * Usage for Application and Bootloader:
  * @code
- *  #include "cfg_gpio.hpp"
  *  #include "gpio_manager_stm32.hpp"
  *
- *  constexpr std::array<std::string_view, 2> pinLabels = {"LED1", "BUTTON1"};
- *  GpioManager gpioManager;
- *  gpioManager.initializePins(pinConfigs);
- *  IGPIOPin* ledPin = gpioManager.getPin("LED1");
- *  ledPin->set();
+ *  GpioManager gpio;
+ *  gpio.initialize(gpioPinConfigs);
+ *  auto led = gpio.getPin("LD_RED");
+ *  
+ *  led->set();
  * @endcode
- *
- * These arrays are stored in flash and used directly without dynamic allocation.
  */
 #ifndef GPIO_CONFIG_STM32_HPP
 #define GPIO_CONFIG_STM32_HPP
 
 #include <array>
+#include <string_view>
 #include "pil_pin_config.hpp"
+#include "gpio_pin_stm32.hpp"
 
 using enum PinConfig::Mode;
 using enum PinConfig::Pull;
@@ -37,7 +36,7 @@ using enum PinConfig::InterruptTrigger;
 using enum PinConfig::PortStm32;
 using enum PinConfig::InterruptExti;
 
-constexpr std::size_t PIN_CONFIG_ARRAY_SIZE = 7; // Adjust as needed
+constexpr std::size_t PIN_CONFIG_ARRAY_SIZE = 7;
 
 /**
  * @brief   GPIO PIN configuration array
@@ -60,5 +59,31 @@ constexpr std::array<PinConfig, PIN_CONFIG_ARRAY_SIZE> gpioPinConfigs = {
 
 // Static assert to ensure the array size matches the defined size
 // static_assert(sizeof(gpioPinConfigs) / sizeof(gpioPinConfigs[0]) == PIN_CONFIG_ARRAY_SIZE, "GPIO config array size mismatch");
+
+/**
+ * @brief Find a PinConfig by its name.
+ * This function performs a linear search through the gpioPinConfigs array
+ * to find a PinConfig with the specified name.
+ * @param t_name The name of the pin to find.
+ * @return A pointer to the PinConfig if found, or nullptr if not found.
+ * @note This function is constexpr and can be used in compile-time contexts.
+ *
+ * Usage:
+ * constexpr auto* buttonCfg = findPinConfig("BUTTON");
+ * GpioPin_STM32* buttonPin = GpioPin_STM32::createStatic(*buttonCfg);
+ * buttonPin->set();
+ */
+// Compile-time lookup by name
+constexpr const PinConfig* findPinConfig(std::string_view t_name)
+{
+    for (const auto& cfg : gpioPinConfigs)
+    {
+        if (cfg.name == t_name)
+        {
+            return &cfg;
+        }
+    }
+    return nullptr;
+}
 
 #endif // GPIO_CONFIG_STM32_HPP

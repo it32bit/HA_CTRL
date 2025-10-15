@@ -19,15 +19,28 @@
 #include <memory>
 #include <span>
 
+constexpr size_t MAX_PORT_PINS_STM32 = 16; // Arbitrary limit to avoid excessive memory usage
+
 class GpioManager : public IGPIOManager
 {
   public:
-    void initialize(const std::span<const PinConfig> configs);
+    constexpr GpioManager() = default;
 
-    IGPIOPin* getPin(std::string_view name) override;
+    void initialize(const std::span<const PinConfig> t_configs);
+
+    [[nodiscard]] IGPIOPin* getPin(std::string_view t_name) override;
+
+    void reset()
+    {
+        m_pins.fill(nullptr);
+        m_configsRef.fill(nullptr);
+        m_pinCount = 0;
+    }
 
   private:
-    std::vector<std::unique_ptr<IGPIOPin>> m_pins;
+    std::array<IGPIOPin*, PIN_CONFIG_ARRAY_SIZE>        m_pins{};
+    std::array<const PinConfig*, PIN_CONFIG_ARRAY_SIZE> m_configsRef{};
+    std::size_t                                         m_pinCount = 0;
 };
 
 #endif // _GPIO_MANAGER_STM32_HPP_
