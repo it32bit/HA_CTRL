@@ -38,15 +38,6 @@ class GpioPin_STM32 : public IGPIOPin
 
     std::string_view name() const override { return m_name; };
 
-    // Factory method to create a GpioPin_STM32 instance without dynamic allocation.
-    // Uses a static pool to avoid heap usage. Returns nullptr if the pool is exhausted.
-    // Note: This method is not thread-safe.
-    // @return Pointer to the created GpioPin_STM32 instance, or nullptr if the pool is exhausted.
-    // @note The pool size is defined by PIN_CONFIG_ARRAY_SIZE in gpio_config_stm32.hpp
-    //       This avoids dynamic memory allocation and fragmentation.
-    //       The created instances are valid for the lifetime of the program.
-    static GpioPin_STM32* createStatic(const PinConfig& t_cfg);
-
     void toggle() override;
     void set() override;
     void reset() override;

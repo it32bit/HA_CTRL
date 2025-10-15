@@ -38,6 +38,7 @@ class GpioManager : public IGPIOManager
     }
 
   private:
+    std::array<GpioPin_STM32, PIN_CONFIG_ARRAY_SIZE>    m_pinPool{};
     std::array<IGPIOPin*, PIN_CONFIG_ARRAY_SIZE>        m_pins{};
     std::array<const PinConfig*, PIN_CONFIG_ARRAY_SIZE> m_configsRef{};
     std::size_t                                         m_pinCount = 0;

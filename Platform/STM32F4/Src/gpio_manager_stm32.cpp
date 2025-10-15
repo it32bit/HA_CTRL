@@ -15,19 +15,32 @@
 
 void GpioManager::initialize(std::span<const PinConfig> t_configs)
 {
-    gpioHalConfig(t_configs);
+    reset(); // Clear existing state
 
     m_pinCount = std::min(t_configs.size(), PIN_CONFIG_ARRAY_SIZE);
 
     for (std::size_t i = 0; i < m_pinCount; ++i)
     {
-        //static_assert(MAX_PORT_PINS_STM32 <= 16, "Too many pins for STM32 port");
+        const auto& cfg = t_configs[i];
 
-        if (t_configs[i].pinNumber < MAX_PORT_PINS_STM32)
-        {
-            m_pins[i]       = GpioPin_STM32::createStatic(t_configs[i]);
-            m_configsRef[i] = &t_configs[i];
-        }
+        // Validate pin number
+        if (cfg.pinNumber >= MAX_PORT_PINS_STM32)
+            continue;
+
+        // Validate port
+        GPIO_TypeDef* port = getPortStm32FromIndex(cfg.portIndex);
+        if (!port)
+            continue;
+
+        // Configure pin via HAL
+        if (!gpioHalConfig(cfg))
+            continue;
+
+        // Statically construct the pin (assign into pre-allocated array)
+        m_pinPool[i] = GpioPin_STM32(cfg.name, port, cfg.pinNumber);
+
+        m_pins[i]       = &m_pinPool[i];
+        m_configsRef[i] = &cfg;
     }
 }
 
@@ -37,7 +50,6 @@ IGPIOPin* GpioManager::getPin(std::string_view name)
     {
         if (m_configsRef[i] && m_configsRef[i]->name == name)
         {
-
             return m_pins[i];
         }
     }

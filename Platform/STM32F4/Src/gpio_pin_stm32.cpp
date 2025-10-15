@@ -14,28 +14,7 @@
 
 
 
-GpioPin_STM32* GpioPin_STM32::createStatic(const PinConfig& t_cfg)
-{
-    static std::array<GpioPin_STM32, PIN_CONFIG_ARRAY_SIZE> pool{};
-    static std::size_t                                      next = 0;
 
-    if (next >= PIN_CONFIG_ARRAY_SIZE)
-    {
-        return nullptr;
-    }
-
-    GPIO_TypeDef* port = getPortStm32FromIndex(t_cfg.portIndex);
-    if (port == nullptr || t_cfg.pinNumber > 15)
-    {
-        return nullptr;
-    }
-
-    gpioHalConfig(t_cfg);
-
-    pool[next] = GpioPin_STM32(t_cfg.name, port, t_cfg.pinNumber);
-
-    return &pool[next++];
-}
 
 void GpioPin_STM32::toggle()
 {

@@ -14,6 +14,7 @@
 #include "boot.hpp"
 
 #include "gpio_config_stm32.hpp"
+#include "gpio_manager_stm32.hpp"
 
 /**
  * @brief System Clock Configuration
@@ -42,15 +43,20 @@ static void SystemClock_Config(void);
 static void JumpToApp();
 static void Error_Boot_Handler();
 
-constexpr const PinConfig* redCfg = findPinConfig("LD_RED");
-GpioPin_STM32*             redLed = GpioPin_STM32::createStatic(*redCfg);
-
+static GpioManager gpio;
 
 extern "C" int main(void)
 {
     SystemClock_Config();
 
-    redLed->set();
+    gpio.initialize(gpioPinConfigs);
+
+    auto red = gpio.getPin("LD_RED");
+
+    if (red)
+    {
+        red->toggle();
+    }
 
     JumpToApp();
 
