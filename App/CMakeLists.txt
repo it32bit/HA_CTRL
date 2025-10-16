@@ -31,7 +31,7 @@ endforeach()
 
 message(STATUS "Building target ${APP_TARGET} with sources:")
 foreach(file IN LISTS app_sources)
-    message(STATUS "+ ${file}")
+    message(STATUS "app ${file}")
 endforeach()
 
 # Create executable first

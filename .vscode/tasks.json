@@ -177,7 +177,7 @@
     {
       "label": "Build and Run Unit Tests",
       "type": "shell",
-      "command": "cmake -S . -B build-tests -DBUILD_TESTING=ON && cmake --build build-tests && ./build-tests/tests/run_tests",
+      "command": "cmake -S . -B build-tests -DBUILD_BOOTLOADER=OFF -DBUILD_APP=OFF -DBUILD_TESTING=ON && cmake --build build-tests && ./build-tests/tests/run_tests",
       "group": "build",
       "problemMatcher": []
     }

@@ -215,7 +215,7 @@ message(STATUS "BUILD_BOOTLOADER: ${BUILD_BOOTLOADER}")
 message(STATUS "BUILD_TESTING: ${BUILD_TESTING}")
 message(STATUS "ENABLE_CLANG_TIDY: ${ENABLE_CLANG_TIDY}")
 
-if(NOT BUILD_APP AND NOT BUILD_BOOTLOADER AND NOT BUILD_TESTS)
+if(NOT BUILD_APP AND NOT BUILD_BOOTLOADER AND NOT BUILD_TESTING)
     message(FATAL_ERROR "All build options (APP, BOOTLOADER, TESTS) are disabled. Nothing to build.")
 endif()
 
@@ -232,8 +232,9 @@ add_custom_target(check_size ALL
     # DEPENDS ha-ctrl-boot ha-ctrl-app # This will ensure boot and app are built first. No need to add:
     # USES_TERMINAL
 )
-add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
-
+if(NOT BUILD_TESTING)
+    add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
+endif()
 
 # =========================================================================
 # Additional notes and setup for sources_SRCS variable

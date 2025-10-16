@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_C_COMPILER /usr/bin/gcc)
 set(CMAKE_CXX_COMPILER /usr/bin/g++)
@@ -21,4 +22,4 @@ target_include_directories(run_tests PRIVATE
 )
 
 # Compile with C++ flags
-target_compile_features(run_tests PRIVATE cxx_std_17)
+target_compile_features(run_tests PRIVATE cxx_std_20)

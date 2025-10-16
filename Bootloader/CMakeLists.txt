@@ -33,7 +33,7 @@ endforeach()
 
 message(STATUS "Building target ${BOOT_TARGET} with sources:")
 foreach(file IN LISTS bootloader_sources)
-    message(STATUS "> ${file}")
+    message(STATUS "boot ${file}")
 endforeach()
 
 # Create executable first
