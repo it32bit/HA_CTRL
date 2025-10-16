@@ -17,12 +17,12 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/console.cpp
 	${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_manager_stm32.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_pin_stm32.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/gpio_hal_stm32.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/watchdog.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_uart.cpp
-	${CMAKE_SOURCE_DIR}/Platform/STM32F4/Src/hal_adc.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_manager_stm32.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_pin_stm32.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_hal_stm32.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/watchdog.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/hal_uart.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/hal_adc.cpp
 	${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c

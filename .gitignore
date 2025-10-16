@@ -6,3 +6,5 @@ extern/
 *.log
 *.html
 clangd*
+Doc/ToDo.md
+Doc/TMemo.md

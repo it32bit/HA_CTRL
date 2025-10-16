@@ -34,9 +34,6 @@ if(NOT BUILD_TESTING)
 
     # Load auto-generated sources, includes, and flags
     # vscode_generated.cmake" included in subdirectories boot and app
-
-    # Remove default main.c (don't build it)
-    list(REMOVE_ITEM sources_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c")
 endif()
 
 message("Build type: ${CMAKE_BUILD_TYPE}")
@@ -50,12 +47,12 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
 # =========================================================================
 # Platform-Specific Settings
 # =========================================================================
-add_subdirectory(Platform/STM32F4)
+set(PLATFORM_MCU "STM32F4")
+add_subdirectory(Platform/${PLATFORM_MCU})
 
 # =========================================================================
 # Add Subdirectories (Targets: Bootloader and App)
 # =========================================================================
-# NOTE: Pass sources_SRCS variable to subdirectories expicitly if needed.
 if(BUILD_APP)
     add_subdirectory(App)
 endif()
@@ -63,7 +60,6 @@ endif()
 if(BUILD_BOOTLOADER)
     add_subdirectory(Bootloader)
 endif()
-
 
 # =========================================================================
 # Extra Cleaning Target
@@ -230,13 +226,14 @@ endif()
 # DEPENDS → ensures ha-ctrl-app and ha-ctrl-boot are built first
 # -Dtarget=... → passes the target name to your script
 # -P → tells CMake to run the script
-
 add_custom_target(check_size ALL
     COMMAND ${CMAKE_COMMAND} -Dtarget=ha-ctrl-app -P ${CMAKE_SOURCE_DIR}/cmake/utilities-check-size.cmake
     COMMENT "Running combined size check after build"
-    DEPENDS ha-ctrl-boot ha-ctrl-app
-    USES_TERMINAL
+    # DEPENDS ha-ctrl-boot ha-ctrl-app # This will ensure boot and app are built first. No need to add:
+    # USES_TERMINAL
 )
+add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
+
 
 # =========================================================================
 # Additional notes and setup for sources_SRCS variable
