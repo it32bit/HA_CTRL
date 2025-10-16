@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.22)
 project(ha-ctrl LANGUAGES C CXX ASM)
 
 # =========================================================================
+# Options to Enable/Disable Parts of the Build
+# =========================================================================
+option(BUILD_APP "Build the main application" ON)
+option(BUILD_BOOTLOADER "Build the bootloader" ON)
+option(BUILD_TESTING "Build unit tests" OFF)
+option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" OFF)
+
+# =========================================================================
 # Module Path for Custom CMake Files
 # =========================================================================
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -48,15 +56,21 @@ add_subdirectory(Platform/STM32F4)
 # Add Subdirectories (Targets: Bootloader and App)
 # =========================================================================
 # NOTE: Pass sources_SRCS variable to subdirectories expicitly if needed.
-add_subdirectory(Bootloader)
-add_subdirectory(App)
+if(BUILD_APP)
+    add_subdirectory(App)
+endif()
+
+if(BUILD_BOOTLOADER)
+    add_subdirectory(Bootloader)
+endif()
+
 
 # =========================================================================
 # Extra Cleaning Target
 # =========================================================================
 add_custom_target(clean-extra
     COMMAND ${CMAKE_COMMAND} -E rm -rf
-        ${CMAKE_SOURCE_DIR}/bin/*
+        ${CMAKE_BINARY_DIR_BIN}/bin/*
         ${CMAKE_BINARY_DIR}/CMakeFiles/*
         ${CMAKE_SOURCE_DIR}/build-tests/*
     COMMENT "Cleaning build products (*.elf, *.map, *.hex, *.bin)"
@@ -65,8 +79,6 @@ add_custom_target(clean-extra
 # =========================================================================
 # Clang-Tidy Support (optional)
 # =========================================================================
-option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" OFF)
-
 if(ENABLE_CLANG_TIDY AND NOT BUILD_TESTING)
     # Keep your full clang-tidy logic here (unchanged)...
     # [omitted for brevity — include everything from your script if needed]
@@ -193,13 +205,38 @@ endif()
 # =========================================================================
 # CppUTest Unit Testing Support (host only)
 # =========================================================================
-option(BUILD_TESTING "Build unit tests" ON)
-
 if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     enable_testing()
     add_subdirectory(extern/cpputest)
     add_subdirectory(tests)
 endif()
+
+# =========================================================================
+# Print Summary of Build Options
+# =========================================================================
+message(STATUS "BUILD_APP: ${BUILD_APP}")
+message(STATUS "BUILD_BOOTLOADER: ${BUILD_BOOTLOADER}")
+message(STATUS "BUILD_TESTING: ${BUILD_TESTING}")
+message(STATUS "ENABLE_CLANG_TIDY: ${ENABLE_CLANG_TIDY}")
+
+if(NOT BUILD_APP AND NOT BUILD_BOOTLOADER AND NOT BUILD_TESTS)
+    message(FATAL_ERROR "All build options (APP, BOOTLOADER, TESTS) are disabled. Nothing to build.")
+endif()
+
+# ========================================================================
+# Combined Size Check Target (after both bootloader and app are built)
+# ========================================================================
+# ALL → ensures this runs every time you build
+# DEPENDS → ensures ha-ctrl-app and ha-ctrl-boot are built first
+# -Dtarget=... → passes the target name to your script
+# -P → tells CMake to run the script
+
+add_custom_target(check_size ALL
+    COMMAND ${CMAKE_COMMAND} -Dtarget=ha-ctrl-app -P ${CMAKE_SOURCE_DIR}/cmake/utilities-check-size.cmake
+    COMMENT "Running combined size check after build"
+    DEPENDS ha-ctrl-boot ha-ctrl-app
+    USES_TERMINAL
+)
 
 # =========================================================================
 # Additional notes and setup for sources_SRCS variable
@@ -208,3 +245,4 @@ endif()
 # (App, Bootloader), just rely on the include of vscode_generated.cmake
 # in App/CMakeLists.txt and Bootloader/CMakeLists.txt files.:
 #    include("${CMAKE_SOURCE_DIR}/cmake/vscode_generated.cmake")
+

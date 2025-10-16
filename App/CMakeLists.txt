@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
 
 include("${CMAKE_SOURCE_DIR}/cmake/vscode_generated.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/compiler-warnings.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/utilities.cmake")
 
 # App target
 set(APP_TARGET ha-ctrl-app)
 
 # Linker script
 set(app_linker_script_SRC ${app_linker_script_SRC}
-    ${CMAKE_SOURCE_DIR}/App/app_FLASH.ld
+    ${CMAKE_SOURCE_DIR}/App/app_linker.ld
 )
 
 # Filter only app-related sources
@@ -49,13 +51,14 @@ set_target_properties(${APP_TARGET} PROPERTIES
 
 # Include paths
 target_include_directories(${APP_TARGET} PRIVATE
-    ${CMAKE_SOURCE_DIR}/Drivers//stm32f4xx-hal-driver/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
-    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include
-	${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/App/Inc
+	${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
     ${CMAKE_SOURCE_DIR}/Platform/STM32F4/Inc
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
+    ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
+    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include
+
 )
 
 # Compiler defines
@@ -70,7 +73,8 @@ target_link_options(${APP_TARGET} PRIVATE
     -T${app_linker_script_SRC}
     ${cpu_PARAMS}
     ${linker_OPTS}
-    -Wl,--gc-sections -Wl,-Map=${CMAKE_BINARY_DIR_BIN}/${APP_TARGET}.map
+    -Wl,-Map=${CMAKE_BINARY_DIR_BIN}/${APP_TARGET}.map
+    -Wl,--gc-sections
     --specs=nosys.specs
     -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
     -Wl,-z,max-page-size=8
@@ -78,15 +82,14 @@ target_link_options(${APP_TARGET} PRIVATE
     -u _printf_float
 )
 
-# Compiler options
+# CPU/Compiler specific flags and optimizations
 target_compile_options(${APP_TARGET} PRIVATE
     ${cpu_PARAMS}
     ${compiler_OPTS}
-    -Wall -Wextra -Wpedantic -Wno-unused-parameter
-    $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp -MMD -MP>
-    $<$<CONFIG:Debug>:-Og -g3 -ggdb>
-    $<$<CONFIG:Release>:-Og -g0>
 )
+
+# Set common warning flags, see cmake/compiler-warnings.cmake
+set_project_warnings(${APP_TARGET})
 
 # Post-build: generate HEX and BIN
 add_custom_command(TARGET ${APP_TARGET} POST_BUILD
@@ -96,13 +99,9 @@ add_custom_command(TARGET ${APP_TARGET} POST_BUILD
 )
 
 # Print memory usage
-add_custom_command(TARGET ${APP_TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "******** Print size information:"
-    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${APP_TARGET}>
-    COMMENT "Size information"
-)
+add_size_print(${APP_TARGET})
 
-# Flash target
+# Flash target (using ST-Link via STM32CubeProgrammer)
 add_custom_target(app-flash
     DEPENDS ${APP_TARGET}
     COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${APP_TARGET}.elf

@@ -55,8 +55,9 @@
       "type": "cmake",
       "command": "build",
       "targets": [
+        "ha-ctrl-boot",
         "ha-ctrl-app",
-        "ha-ctrl-boot"
+        "check_size"
       ],
       "preset": "debug",
       "group": "build",

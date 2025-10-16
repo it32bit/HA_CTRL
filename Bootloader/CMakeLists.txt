@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
 
 include("${CMAKE_SOURCE_DIR}/cmake/vscode_generated.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/compiler-warnings.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/utilities.cmake")
 
 # Bootloader target
 set(BOOT_TARGET ha-ctrl-boot)
 
 # Linker script
 set(boot_linker_script_SRC ${boot_linker_script_SRC}
-    ${CMAKE_SOURCE_DIR}/Bootloader/boot_FLASH.ld
+    ${CMAKE_SOURCE_DIR}/Bootloader/boot_linker.ld
 )
 
 # Filter only bootloader-related sources
@@ -51,13 +53,13 @@ set_target_properties(${BOOT_TARGET} PROPERTIES
 
 # Include paths
 target_include_directories(${BOOT_TARGET} PRIVATE
-    ${CMAKE_SOURCE_DIR}/Drivers//stm32f4xx-hal-driver/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
-    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include
-    ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Bootloader/Inc
+    ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
     ${CMAKE_SOURCE_DIR}/Platform/STM32F4/Inc
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
+    ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
+    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include
 )
 
 # Compiler defines
@@ -72,22 +74,23 @@ target_link_options(${BOOT_TARGET} PRIVATE
     -T${boot_linker_script_SRC}
     ${cpu_PARAMS}
     ${linker_OPTS}
-    -Wl,--gc-sections -Wl,-Map=${CMAKE_BINARY_DIR_BIN}/${BOOT_TARGET}.map
+    -Wl,-Map=${CMAKE_BINARY_DIR_BIN}/${BOOT_TARGET}.map
+    -Wl,--gc-sections
     --specs=nosys.specs
     -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
     -Wl,-z,max-page-size=8
     -Wl,--print-memory-usage
+    -u _printf_float
 )
 
-# Compiler options
+# CPU/Compiler specific flags and optimizations
 target_compile_options(${BOOT_TARGET} PRIVATE
     ${cpu_PARAMS}
     ${compiler_OPTS}
-    -Wall -Wextra -Wno-unused-parameter
-    $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp -MMD -MP>
-    $<$<CONFIG:Debug>:-Og -g3 -ggdb>
-    $<$<CONFIG:Release>:-Og -g0>
 )
+
+# Set common warning flags, see cmake/compiler-warnings.cmake
+set_project_warnings(${BOOT_TARGET})
 
 # Create bin and hex after build
 add_custom_command(TARGET ${BOOT_TARGET} POST_BUILD
@@ -97,8 +100,11 @@ add_custom_command(TARGET ${BOOT_TARGET} POST_BUILD
 )
 
 # Print memory usage
-add_custom_command(TARGET ${BOOT_TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "******** Print size information:"
-    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${BOOT_TARGET}>
-    COMMENT "Size information"
+add_size_print(${BOOT_TARGET})
+
+# Flash target (using ST-Link via STM32CubeProgrammer)
+add_custom_target(boot-flash
+    DEPENDS ${BOOT_TARGET}
+    COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${BOOT_TARGET}.elf
+    COMMENT "Flashing Bootloader via ST-Link"
 )
