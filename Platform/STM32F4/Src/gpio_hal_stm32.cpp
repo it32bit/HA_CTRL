@@ -1,3 +1,11 @@
+/**
+ * @file gpio_hal_stm32.cpp
+ * @author i32bit
+ * @brief GPIO HAL implementation for STM32F4 series microcontrollers.
+ * @version 1.0
+ * @date 2025-10-15
+ */
+
 #include <stdint-gcc.h>
 #include <cstddef>
 #include "stm32f4xx_ll_gpio.h" // IWYU pragma: keep

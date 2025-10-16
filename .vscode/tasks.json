@@ -25,6 +25,7 @@
       "type": "cmake",
       "command": "build",
       "targets": [
+        "clean-extra",
         "ha-ctrl-boot"
       ],
       "preset": "debug",
@@ -40,6 +41,7 @@
       "type": "cmake",
       "command": "build",
       "targets": [
+        "clean-extra",
         "ha-ctrl-app"
       ],
       "preset": "debug",
@@ -55,6 +57,7 @@
       "type": "cmake",
       "command": "build",
       "targets": [
+        "clean-extra",
         "ha-ctrl-boot",
         "ha-ctrl-app",
         "check_size"

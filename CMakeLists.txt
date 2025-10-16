@@ -70,7 +70,7 @@ endif()
 # =========================================================================
 add_custom_target(clean-extra
     COMMAND ${CMAKE_COMMAND} -E rm -rf
-        ${CMAKE_BINARY_DIR_BIN}/bin/*
+        ${CMAKE_BINARY_DIR_BIN}/*
         ${CMAKE_BINARY_DIR}/CMakeFiles/*
         ${CMAKE_SOURCE_DIR}/build-tests/*
     COMMENT "Cleaning build products (*.elf, *.map, *.hex, *.bin)"

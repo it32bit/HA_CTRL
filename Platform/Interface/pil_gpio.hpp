@@ -1,3 +1,13 @@
+/**
+ * @file pil_gpio.hpp
+ * @author it32bit
+ * @brief GPIO interface definitions for platform-independent GPIO management.
+ * @version 1.0
+ * @date 2025-10-15
+ * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *            (c) 2024 ha-ctrl project authors.
+ */
+
 #ifndef PIL_GPIO_HPP
 #define PIL_GPIO_HPP
 
