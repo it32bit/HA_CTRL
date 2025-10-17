@@ -1,0 +1,55 @@
+@startuml
+interface IGPIOPin {
+    +toggle()
+    +set()
+    +reset()
+    +read() : bool
+}
+
+class GpioPin_STM32 {
+    -m_port : GPIO_TypeDef*
+    -m_pin_mask : uint32_t
+    +toggle()
+    +set()
+    +reset()
+    +read() : bool
+}
+
+class PinConfig {
+    +id : PinId
+    +portIndex : uint8_t
+    +pinNumber : uint16_t
+    +mode : Mode
+    +pull : Pull
+    +type : Type
+    +speed : Speed
+    +iExti : InterruptExti
+    +iTrigger : InterruptTrigger
+    +altFunction : uint32_t
+    +iPriority : uint32_t
+}
+
+class GpioManager {
+    -m_pinPool[]
+    -m_pinPtrs[]
+    -m_configPtrs[]
+    -m_pinCount : size_t
+    +initialize(configs)
+    +getPin(PinId)
+    +setPin(PinId)
+    +resetPin(PinId)
+    +togglePin(PinId)
+    +reset()
+}
+
+class gpioHalConfig {
+    +gpioHalConfig(PinConfig) : bool
+    +gpioHalConfig(range) : bool
+    +gpioHalConfig(begin, end) : bool
+}
+
+IGPIOPin <|.. GpioPin_STM32
+GpioManager --> GpioPin_STM32
+GpioManager --> PinConfig
+GpioManager --> gpioHalConfig
+@enduml

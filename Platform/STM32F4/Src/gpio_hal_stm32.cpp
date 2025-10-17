@@ -1,11 +1,23 @@
 /**
- * @file gpio_hal_stm32.cpp
- * @author i32bit
- * @brief GPIO HAL implementation for STM32F4 series microcontrollers.
- * @version 1.0
- * @date 2025-10-15
+ ******************************************************************************
+ * @file        gpio_hal_stm32.cpp
+ * @author      it32bit
+ * @version     1.0
+ * @date        2025-10-15
+ * @brief       GPIO HAL implementation for STM32F4 series microcontrollers.
+ *
+ *              Implements low-level GPIO configuration using the STM32 LL (Low-Layer) API.
+ *              Configures pins based on the standardized PinConfig structure, including
+ *              mode, pull-up/down, speed, output type, alternate function, and EXTI interrupts.
+ *
+ * @note        - Designed for compile-time configuration via PinConfig
+ *              - Supports EXTI interrupt setup with priority mapping
+ *              - Assumes peripheral clocks are enabled as needed
+ *
+ * @attention   This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *              (c) 2025 ha-ctrl project authors.
+ ******************************************************************************
  */
-
 #include <stdint-gcc.h>
 #include <cstddef>
 #include "stm32f4xx_ll_gpio.h" // IWYU pragma: keep

@@ -1,11 +1,24 @@
 /**
- * @file gpio_pin_stm32.hpp
- * @author it32bit
- * @brief GPIO pin implementation for STM32F4 microcontrollers.
- * @version 0.1
- * @date 2025-10-15
- * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
- *            (c) 2025 ha-ctrl project authors.
+ ******************************************************************************
+ * @file        gpio_pin_stm32.hpp
+ * @author      it32bit
+ * @version     0.1
+ * @date        2025-10-15
+ * @brief       GPIO pin control implementation for STM32F4 microcontrollers.
+ *
+ *              Provides methods to manipulate GPIO pins (set, reset, toggle, read)
+ *              using the STM32 HAL library. Implements the IGPIOPin interface.
+ *
+ * @note        This class does not handle pin configuration (mode, pull, speed, etc.).
+ *              Configuration should be performed separately using the PinConfig structure
+ *              and platform-specific HAL setup functions.
+ *
+ * @see         IGPIOPin for interface definition.
+ * @see         PinConfig for configuration structure.
+ *
+ * @attention   This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *              (c) 2025 ha-ctrl project authors.
+ ******************************************************************************
  */
 #ifndef GPIO_PIN_STM32_HPP
 #define GPIO_PIN_STM32_HPP

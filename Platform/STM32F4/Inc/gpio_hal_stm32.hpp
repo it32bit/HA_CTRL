@@ -1,15 +1,20 @@
 /**
- * @file gpio_hal_stm32.hpp
- * @author it32bit
- * @brief GPIO Hardware Abstraction Layer for STM32 microcontrollers.
- * This file provides functions to configure GPIO pins based on a
- * standardized PinConfig structure.
- * @version 1.0
- * @date 2025-10-15
- * @copyright Copyright (c) 2024-2025 it32bit
- * @license MIT License
+ ******************************************************************************
+ * @file        gpio_hal_stm32.hpp
+ * @author      it32bit
+ * @version     1.0
+ * @date        2025-10-15
+ * @brief       GPIO Hardware Abstraction Layer for STM32 microcontrollers.
+ *
+ *              Provides functions to configure GPIO pins using the standardized
+ *              PinConfig structure. Enables platform-specific initialization
+ *              while maintaining compatibility with the platform-independent layer (PIL).
+ *
+ * @copyright   Copyright (c) 2024–2025 it32bit
+ * @license     MIT License
+ *              This software is provided "as is", without warranty of any kind.
+ ******************************************************************************
  */
-
 #ifndef _GPIO_HAL_STM32_HPP_
 #define _GPIO_HAL_STM32_HPP_
 

@@ -64,7 +64,7 @@ math(EXPR RAM_USAGE_PERCENT   "(${RAM_TOTAL} * 100) / ${RAM_LIMIT_BYTES}")
 # Print formatted summary table
 message(STATUS "")
 message(STATUS "┌────────────────────┬──────────────┬────────────────────────────────────────┐")
-message(STATUS "│ Section            │ Size (bytes) │ Description                            │")
+message(STATUS "│ Section            │ Size (bytes) │ Description Platform STM32F407         │")
 message(STATUS "├────────────────────┼──────────────┼────────────────────────────────────────┤")
 message(STATUS "│ Bootloader .text   │ ${BOOT_TEXT}        │ Code (in FLASH)                        │")
 message(STATUS "│ Bootloader .data   │ ${BOOT_DATA}         │ Initialized data (RAM, stored in FLASH)│")

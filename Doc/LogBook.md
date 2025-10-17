@@ -1181,3 +1181,188 @@ Memory region         Used Size  Region Size  %age Used
    text    data     bss     dec     hex filename
   80696    2040    2560   85296   14d30 ha-ctrl-app.elf
 ```
+
+## INFO-41 Added target check_size
+
+Target check_size print summary with separeted size for App and Bootloader.
+At the end print sum (App+Boot) of FLASH usage and RAM usage.
+Target is able to check if Flash or Ram usege is over 90% of mcu limit (scaled for STM32F407).
+If limit exceeded then Compiler throw ERROR message
+
+```bash
+-- ┌────────────────────┬──────────────┬────────────────────────────────────────┐
+-- │ Section            │ Size (bytes) │ Description Platform STM32F407         │
+-- ├────────────────────┼──────────────┼────────────────────────────────────────┤
+-- │ Bootloader .text   │ 15488        │ Code (in FLASH)                        │
+-- │ Bootloader .data   │ 2032         │ Initialized data (RAM, stored in FLASH)│
+-- │ Bootloader .bss    │ 2352         │ Uninitialized data (RAM)               │
+-- │ App .text          │ 80696        │ Code (in FLASH)                        │
+-- │ App .data          │ 2040         │ Initialized data (RAM, stored in FLASH)│
+-- │ App .bss           │ 2560         │ Uninitialized data (RAM)               │
+-- ├────────────────────┼──────────────┼────────────────────────────────────────┤
+-- │ FLASH total        │ 100256       │ .text + .data                          │
+-- │ RAM total          │ 8984         │ .data + .bss                           │
+-- └────────────────────┴──────────────┴────────────────────────────────────────┘
+--
+-- FLASH usage: 100256 bytes (10%)
+-- RAM usage: 8984 bytes (6%)
+```
+
+Target check_size generate combined_size.json in future will be used in CI/CD
+
+```json
+{
+  "bootloader": {
+    "text": 15136,
+    "data": 1976,
+    "bss": 2352
+  },
+  "application": {
+    "text": 80336,
+    "data": 1984,
+    "bss": 2560
+  },
+  "combined": {
+    "flash": 99432,
+    "ram": 8872,
+    "flash_usage_percent": 10,
+    "ram_usage_percent": 6
+  }
+}
+```
+
+## INFO-42 How to change branch name
+
+New name is more accurate with changes
+
+```bash
+git branch -m feature/bootloader feature/modular-architecture
+git push origin -u feature/modular-architecture
+git push origin --delete feature/bootloader
+```
+
+## INFO-43 Project directory tree
+
+```bash
+.
+├── App
+│   ├── app_linker.ld
+│   ├── CMakeLists.txt
+│   ├── Inc
+│   │   ├── app.hpp
+│   │   ├── app_it.hpp
+│   │   ├── circular_buffer.hpp
+│   │   ├── console.hpp
+│   │   └── patterns.hpp
+│   └── Src
+│       ├── app.cpp
+│       ├── app_it.cpp
+│       └── console.cpp
+├── Bootloader
+│   ├── boot_linker.ld
+│   ├── CMakeLists.txt
+│   ├── Inc
+│   │   └── boot.hpp
+│   └── Src
+│       └── boot.cpp
+├── build
+│   ├── bin
+│   │   ├── combined_size.json
+│   │   ├── ha-ctrl-app.bin
+│   │   ├── ha-ctrl-app.elf
+│   │   ├── ha-ctrl-app.hex
+│   │   ├── ha-ctrl-app.map
+│   │   ├── ha-ctrl-app_size.txt
+│   │   ├── ha-ctrl-boot.bin
+│   │   ├── ha-ctrl-boot.elf
+│   │   ├── ha-ctrl-boot.hex
+│   │   ├── ha-ctrl-boot.map
+│   │   └── ha-ctrl-boot_size.txt
+│   └── debug
+├── cmake
+│   ├── compiler-warnings.cmake
+│   ├── gcc-arm-none-eabi.cmake
+│   ├── platform-traits.cmake
+│   ├── utilities-check-size.cmake
+│   ├── utilities.cmake
+│   └── vscode_generated.cmake
+├── CMakeLists.txt
+├── CMakePresets.json
+├── Core
+│   ├── Inc
+│   │   ├── stm32f4xx_hal_conf.h
+│   │   └── stm32f4xx_it.h
+│   └── Src
+│       ├── stm32f4xx_it.c
+│       ├── syscall.c
+│       ├── sysmem.c
+│       └── system_stm32f4xx.c
+├── Doc
+│   └── LogBook.md
+├── Drivers
+│   ├── CMSIS
+│   │   └── Core
+│   │       └── Include
+│   │           ├── core_cm4.h
+│   ├── cmsis-device-f4
+│   │   ├── Include
+│   │   │   ├── stm32f407xx.h
+│   │   │   ├── stm32f4xx.h
+│   │   │   └── system_stm32f4xx.h
+│   │   └── Source
+│   │       └── Templates
+│   │           └── system_stm32f4xx.c
+│   └── stm32f4xx-hal-driver
+│       ├── Inc
+│       │   ├── stm32f4xx_ll_utils.h
+│       │   └── stm32f4xx_ll_*.h
+│       └── Src
+│           └── stm32f4xx_ll_*.c
+├── extern
+│   └── cpputest
+├── LICENSE
+├── Platform
+│   ├── Interface
+│   │   ├── api_debug.hpp
+│   │   └── PilGpio
+│   │       ├── CMakeLists.txt
+│   │       ├── pil_gpio.hpp
+│   │       ├── pil_pin_config.hpp
+│   │       └── pil_pin_id.hpp
+│   └── STM32F4
+│       ├── CMakeLists.txt
+│       ├── Inc
+│       │   ├── gpio_config_stm32.hpp
+│       │   ├── gpio_hal_stm32.hpp
+│       │   ├── gpio_manager_stm32.hpp
+│       │   ├── gpio_pin_stm32.hpp
+│       │   ├── hal_adc.hpp
+│       │   ├── traits_stm32.hpp
+│       │   └── watchdog.hpp
+│       └── Src
+│           ├── gpio_hal_stm32.cpp
+│           ├── gpio_manager_stm32.cpp
+│           ├── gpio_pin_stm32.cpp
+│           ├── hal_adc.cpp
+│           ├── hal_uart.cpp
+│           └── watchdog.cpp
+├── README.md
+├── Startup
+│   └── startup_stm32f407vgtx.s
+├── tests
+│   ├── CMakeFiles
+│   ├── CMakeLists.txt
+│   ├── hal_adc_mock.cpp
+│   ├── main.cpp
+│   └── test_hal_adc.cpp
+└── Tools
+    └── clang-tidy-html.sh
+```
+
+## INFO-44 Architecture UML
+
+Added /Platform/Architecture/GPIO.puml
+
+PlantUML online Server
+
+<https://www.plantuml.com/plantuml/uml/>

@@ -1,24 +1,27 @@
 /**
  ******************************************************************************
- * @file        : gpio_config_stm32.hpp
- * @author      : i32bit
- * @brief       : GPIO configuration and label mapping header
- *                for board-level initialization.
- ******************************************************************************
- * This header provides compile-time arrays for GPIO pin setup and name-to-index mapping.
- * The configuration array `gpioPinConfigs` defines hardware parameters and labels for each pin,
- * enabling platform-agnostic initialization code to configure GPIOs based on this data.
+ * @file        gpio_config_stm32.hpp
+ * @author      it32bit
+ * @brief       GPIO configuration and label mapping for board-level initialization.
  *
- * Usage for Application and Bootloader:
+ *              Provides compile-time configuration data for GPIO setup and pin labeling.
+ *              Enables platform-agnostic initialization using static arrays, without runtime parsing.
+ *
+ * @details     The `gpioPinConfigs` array defines hardware parameters and symbolic labels for each pin.
+ *              This allows both the Application and Bootloader to configure GPIOs in a unified way,
+ *              without including platform-specific headers or relying on dynamic allocation.
+ *
+ * @usage
  * @code
  *  #include "gpio_manager_stm32.hpp"
  *
  *  GpioManager gpio;
  *  gpio.initialize(gpioPinConfigs);
- *  auto led = gpio.getPin("LD_RED");
+ *  auto led = gpio.getPin(PinId::LD_RED);
  *
  *  led->set();
  * @endcode
+ ******************************************************************************
  */
 #ifndef GPIO_CONFIG_STM32_HPP
 #define GPIO_CONFIG_STM32_HPP
@@ -57,9 +60,6 @@ constexpr std::array<PinConfig, PIN_CONFIG_ARRAY_SIZE> gpioPinConfigs = {
 
 /** (*Note 1) Alternate function mapping number for STM32: USART2 on PA2/PA3 is GPIO_AF7_USART2 = 7 */
 /** (*Note 2) CLI = Command Line Interface, used for serial console over UART */
-
-// Static assert to ensure the array size matches the defined size
-// static_assert(sizeof(gpioPinConfigs) / sizeof(gpioPinConfigs[0]) == PIN_CONFIG_ARRAY_SIZE, "GPIO config array size mismatch");
 
 // Compile-Time std::array Optimization
 constexpr const PinConfig& getPinConfigIndexed(PinId id)

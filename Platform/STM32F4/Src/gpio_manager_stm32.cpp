@@ -1,12 +1,15 @@
 /**
  ******************************************************************************
- * @file        : gpio_manager_stm32.cpp
- * @author      : i32bit
- * @brief       : Dispatcher for GPIO perypheral
- ******************************************************************************
- * This software is licensed under the MIT License.
- * Provided "as is", without warranty of any kind.
- * The author is not liable for any damages resulting from its use.
+ * @file        gpio_manager_stm32.cpp
+ * @author      it32bit
+ * @brief       GPIO peripheral dispatcher for STM32 platform.
+ *
+ *              Implements centralized GPIO initialization and access using
+ *              compile-time PinId mapping and static memory allocation.
+ *
+ * @license     MIT License
+ *              This software is provided "as is", without warranty of any kind.
+ *              The author is not liable for any damages resulting from its use.
  ******************************************************************************
  */
 #include "gpio_pin_stm32.hpp"
