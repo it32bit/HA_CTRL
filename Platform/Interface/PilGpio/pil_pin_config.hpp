@@ -1,29 +1,28 @@
 /**
  * @file pil_pin_config.hpp
- *
  * @author it32bit
- *
  * @version 0.1
+ * @brief Defines a hardware-agnostic structure for GPIO pin configuration.
  *
- * @brief This header defines a hardware-agnostic pin configuration structure.
+ * @note This header can be used by both bootloader and application code to configure GPIO pins
+ *       without including any hardware-specific dependencies. No HAL or platform-specific headers
+ *       should be included here.
  *
- * @note This can be used by both bootloader and application code
- *       to configure GPIO pins without including any hardware-specific headers.
- *       No HAL or hardware-specific headers should be included here.
- *       The actual implementation of pin control (set, reset, toggle, read) will be
- *       done in platform-specific code (e.g., STM32F4) using this configuration.
- *       The actual GPIO operations will be implemented in platform-specific files
- *       (e.g., gpio_pin_stm32.hpp/cpp) that use this configuration data
- *       to control the pins.
+ *       The actual implementation of pin control operations (e.g., set, reset, toggle, read)
+ *       is delegated to platform-specific code (such as STM32F4), which uses this configuration
+ *       structure to manage GPIO behavior.
  *
- *  Example usage:
- *      constexpr PinConfig pinConfigs[] = {
- *          {"LED1", 0, 5, PinConfig::Mode::Output, PinConfig::Pull::None, 0},
- *          {"BUTTON1", 0, 13, PinConfig::Mode::Input, PinConfig::Pull::Up, 0},  // etc.
- *      };
+ *       GPIO operations are implemented in platform-specific files (e.g., gpio_pin_stm32.hpp/cpp)
+ *       that interpret this configuration data to control the hardware.
+ *
+ * @example
+ *       constexpr PinConfig pinConfigs[] = {
+ *           {PinId::LD_RED, 0, 5, PinConfig::Mode::Output, PinConfig::Pull::PullNone, 0},
+ *           {PinId::BUTTON, 0, 13, PinConfig::Mode::Input, PinConfig::Pull::PullUp, 0},
+ *       };
+ *
  * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
- *            (c) 2024 ha-ctrl project authors.
- *            SPDX-License-Identifier: MIT
+ *            (c) 2025 ha-ctrl project authors.
  */
 #ifndef _PIN_CONFIG_HPP_
 #define _PIN_CONFIG_HPP_
@@ -31,6 +30,7 @@
 #include <cstdint>
 #include <string_view>
 #include <stdint-gcc.h>
+#include "pil_pin_id.hpp"
 
 struct PinConfig
 {
@@ -100,7 +100,7 @@ struct PinConfig
         ExtiEVT  = 2
     };
 
-    std::string_view name;
+    PinId            id;
     uint8_t          portIndex;
     uint16_t         pinNumber; // Pin number within the port (0-15) for SMT32 or (0-32) for ESP32
     Mode             mode;      // Input, Output, Alternate, Analog
@@ -112,5 +112,23 @@ struct PinConfig
     uint32_t         altFunction; // Alternate function number (0-15), 0 = none.
     uint32_t         iPriority;   // NVIC priority (optional)
 };
+
+// Compile-time lookup function.
+template <std::size_t N>
+constexpr const PinConfig& getPinConfigById(PinId t_id, const PinConfig (&t_configs)[N])
+{
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        if (t_configs[i].id == t_id)
+        {
+            return t_configs[i];
+        }
+    }
+    // Force a compile-time error if not found
+    static_assert(N < 0, "PinId not found in gpioPinConfigs array");
+
+    // fallback to suppress warning
+    return t_configs[0];
+}
 
 #endif // _PIN_CONFIG_HPP_

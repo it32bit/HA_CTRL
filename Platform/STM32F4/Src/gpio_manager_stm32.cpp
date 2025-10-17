@@ -15,43 +15,38 @@
 
 void GpioManager::initialize(std::span<const PinConfig> t_configs)
 {
-    reset(); // Clear existing state
+    reset();
 
-    m_pinCount = std::min(t_configs.size(), PIN_CONFIG_ARRAY_SIZE);
-
-    for (std::size_t i = 0; i < m_pinCount; ++i)
+    for (const auto& cfg : t_configs)
     {
-        const auto& cfg = t_configs[i];
+        auto idx = static_cast<std::size_t>(cfg.id);
 
-        // Validate pin number
+        if (idx >= m_pinPool.size())
+            continue;
+
         if (cfg.pinNumber >= MAX_PORT_PINS_STM32)
             continue;
 
-        // Validate port
         GPIO_TypeDef* port = getPortStm32FromIndex(cfg.portIndex);
         if (!port)
             continue;
 
-        // Configure pin via HAL
         if (!gpioHalConfig(cfg))
             continue;
 
-        // Statically construct the pin (assign into pre-allocated array)
-        m_pinPool[i] = GpioPin_STM32(cfg.name, port, cfg.pinNumber);
+        m_pinPool[idx]    = GpioPin_STM32(port, cfg.pinNumber);
+        m_pinPtrs[idx]    = &m_pinPool[idx];
+        m_configPtrs[idx] = &cfg;
 
-        m_pins[i]       = &m_pinPool[i];
-        m_configsRef[i] = &cfg;
+        ++m_pinCount;
     }
 }
 
-IGPIOPin* GpioManager::getPin(std::string_view name)
+IGPIOPin* GpioManager::getPin(PinId id)
 {
-    for (std::size_t i = 0; i < m_pinCount; ++i)
-    {
-        if (m_configsRef[i] && m_configsRef[i]->name == name)
-        {
-            return m_pins[i];
-        }
-    }
-    return nullptr;
+    auto idx = static_cast<std::size_t>(id);
+    if (idx >= m_pinPtrs.size())
+        return nullptr;
+
+    return m_pinPtrs[idx];
 }

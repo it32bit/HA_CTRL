@@ -31,7 +31,7 @@ endforeach()
 
 message(STATUS "Building target ${APP_TARGET} with sources:")
 foreach(file IN LISTS app_sources)
-    message(STATUS "app ${file}")
+    message(STATUS "[app] ${file}")
 endforeach()
 
 # Create executable first
@@ -39,9 +39,9 @@ add_executable(${APP_TARGET}
     ${app_sources}
 )
 
-# Link with PlatformSTM32F4 HAL wrapper library
+# Link with Platform_STM32F4 HAL wrapper library
 target_link_libraries(${APP_TARGET} PRIVATE
-    PlatformSTM32F4
+    Platform_STM32F4
 )
 
 # Set output directory for ELF, BIN, and HEX files

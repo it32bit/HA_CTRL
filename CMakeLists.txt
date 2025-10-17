@@ -50,6 +50,9 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
 set(PLATFORM_MCU "STM32F4")
 add_subdirectory(Platform/${PLATFORM_MCU})
 
+# PIL (platform-independent)
+add_subdirectory(Platform/Interface/PilGpio)
+
 # =========================================================================
 # Add Subdirectories (Targets: Bootloader and App)
 # =========================================================================
@@ -219,20 +222,20 @@ if(NOT BUILD_APP AND NOT BUILD_BOOTLOADER AND NOT BUILD_TESTING)
     message(FATAL_ERROR "All build options (APP, BOOTLOADER, TESTS) are disabled. Nothing to build.")
 endif()
 
-# ========================================================================
-# Combined Size Check Target (after both bootloader and app are built)
-# ========================================================================
-# ALL → ensures this runs every time you build
-# DEPENDS → ensures ha-ctrl-app and ha-ctrl-boot are built first
-# -Dtarget=... → passes the target name to your script
-# -P → tells CMake to run the script
-add_custom_target(check_size ALL
-    COMMAND ${CMAKE_COMMAND} -Dtarget=ha-ctrl-app -P ${CMAKE_SOURCE_DIR}/cmake/utilities-check-size.cmake
-    COMMENT "Running combined size check after build"
-    # DEPENDS ha-ctrl-boot ha-ctrl-app # This will ensure boot and app are built first. No need to add:
-    # USES_TERMINAL
-)
 if(NOT BUILD_TESTING)
+    # ========================================================================
+    # Combined Size Check Target (after both bootloader and app are built)
+    # ========================================================================
+    # ALL → ensures this runs every time you build
+    # DEPENDS → ensures ha-ctrl-app and ha-ctrl-boot are built first
+    # -Dtarget=... → passes the target name to your script
+    # -P → tells CMake to run the script
+    add_custom_target(check_size ALL
+        COMMAND ${CMAKE_COMMAND} -Dtarget=ha-ctrl-app -P ${CMAKE_SOURCE_DIR}/cmake/utilities-check-size.cmake
+        COMMENT "Running combined size check after build"
+        # DEPENDS ha-ctrl-boot ha-ctrl-app # This will ensure boot and app are built first. No need to add:
+        # USES_TERMINAL
+    )
     add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
 endif()
 

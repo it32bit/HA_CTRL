@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2025-10-15
  * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
- *            (c) 2024 ha-ctrl project authors.
+ *            (c) 2025 ha-ctrl project authors.
  */
 #ifndef GPIO_PIN_STM32_HPP
 #define GPIO_PIN_STM32_HPP
@@ -29,14 +29,12 @@
 class GpioPin_STM32 : public IGPIOPin
 {
   public:
-    constexpr GpioPin_STM32() = default; // Needed for std::array
+    constexpr GpioPin_STM32() = default;
 
-    constexpr GpioPin_STM32(std::string_view t_name, GPIO_TypeDef* t_port, uint16_t t_pin)
-        : m_port(t_port), m_pin_mask(get16BitMask(t_pin)), m_name(t_name)
+    constexpr GpioPin_STM32(GPIO_TypeDef* t_port, uint16_t t_pin)
+        : m_port(t_port), m_pin_mask(get16BitMask(t_pin))
     {
     }
-
-    std::string_view name() const override { return m_name; };
 
     void toggle() override;
     void set() override;
@@ -44,15 +42,13 @@ class GpioPin_STM32 : public IGPIOPin
     bool read() const override;
 
   private:
-    GPIO_TypeDef*    m_port = nullptr;
-    uint32_t         m_pin_mask{};
-    std::string_view m_name{};
+    GPIO_TypeDef* m_port = nullptr;
+    uint32_t      m_pin_mask{};
 
     [[nodiscard]]
-    constexpr uint32_t get16BitMask(const uint_fast8_t pinNumber)
+    constexpr uint32_t get16BitMask(uint_fast8_t pinNumber)
     {
-        constexpr std::size_t GPIO_16BIT_PIN_SHIFT_MAX = 15;
-        return (pinNumber > GPIO_16BIT_PIN_SHIFT_MAX) ? 0U : (1U << pinNumber);
+        return (pinNumber > 15) ? 0U : (1U << pinNumber);
     }
 };
 

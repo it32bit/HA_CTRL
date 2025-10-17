@@ -33,7 +33,7 @@ endforeach()
 
 message(STATUS "Building target ${BOOT_TARGET} with sources:")
 foreach(file IN LISTS bootloader_sources)
-    message(STATUS "boot ${file}")
+    message(STATUS "[boot] ${file}")
 endforeach()
 
 # Create executable first
@@ -41,9 +41,9 @@ add_executable(${BOOT_TARGET}
     ${bootloader_sources}
 )
 
-# Link with PlatformSTM32F4 HAL wrapper library
+# Link with Platform_STM32F4 HAL wrapper library
 target_link_libraries(${BOOT_TARGET} PRIVATE
-    PlatformSTM32F4
+    Platform_STM32F4
 )
 
 # Set output directory for ELF, BIN, and HEX files

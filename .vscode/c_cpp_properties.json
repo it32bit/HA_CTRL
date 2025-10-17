@@ -10,6 +10,7 @@
             "includePath": [
                 "${workspaceRoot}/**",
                 "${workspaceRoot}/Platform/Interface",
+                "${workspaceRoot}/Platform/Interface/PilGpio",
                 "${workspaceRoot}/Platform/STM32F4/Inc",
                 "${workspaceRoot}/Core/Inc",
                 "${workspaceRoot}/Core/Src",

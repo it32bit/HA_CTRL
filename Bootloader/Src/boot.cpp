@@ -13,7 +13,6 @@
 #include "stm32f4xx_hal.h"
 #include "boot.hpp"
 
-#include "gpio_config_stm32.hpp"
 #include "gpio_manager_stm32.hpp"
 
 /**
@@ -52,7 +51,7 @@ extern "C" int main(void)
 
     gpio.initialize(gpioPinConfigs);
 
-    auto red = gpio.getPin("LD_RED");
+    auto red = gpio.getPin(PinId::LD_RED);
 
     if (red)
     {
@@ -70,9 +69,9 @@ extern "C" int main(void)
 
 static void JumpToApp()
 {
-    constexpr uint32_t APP_ADDRESS = 0x08020000;
-    uint32_t app_stack         = *(volatile uint32_t*)(APP_ADDRESS);
-    uint32_t app_reset_handler = *(volatile uint32_t*)(APP_ADDRESS + 4);
+    constexpr uint32_t APP_ADDRESS       = 0x08020000;
+    uint32_t           app_stack         = *(volatile uint32_t*)(APP_ADDRESS);
+    uint32_t           app_reset_handler = *(volatile uint32_t*)(APP_ADDRESS + 4);
 
     // Disable interrupts
     __disable_irq();

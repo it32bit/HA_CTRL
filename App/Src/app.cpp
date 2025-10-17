@@ -99,7 +99,7 @@ void LedManager::process()
     if (m_pending)
     {
         m_pending = false;
-        // m_ledPtr->toggle();
+        m_ledPtr->toggle();
     }
 }
 
@@ -133,9 +133,9 @@ extern "C" int main(void)
 
     /** Initialization code for C++ application can be added here */
     gpioManager.initialize(gpioPinConfigs);
-    auto userButton = gpioManager.getPin("BUTTON");
+    auto userButton = gpioManager.getPin(PinId::BUTTON);
 
-    auto led = gpioManager.getPin("LD_BLU");
+    auto led = gpioManager.getPin(PinId::LD_ORA);
 
     if (led)
     {
@@ -148,7 +148,7 @@ extern "C" int main(void)
     WatchdogFeed();
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
-    LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpioManager.getPin("LD_GRE"));
+    LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpioManager.getPin(PinId::LD_BLU));
 
     AppIntro();
 

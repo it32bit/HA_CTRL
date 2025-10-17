@@ -111,8 +111,7 @@ constexpr std::array<GPIO_TypeDef*, 9> gpioPortsStm32 = {GPIOA, GPIOB, GPIOC, GP
  * @param t_index The port index (0 for GPIOA, 1 for GPIOB, etc.).
  * @return The GPIO_TypeDef pointer for the specified port, or nullptr if the index is invalid.
  */
-[[nodiscard]]
-constexpr GPIO_TypeDef* getPortStm32FromIndex(uint8_t t_index) noexcept
+[[nodiscard]] constexpr GPIO_TypeDef* getPortStm32FromIndex(uint8_t t_index) noexcept
 {
     return t_index < gpioPortsStm32.size() ? gpioPortsStm32[t_index] : nullptr;
 }

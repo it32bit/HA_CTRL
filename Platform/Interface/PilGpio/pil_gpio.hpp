@@ -5,7 +5,7 @@
  * @version 1.0
  * @date 2025-10-15
  * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
- *            (c) 2024 ha-ctrl project authors.
+ *            (c) 2025 ha-ctrl project authors.
  */
 
 #ifndef PIL_GPIO_HPP
@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <string_view>
+#include "pil_pin_id.hpp"
 
 class IGPIOPin
 {
@@ -23,8 +24,6 @@ class IGPIOPin
     virtual void set()        = 0;
     virtual void reset()      = 0;
     virtual bool read() const = 0;
-
-    virtual std::string_view name() const = 0;
 };
 
 class IGPIOManager
@@ -33,9 +32,7 @@ class IGPIOManager
     virtual ~IGPIOManager() = default;
 
     // Get a pin controller by name. Return nullptr if not found.
-    virtual IGPIOPin* getPin(std::string_view pinName) = 0;
-
-    // std::optional<IGPIOPin*> getPin(std::string_view t_name);
+    virtual IGPIOPin* getPin(PinId t_id) = 0;
 };
 
 #endif // PIL_GPIO_HPP

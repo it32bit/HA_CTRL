@@ -1,7 +1,6 @@
 build*/
 bin/
 *.pdf
-*.txt
 *.log
 *.html
 clangd*

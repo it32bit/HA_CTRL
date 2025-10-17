@@ -16,7 +16,7 @@
  *  GpioManager gpio;
  *  gpio.initialize(gpioPinConfigs);
  *  auto led = gpio.getPin("LD_RED");
- *  
+ *
  *  led->set();
  * @endcode
  */
@@ -27,6 +27,7 @@
 #include <string_view>
 #include "pil_pin_config.hpp"
 #include "gpio_pin_stm32.hpp"
+#include "pil_pin_id.hpp"
 
 using enum PinConfig::Mode;
 using enum PinConfig::Pull;
@@ -36,7 +37,7 @@ using enum PinConfig::InterruptTrigger;
 using enum PinConfig::PortStm32;
 using enum PinConfig::InterruptExti;
 
-constexpr std::size_t PIN_CONFIG_ARRAY_SIZE = 7;
+constexpr std::size_t PIN_CONFIG_ARRAY_SIZE = static_cast<std::size_t>(PinId::COUNT);
 
 /**
  * @brief   GPIO PIN configuration array
@@ -45,13 +46,13 @@ constexpr std::size_t PIN_CONFIG_ARRAY_SIZE = 7;
  *          without the need to populate structs in stack memory
  */
 constexpr std::array<PinConfig, PIN_CONFIG_ARRAY_SIZE> gpioPinConfigs = {
-    {{"BUTTON", PortA, 0, Input, PullDown, PushPull, Low, ExtiIT, Rising, 0, 15},
-     {"CLI_TX", PortA, 2, Alternate, PullNone, PushPull, VeryHigh, ExtiNone, None, 7, 15},
-     {"CLI_RX", PortA, 3, Alternate, PullNone, PushPull, VeryHigh, ExtiNone, None, 7, 15},
-     {"LD_GRE", PortD, 12, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15},
-     {"LD_ORA", PortD, 13, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15},
-     {"LD_RED", PortD, 14, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15},
-     {"LD_BLU", PortD, 15, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15}}
+    {{PinId::BUTTON, PortA, 0, Input, PullDown, PushPull, Low, ExtiIT, Rising, 0, 15},
+     {PinId::CLI_TX, PortA, 2, Alternate, PullNone, PushPull, VeryHigh, ExtiNone, None, 7, 15},
+     {PinId::CLI_RX, PortA, 3, Alternate, PullNone, PushPull, VeryHigh, ExtiNone, None, 7, 15},
+     {PinId::LD_GRE, PortD, 12, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15},
+     {PinId::LD_ORA, PortD, 13, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15},
+     {PinId::LD_RED, PortD, 14, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15},
+     {PinId::LD_BLU, PortD, 15, Output, PullNone, PushPull, Low, ExtiNone, None, 0, 15}}
 };
 
 /** (*Note 1) Alternate function mapping number for STM32: USART2 on PA2/PA3 is GPIO_AF7_USART2 = 7 */
@@ -60,30 +61,10 @@ constexpr std::array<PinConfig, PIN_CONFIG_ARRAY_SIZE> gpioPinConfigs = {
 // Static assert to ensure the array size matches the defined size
 // static_assert(sizeof(gpioPinConfigs) / sizeof(gpioPinConfigs[0]) == PIN_CONFIG_ARRAY_SIZE, "GPIO config array size mismatch");
 
-/**
- * @brief Find a PinConfig by its name.
- * This function performs a linear search through the gpioPinConfigs array
- * to find a PinConfig with the specified name.
- * @param t_name The name of the pin to find.
- * @return A pointer to the PinConfig if found, or nullptr if not found.
- * @note This function is constexpr and can be used in compile-time contexts.
- *
- * Usage:
- * constexpr auto* buttonCfg = findPinConfig("BUTTON");
- * GpioPin_STM32* buttonPin = GpioPin_STM32::createStatic(*buttonCfg);
- * buttonPin->set();
- */
-// Compile-time lookup by name
-constexpr const PinConfig* findPinConfig(std::string_view t_name)
+// Compile-Time std::array Optimization
+constexpr const PinConfig& getPinConfigIndexed(PinId id)
 {
-    for (const auto& cfg : gpioPinConfigs)
-    {
-        if (cfg.name == t_name)
-        {
-            return &cfg;
-        }
-    }
-    return nullptr;
+    return gpioPinConfigs[static_cast<std::size_t>(id)];
 }
 
 #endif // GPIO_CONFIG_STM32_HPP

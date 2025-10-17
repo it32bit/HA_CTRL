@@ -43,7 +43,7 @@ extern "C" void SysTick_HeartBeat(void)
 {
     static uint32_t ticks = 0u;
 
-    auto ledHeartBeat = gpioManager.getPin("LD_GRE");
+    auto ledHeartBeat = gpioManager.getPin(PinId::LD_GRE);
 
     if (ticks++ >= 500)
     {
