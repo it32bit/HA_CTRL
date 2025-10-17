@@ -38,6 +38,7 @@ target_compile_definitions(${PLATFORM_TARGET} PRIVATE
 
 # Link HAL/LL libraries here if needed
 # target_link_libraries(${PLATFORM_TARGET} PRIVATE stm32_hal)
+target_link_libraries(Platform_STM32F4 PUBLIC pil_clock)
 target_link_libraries(Platform_STM32F4 PUBLIC pil_gpio)
 target_link_libraries(Platform_STM32F4 PUBLIC pil_watchdog)
 
