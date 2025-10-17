@@ -52,6 +52,7 @@ add_subdirectory(Platform/${PLATFORM_MCU})
 
 # PIL (platform-independent)
 add_subdirectory(Platform/Interface/PilGpio)
+add_subdirectory(Platform/Interface/PilWatchdog)
 
 # =========================================================================
 # Add Subdirectories (Targets: Bootloader and App)

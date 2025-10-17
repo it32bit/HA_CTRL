@@ -3,14 +3,16 @@
 set(PLATFORM_TARGET Platform_STM32F4)
 
 
+
 add_library(${PLATFORM_TARGET} STATIC
     Src/gpio_manager_stm32.cpp
     Src/gpio_pin_stm32.cpp
     Src/gpio_hal_stm32.cpp
+    Src/watchdog_stm32.cpp
     # Add other .cpp files
     Src/hal_uart.cpp
     Src/hal_adc.cpp
-    Src/watchdog.cpp
+
 )
 
 target_include_directories(${PLATFORM_TARGET} PUBLIC
@@ -37,4 +39,5 @@ target_compile_definitions(${PLATFORM_TARGET} PRIVATE
 # Link HAL/LL libraries here if needed
 # target_link_libraries(${PLATFORM_TARGET} PRIVATE stm32_hal)
 target_link_libraries(Platform_STM32F4 PUBLIC pil_gpio)
+target_link_libraries(Platform_STM32F4 PUBLIC pil_watchdog)
 

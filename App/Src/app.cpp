@@ -11,11 +11,11 @@
  */
 #include "app.hpp"
 #include "gpio_manager_stm32.hpp"
-
+#include "watchdog_manager_stm32.hpp"
 #include "api_debug.hpp"
 #include "hal_adc.hpp"
 #include "console.hpp"
-#include "watchdog.hpp"
+
 #include <cstring>
 #include <stdio.h>
 #include "stm32f4xx_hal.h"
@@ -110,18 +110,16 @@ static void AppIntro();
 
 /**
  * @brief Global Objects
- *          Console console
  */
 Console console;
 
-Watchdog watchdog(100);
+GpioManager     gpioManager;
+WatchdogManager watchdog;
 
 extern "C" void WatchdogFeed(void)
 {
     watchdog.feed();
 }
-
-GpioManager gpioManager;
 
 /**
  * Main application entry point for C++ code
@@ -132,20 +130,12 @@ extern "C" int main(void)
     HAL_Init();
 
     /** Initialization code for C++ application can be added here */
+    watchdog.initialize(1000); // 1 second timeout
     gpioManager.initialize(gpioPinConfigs);
-    auto userButton = gpioManager.getPin(PinId::BUTTON);
-
-    auto led = gpioManager.getPin(PinId::LD_ORA);
-
-    if (led)
-    {
-        led->set();
-    }
 
     ADC_Internal_Init();
 
     debugInit();
-    WatchdogFeed();
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpioManager.getPin(PinId::LD_BLU));
@@ -161,7 +151,7 @@ extern "C" int main(void)
         usrButton.process();
         usrLed.process();
 
-        WatchdogFeed();
+        watchdog.feed();
     }
 }
 

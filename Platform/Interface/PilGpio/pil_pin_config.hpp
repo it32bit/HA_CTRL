@@ -28,7 +28,6 @@
 #define _PIN_CONFIG_HPP_
 
 #include <cstdint>
-#include <string_view>
 #include <stdint-gcc.h>
 #include "pil_pin_id.hpp"
 
