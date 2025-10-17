@@ -862,3 +862,507 @@ value in the IWDG_WINR register.
 - Otherwise, refresh the counter by a writing 0x0000
 AAAA in the Key register to disable the window
 option.
+
+## INFO-30 Bootloader
+
+### Goal
+
+- Bootloader: Initializes first, handles flashing or fallback behavior, and jumps to the App.
+- Application: Your existing App code, but adjusted to start at an offset
+- Replace the default main.c with my own boot.cpp (custom bootloader).
+- Remove unnecessary inclusion of Core/Src/main.c.
+- Keep Clang-Tidy, CppUTest, and clean-extra features.
+- Ensure proper CMAKE_MODULE_PATH logic.
+- Maintain clarity and portability.
+
+### Directory Tree
+
+├── App
+├── Bootloader                <-- NEW
+│   ├── Inc
+│   ├── Src
+│   ├── bootloader.ld         <-- Linker script for bootloader
+│   └── main.cpp              <-- Bootloader entry point
+├── bin
+├── Core
+├── Drivers
+├── Startup
+│   └── startup_stm32f407vgtx.s
+├── stm32f407vgtx_FLASH.ld
+├── app_flash.ld              <-- NEW: linker script for App
+├── CMakeLists.txt
+├── CMakePresets.json
+└── ...
+
+## Info-31 Platform
+
+Structure like below is future-proof and it allows to:
+
+- write platform-agnostic application code,
+- easily swap to another MCU by switching the Platform/XYZ folder,
+- and test against mocks or stubs using the interfaces.
+
+```bash
+Platform/
+├── Interface/
+│   ├── IGpio.hpp
+│   └── ...
+├── STM32F4/
+│   ├── Inc/
+│   │   └── hal_gpio.hpp
+│   ├── Src/
+│   │   └── hal_gpio.cpp
+│   └── CMakeLists.txt
+
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        2080 B       128 KB      1.59%
+           FLASH:        5980 B        16 KB     36.50%
+   text    data     bss     dec     hex filename
+   5888      92    1988    7968    1f20 /ha-ctrl-boot.elf
+
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4416 B       128 KB      3.37%
+           FLASH:       81876 B      1008 KB      7.93%
+   text    data     bss     dec     hex filename
+  80020    1848    2568   84436   149d4 /ha-ctrl-app.elf
+build finished successfully.
+```
+
+## Info-32 Modularization of my Custom GPIO Driver
+
+This approach ensures that both bootloader and application code can share
+the same pin configuration definitions without duplicating code or
+introducing hardware dependencies in this common header.
+
+1.Pure Abstract GPIO Interface in /Interface
+
+- Abstract interfaces allow you to hide hardware details behind these classes.
+- Both bootloader and app will depend only on this header.
+- No HAL or hardware headers leak here.
+
+2.Implement a GPIO manager (e.g., GpioManager_STM32) that uses the PinConfig array to initialize pins.
+
+3.Ensure both bootloader and application code can use the GPIO manager to access pins by name.
+
+4.Test the implementation on the target hardware (e.g., STM32F4). This file should not include any HAL or hardware-specific headers.
+
+### Summary
+
+- Interface-based abstraction in /Interface/
+- STM32-specific implementation in /Platform/STM32F4/
+- App and bootloader can both depend on pil_gpio.hpp and pil_pin_config.hpp
+- Clean and portable GPIO layer now decoupled from HAL
+
+## ISSUE-33
+
+`--specs=nano.specs` provides to disabling `_sbrk()` - a function used by malloc() and other heap-related operations to allocate memory, we can stub or disable dynamic memory allocation or write `_sbrk()` implementation in syscall.c
+
+```C
+// Add this to your project (e.g., in syscall.c or minimal_syscalls.c):
+extern "C" {
+  caddr_t _sbrk(int incr) {
+    extern char _end; // Defined by the linker
+    static char* heap_end;
+    char* prev_heap_end;
+
+    if (heap_end == 0) {
+      heap_end = &_end;
+    }
+
+    prev_heap_end = heap_end;
+    heap_end += incr;
+
+    return (caddr_t)prev_heap_end;
+  }
+}
+```
+
+## ISSUE-34
+
+`--specs=nosys.specs` provides to the `_getentropy` warning and huge increase of flash size.
+
+```C
+extern "C" int _getentropy(void* buffer, size_t length) __attribute__((weak));
+int _getentropy(void* buffer, size_t length) {
+    return -1; // Always fail, as expected
+}
+```
+
+## Info-35 Memory Usage Bootloader new GPIO Driver from /Platform
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4272 B       128 KB      3.26%
+           FLASH:       75008 B       128 KB     57.23%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  73144    1856    2416   77416   12e68 ha-ctrl-boot.elf
+```
+
+## INFO-36 GPIO getPortFromIndex - refactoring
+
+| Better solution       | Description |
+|-----------------------|-------------------------------------------------------------------------------|
+| `constexpr`           | Enables compile-time evaluation when possible, ideal for embedded systems. |
+| `constexpr std::array`| Ensures the array is evaluated at compile time, reducing runtime overhead. |
+|`noexcept`             | Signals that the function won't throw, improving optimization and safety. |
+|`gpioPortsStm32.size()`| Avoids manual sizeof math, improving readability and correctness. |
+
+```C
+constexpr std::array<GPIO_TypeDef*, 9> gpioPortsStm32 = {
+    GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, GPIOI
+};
+
+constexpr GPIO_TypeDef* getPortStm32FromIndex(uint8_t index) noexcept {
+    return index < gpioPortsStm32.size() ? gpioPortsStm32[index] : nullptr;
+}
+```
+
+### Hybrid: Constexpr with std::span
+
+```Cpp
+constexpr auto defaultPorts = std::to_array({GPIOA, GPIOB, GPIOC});
+std::span<GPIO_TypeDef* const> activePorts = defaultPorts;
+```
+
+## Info-37 Comparation: constexpr vs std::span
+
+`constexpr` vs `std::span` in Embedded C++
+
+| Feature                                     | `constexpr` | `std::span`
+|---------------------------------------------|-----------|-----------
+| Compile-time only                           | Yes       | No
+| Runtime flexibility                         | No        | Yes
+| Memory safety                               | Yes       | Yes
+| Works with dynamic data                     | No        | Yes
+| Ideal for fixed hardware tables             | Yes       | Yes
+| Ideal for testing, mocks, or runtime config | No        | Yes
+
+### `std::span` Is More Flexible
+
+```Cpp
+constexpr auto defaultPorts = std::to_array({GPIOA, GPIOB, GPIOC});
+std::span<GPIO_TypeDef* const> activePorts = defaultPorts;
+
+GPIO_TypeDef* getPortFromIndex(uint8_t index, std::span<GPIO_TypeDef* const> ports) {
+    return index < ports.size() ? ports[index] : nullptr;
+}
+```
+
+#### Safe Views Without Ownership
+
+`std::span` doesn’t own memory — it just views it. That’s perfect for embedded systems where memory ownership is tightly controlled.
+
+#### Runtime Configurability - can pass different port tables at runtime — useful for
+
+- Unit testing with mocks
+- Supporting multiple STM32 families
+- Dynamic reconfiguration
+
+#### Container-Agnostic Works with
+
+- std::array
+- std::vector
+- raw C arrays
+
+## Info-38 `CMAKE_CXX_EXTENSIONS` flag in CMake
+
+The `CMAKE_CXX_EXTENSIONS` flag in CMake controls whether compiler is allowed to use non-standard language extensions when compiling C++ code.
+
+### Best practice for Embedded C++ project
+
+```CMake
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+```
+
+This ensures:
+
+- Using modern C++ features
+- Code is portable and standards-compliant
+- Avoid vendor lock-in or hidden behaviors
+
+### `set(CMAKE_CXX_EXTENSIONS OFF)` - Strict Standard Compliance
+
+- Forces the compiler to use pure C++ (e.g., -std=c++20)
+- Disables vendor-specific extensions, like GNU extensions (-std=gnu++20)
+- Ensures portability across compilers and platforms
+- Ideal for embedded systems, safety-critical code, and cross-platform libraries
+
+### `set(CMAKE_CXX_EXTENSIONS ON)` - Enable Compiler Extensions
+
+- Allows compiler-specific features (e.g., GCC’s typeof, asm, etc.)
+- Uses -std=gnu++20 instead of -std=c++20
+- May break portability or introduce subtle bugs on other toolchains
+- Sometimes needed for low-level tricks or legacy code.
+
+## Info-39 Keyword `constinit`
+
+### Use constinit for
+
+- Global managers (like gpioManagerBoot)
+- Configuration tables
+- Static buffers
+- Anything that must be initialized before main() without runtime cost
+
+```Cpp
+struct GpioManager {
+    constexpr GpioManager() = default;
+    void init();
+};
+constinit GpioManager gpioManagerBoot;  // compile-time guaranteed
+```
+
+|Declaration                            | Behavior                                                      |
+|---------------------------------------|---------------------------------------------------------------|
+|GpioManager gpioManagerBoot;           | May be initialized at runtime (even if constructor is trivial)|
+|constinit GpioManager gpioManagerBoot; | Must be initialized at compile time — compiler enforces this  |
+
+### Use `constinit` in Embedded Global Scope
+
+- Ensures deterministic startup — no hidden runtime initialization
+- Avoids static initialization order fiasco across translation units
+- Guarantees zero-cost initialization for trivial types
+- Safer than relying on constexpr alone, because constinit works with mutable objects
+
+### Common Misunderstanding
+
+- `constinit` not equal `const`
+- You can modify a constinit object after startup
+- It’s about how it's initialized, not whether it's mutable
+
+## INFO-40 Boot Size after removeing dynamic memory allocation
+
+Flash reduction from ~72k to 5.4k for:
+
+```Cpp
+constexpr auto* buttonCfg = findPinConfig("BUTTON");
+GpioPin_STM32*buttonPin = GpioPin_STM32::createStatic(*buttonCfg);
+buttonPin->set();
+```
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        3880 B       128 KB      2.96%
+           FLASH:        6928 B       128 KB      5.29%
+******** Print size information:
+   text    data     bss     dec     hex filename
+   5404    1524    2356    9284    2444 ha-ctrl-boot.elf
+build finished successfully.
+```
+
+```Cpp
+static GpioManager gpio;
+gpio.initialize(gpioPinConfigs);
+auto red = gpio.getPin("LD_RED");
+red->toggle();
+```
+
+```bash
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4384 B       128 KB      3.34%
+           FLASH:       17528 B       128 KB     13.37%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  15488    2032    2352   19872    4da0 ha-ctrl-boot.elf
+
+
+Memory region         Used Size  Region Size  %age Used
+          CCMRAM:           0 B        64 KB      0.00%
+             RAM:        4600 B       128 KB      3.51%
+           FLASH:       82744 B       896 KB      9.02%
+******** Print size information:
+   text    data     bss     dec     hex filename
+  80696    2040    2560   85296   14d30 ha-ctrl-app.elf
+```
+
+## INFO-41 Added target check_size
+
+Target check_size print summary with separeted size for App and Bootloader.
+At the end print sum (App+Boot) of FLASH usage and RAM usage.
+Target is able to check if Flash or Ram usege is over 90% of mcu limit (scaled for STM32F407).
+If limit exceeded then Compiler throw ERROR message
+
+```bash
+-- ┌────────────────────┬──────────────┬────────────────────────────────────────┐
+-- │ Section            │ Size (bytes) │ Description Platform STM32F407         │
+-- ├────────────────────┼──────────────┼────────────────────────────────────────┤
+-- │ Bootloader .text   │ 15488        │ Code (in FLASH)                        │
+-- │ Bootloader .data   │ 2032         │ Initialized data (RAM, stored in FLASH)│
+-- │ Bootloader .bss    │ 2352         │ Uninitialized data (RAM)               │
+-- │ App .text          │ 80696        │ Code (in FLASH)                        │
+-- │ App .data          │ 2040         │ Initialized data (RAM, stored in FLASH)│
+-- │ App .bss           │ 2560         │ Uninitialized data (RAM)               │
+-- ├────────────────────┼──────────────┼────────────────────────────────────────┤
+-- │ FLASH total        │ 100256       │ .text + .data                          │
+-- │ RAM total          │ 8984         │ .data + .bss                           │
+-- └────────────────────┴──────────────┴────────────────────────────────────────┘
+--
+-- FLASH usage: 100256 bytes (10%)
+-- RAM usage: 8984 bytes (6%)
+```
+
+Target check_size generate combined_size.json in future will be used in CI/CD
+
+```json
+{
+  "bootloader": {
+    "text": 15136,
+    "data": 1976,
+    "bss": 2352
+  },
+  "application": {
+    "text": 80336,
+    "data": 1984,
+    "bss": 2560
+  },
+  "combined": {
+    "flash": 99432,
+    "ram": 8872,
+    "flash_usage_percent": 10,
+    "ram_usage_percent": 6
+  }
+}
+```
+
+## INFO-42 How to change branch name
+
+New name is more accurate with changes
+
+```bash
+git branch -m feature/bootloader feature/modular-architecture
+git push origin -u feature/modular-architecture
+git push origin --delete feature/bootloader
+```
+
+## INFO-43 Project directory tree
+
+```bash
+.
+├── App
+│   ├── app_linker.ld
+│   ├── CMakeLists.txt
+│   ├── Inc
+│   │   ├── app.hpp
+│   │   ├── app_it.hpp
+│   │   ├── circular_buffer.hpp
+│   │   ├── console.hpp
+│   │   └── patterns.hpp
+│   └── Src
+│       ├── app.cpp
+│       ├── app_it.cpp
+│       └── console.cpp
+├── Bootloader
+│   ├── boot_linker.ld
+│   ├── CMakeLists.txt
+│   ├── Inc
+│   │   └── boot.hpp
+│   └── Src
+│       └── boot.cpp
+├── build
+│   ├── bin
+│   │   ├── combined_size.json
+│   │   ├── ha-ctrl-app.bin
+│   │   ├── ha-ctrl-app.elf
+│   │   ├── ha-ctrl-app.hex
+│   │   ├── ha-ctrl-app.map
+│   │   ├── ha-ctrl-app_size.txt
+│   │   ├── ha-ctrl-boot.bin
+│   │   ├── ha-ctrl-boot.elf
+│   │   ├── ha-ctrl-boot.hex
+│   │   ├── ha-ctrl-boot.map
+│   │   └── ha-ctrl-boot_size.txt
+│   └── debug
+├── cmake
+│   ├── compiler-warnings.cmake
+│   ├── gcc-arm-none-eabi.cmake
+│   ├── platform-traits.cmake
+│   ├── utilities-check-size.cmake
+│   ├── utilities.cmake
+│   └── vscode_generated.cmake
+├── CMakeLists.txt
+├── CMakePresets.json
+├── Core
+│   ├── Inc
+│   │   ├── stm32f4xx_hal_conf.h
+│   │   └── stm32f4xx_it.h
+│   └── Src
+│       ├── stm32f4xx_it.c
+│       ├── syscall.c
+│       ├── sysmem.c
+│       └── system_stm32f4xx.c
+├── Doc
+│   └── LogBook.md
+├── Drivers
+│   ├── CMSIS
+│   │   └── Core
+│   │       └── Include
+│   │           ├── core_cm4.h
+│   ├── cmsis-device-f4
+│   │   ├── Include
+│   │   │   ├── stm32f407xx.h
+│   │   │   ├── stm32f4xx.h
+│   │   │   └── system_stm32f4xx.h
+│   │   └── Source
+│   │       └── Templates
+│   │           └── system_stm32f4xx.c
+│   └── stm32f4xx-hal-driver
+│       ├── Inc
+│       │   ├── stm32f4xx_ll_utils.h
+│       │   └── stm32f4xx_ll_*.h
+│       └── Src
+│           └── stm32f4xx_ll_*.c
+├── extern
+│   └── cpputest
+├── LICENSE
+├── Platform
+│   ├── Interface
+│   │   ├── api_debug.hpp
+│   │   └── PilGpio
+│   │       ├── CMakeLists.txt
+│   │       ├── pil_gpio.hpp
+│   │       ├── pil_pin_config.hpp
+│   │       └── pil_pin_id.hpp
+│   └── STM32F4
+│       ├── CMakeLists.txt
+│       ├── Inc
+│       │   ├── gpio_config_stm32.hpp
+│       │   ├── gpio_hal_stm32.hpp
+│       │   ├── gpio_manager_stm32.hpp
+│       │   ├── gpio_pin_stm32.hpp
+│       │   ├── hal_adc.hpp
+│       │   ├── traits_stm32.hpp
+│       │   └── watchdog.hpp
+│       └── Src
+│           ├── gpio_hal_stm32.cpp
+│           ├── gpio_manager_stm32.cpp
+│           ├── gpio_pin_stm32.cpp
+│           ├── hal_adc.cpp
+│           ├── hal_uart.cpp
+│           └── watchdog.cpp
+├── README.md
+├── Startup
+│   └── startup_stm32f407vgtx.s
+├── tests
+│   ├── CMakeFiles
+│   ├── CMakeLists.txt
+│   ├── hal_adc_mock.cpp
+│   ├── main.cpp
+│   └── test_hal_adc.cpp
+└── Tools
+    └── clang-tidy-html.sh
+```
+
+## INFO-44 Architecture UML
+
+Added /Platform/Architecture/GPIO.puml
+
+PlantUML online Server
+
+<https://www.plantuml.com/plantuml/uml/>

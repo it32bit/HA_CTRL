@@ -9,6 +9,9 @@
             "intelliSenseMode": "gcc-arm",
             "includePath": [
                 "${workspaceRoot}/**",
+                "${workspaceRoot}/Platform/Interface",
+                "${workspaceRoot}/Platform/Interface/PilGpio",
+                "${workspaceRoot}/Platform/STM32F4/Inc",
                 "${workspaceRoot}/Core/Inc",
                 "${workspaceRoot}/Core/Src",
                 "${workspaceRoot}/App/Inc",
@@ -24,7 +27,7 @@
                 "STM32F407xx",
                 "USE_HAL_DRIVER",
                 "USE_FULL_LL_DRIVER",
-                "__cplusplus==202002L"
+                "__cplusplus=202002L"
             ],
             "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json"
         }

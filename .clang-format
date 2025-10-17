@@ -1,6 +1,10 @@
 # .clang-format for STM32 embedded C/C++ projects
 # <https://clang.llvm.org/docs/ClangFormatStyleOptions.html>
 #
+#       // clang-format off
+#       your_unformatted_code_here();
+#       // clang-format on
+#
 # Line ending style (\n or \r\n) to use.
 ##LineEnding: LE_LF
 # The style used for all options not specifically set in the configuration.

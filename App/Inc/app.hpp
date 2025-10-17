@@ -2,7 +2,9 @@
 #define APP_HPP__
 
 #include "patterns.hpp"
-#include "api_gpio.hpp"
+#include "gpio_manager_stm32.hpp"
+
+extern GpioManager gpioManager;
 
 typedef struct
 {
@@ -10,7 +12,7 @@ typedef struct
     uint8_t minor;
 } firmwareVersionS;
 
-constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 1};
+constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 2};
 
 class Debouncer
 {
@@ -60,14 +62,14 @@ class UserButtonManager : public Observer
 class LedManager : public Observer
 {
   public:
-    LedManager(Subject& t_subject, uint32_t t_ledMask, const PinController& t_led);
+    LedManager(Subject& t_subject, uint32_t t_ledMask, IGPIOPin* t_led);
     void notify(uint32_t mask) const override;
     void process();
 
   private:
     Subject&              m_subject;
     uint32_t              m_pin_mask = -1;
-    PinController         m_led;
+    IGPIOPin*             m_ledPtr{nullptr};
     mutable volatile bool m_pending{false};
 };
 

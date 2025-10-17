@@ -1,8 +1,8 @@
 build*/
 bin/
-extern/
 *.pdf
-*.txt
 *.log
 *.html
 clangd*
+Doc/ToDo.md
+Doc/TMemo.md

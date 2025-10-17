@@ -1,154 +1,83 @@
 cmake_minimum_required(VERSION 3.22)
+project(ha-ctrl LANGUAGES C CXX ASM)
 
-project(ha-ctrl)
-enable_language(C CXX ASM)
+# =========================================================================
+# Options to Enable/Disable Parts of the Build
+# =========================================================================
+option(BUILD_APP "Build the main application" ON)
+option(BUILD_BOOTLOADER "Build the bootloader" ON)
+option(BUILD_TESTING "Build unit tests" OFF)
+option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" OFF)
 
+# =========================================================================
+# Module Path for Custom CMake Files
+# =========================================================================
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # =========================================================================
-# Build Type & Toolchain
-# =========================================================================
-if(NOT BUILD_TESTING)
-    message("Build CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
-    include("cmake/gcc-arm-none-eabi.cmake")
-    message("Build CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH})
-endif()
-
-message("Build type: " ${CMAKE_BUILD_TYPE})
-
-# =========================================================================
-# Core Compiler Settings
+# Language Standards
 # =========================================================================
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # =========================================================================
-# Optionally build firmware (only when NOT building tests)
+# Toolchain and Build Type Setup
+# Firmware Build (Only when NOT testing)
 # =========================================================================
 if(NOT BUILD_TESTING)
-    # Core MCU flags, CPU type, instruction set and FPU setup
-    set(cpu_PARAMS)
+    include("cmake/gcc-arm-none-eabi.cmake")
 
-    # Sources
-    set(sources_SRCS)
-
-    # Include directories
-    set(include_DIRS)
-    set(include_c_DIRS)
-    set(include_cxx_DIRS)
-    set(include_asm_DIRS)
-
-    # Symbols
-    set(symbols_SYMB)
-    set(symbols_c_SYMB)
-    set(symbols_cxx_SYMB)
-    set(symbols_asm_SYMB)
-
-    # Linking
-    set(link_DIRS)
-    set(link_LIBS)
-    set(linker_script_SRC)
-
-    # Compiler/Linker flags
-    set(compiler_OPTS)
-    set(linker_OPTS)
-
-    # Output binary location
-    set(CMAKE_BINARY_DIR_BIN ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-
-    include("cmake/vscode_generated.cmake")
-
-    link_directories(${CMAKE_PROJECT_NAME} ${link_DIRS})
-
-    add_executable(${CMAKE_PROJECT_NAME})
-
-    target_sources(${CMAKE_PROJECT_NAME} PUBLIC ${sources_SRCS})
-
-    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-        ${include_DIRS}
-        $<$<COMPILE_LANGUAGE:C>: ${include_c_DIRS}>
-        $<$<COMPILE_LANGUAGE:CXX>: ${include_cxx_DIRS}>
-        $<$<COMPILE_LANGUAGE:ASM>: ${include_asm_DIRS}>
-    )
-
-    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-        ${symbols_SYMB}
-        $<$<COMPILE_LANGUAGE:C>: ${symbols_c_SYMB}>
-        $<$<COMPILE_LANGUAGE:CXX>: ${symbols_cxx_SYMB}>
-        $<$<COMPILE_LANGUAGE:ASM>: ${symbols_asm_SYMB}>
-        $<$<CONFIG:Debug>:DEBUG>
-        $<$<CONFIG:Release>: >
-        STM32F407xx
-        USE_HAL_DRIVER
-        USE_FULL_LL_DRIVER
-    )
-
-    target_link_libraries(${CMAKE_PROJECT_NAME} ${link_LIBS})
-
-    target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
-        ${cpu_PARAMS}
-        ${compiler_OPTS}
-        -Wall -Wextra -Wpedantic -Wno-unused-parameter
-        $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp -MMD -MP>
-        $<$<CONFIG:Debug>:-Og -g3 -ggdb>
-        $<$<CONFIG:Release>:-Og -g0>
-    )
-
-    set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR_BIN}
-    )
-
-    target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
-        -T${linker_script_SRC}
-        ${cpu_PARAMS}
-        ${linker_OPTS}
-        -Wl,-Map=${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.map
-        -u _printf_float
-        --specs=nosys.specs
-        -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
-        -Wl,-z,max-page-size=8
-        -Wl,--print-memory-usage
-    )
-
-    add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.hex
-        COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.bin
-        COMMENT "Generating HEX and BIN file from ELF"
-    )
-
-    add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "******** Print size information:"
-        COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
-        COMMENT "Size information"
-    )
-
-# Flash target using STM32CubeProgrammer CLI
-    add_custom_target(flash
-        DEPENDS ${CMAKE_PROJECT_NAME}
-        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${CMAKE_PROJECT_NAME}.elf
-        COMMENT "Flashing firmware to STM32 via ST-Link"
-    )
-
+    # Load auto-generated sources, includes, and flags
+    # vscode_generated.cmake" included in subdirectories boot and app
 endif()
 
-# Extra clean target to remove generated binary files
+message("Build type: ${CMAKE_BUILD_TYPE}")
+
+# =========================================================================
+# Output Directory
+# =========================================================================
+set(CMAKE_BINARY_DIR_BIN ${CMAKE_BINARY_DIR}/../bin)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
+
+# =========================================================================
+# Platform-Specific Settings
+# =========================================================================
+set(PLATFORM_MCU "STM32F4")
+add_subdirectory(Platform/${PLATFORM_MCU})
+
+# PIL (platform-independent)
+add_subdirectory(Platform/Interface/PilGpio)
+
+# =========================================================================
+# Add Subdirectories (Targets: Bootloader and App)
+# =========================================================================
+if(BUILD_APP)
+    add_subdirectory(App)
+endif()
+
+if(BUILD_BOOTLOADER)
+    add_subdirectory(Bootloader)
+endif()
+
+# =========================================================================
+# Extra Cleaning Target
+# =========================================================================
 add_custom_target(clean-extra
     COMMAND ${CMAKE_COMMAND} -E rm -rf
-        ${CMAKE_SOURCE_DIR}/bin/*
-        ${CMAKE_BINARY_DIR}/CMakeFiles/${CMAKE_PROJECT_NAME}.dir/*
+        ${CMAKE_BINARY_DIR_BIN}/*
+        ${CMAKE_BINARY_DIR}/CMakeFiles/*
         ${CMAKE_SOURCE_DIR}/build-tests/*
-    COMMENT "Removing generated binary files (*.elf, *.map, *.hex, *.bin)"
+    COMMENT "Cleaning build products (*.elf, *.map, *.hex, *.bin)"
 )
 
 # =========================================================================
-# Clang-Tidy (only runs when building firmware)
+# Clang-Tidy Support (optional)
 # =========================================================================
-option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" OFF)
-
 if(ENABLE_CLANG_TIDY AND NOT BUILD_TESTING)
     # Keep your full clang-tidy logic here (unchanged)...
     # [omitted for brevity — include everything from your script if needed]
@@ -273,12 +202,48 @@ if(ENABLE_CLANG_TIDY AND NOT BUILD_TESTING)
 endif()
 
 # =========================================================================
-# CppUTest Unit Test Support (host only)
+# CppUTest Unit Testing Support (host only)
 # =========================================================================
-option(BUILD_TESTING "Build unit tests" ON)
-
 if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     enable_testing()
     add_subdirectory(extern/cpputest)
     add_subdirectory(tests)
 endif()
+
+# =========================================================================
+# Print Summary of Build Options
+# =========================================================================
+message(STATUS "BUILD_APP: ${BUILD_APP}")
+message(STATUS "BUILD_BOOTLOADER: ${BUILD_BOOTLOADER}")
+message(STATUS "BUILD_TESTING: ${BUILD_TESTING}")
+message(STATUS "ENABLE_CLANG_TIDY: ${ENABLE_CLANG_TIDY}")
+
+if(NOT BUILD_APP AND NOT BUILD_BOOTLOADER AND NOT BUILD_TESTING)
+    message(FATAL_ERROR "All build options (APP, BOOTLOADER, TESTS) are disabled. Nothing to build.")
+endif()
+
+if(NOT BUILD_TESTING)
+    # ========================================================================
+    # Combined Size Check Target (after both bootloader and app are built)
+    # ========================================================================
+    # ALL → ensures this runs every time you build
+    # DEPENDS → ensures ha-ctrl-app and ha-ctrl-boot are built first
+    # -Dtarget=... → passes the target name to your script
+    # -P → tells CMake to run the script
+    add_custom_target(check_size ALL
+        COMMAND ${CMAKE_COMMAND} -Dtarget=ha-ctrl-app -P ${CMAKE_SOURCE_DIR}/cmake/utilities-check-size.cmake
+        COMMENT "Running combined size check after build"
+        # DEPENDS ha-ctrl-boot ha-ctrl-app # This will ensure boot and app are built first. No need to add:
+        # USES_TERMINAL
+    )
+    add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
+endif()
+
+# =========================================================================
+# Additional notes and setup for sources_SRCS variable
+# =========================================================================
+# To pass the sources_SRCS from vscode_generated.cmake into subdirectories
+# (App, Bootloader), just rely on the include of vscode_generated.cmake
+# in App/CMakeLists.txt and Bootloader/CMakeLists.txt files.:
+#    include("${CMAKE_SOURCE_DIR}/cmake/vscode_generated.cmake")
+

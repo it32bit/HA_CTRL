@@ -9,15 +9,42 @@
  * The author is not liable for any damages resulting from its use.
  ******************************************************************************
  */
-
 #include "app.hpp"
-#include "api_gpio.hpp"
+#include "gpio_manager_stm32.hpp"
+
 #include "api_debug.hpp"
 #include "hal_adc.hpp"
 #include "console.hpp"
 #include "watchdog.hpp"
 #include <cstring>
 #include <stdio.h>
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx.h"
+
+/**
+ * @brief System Clock Configuration
+ * @retval None
+ * @details
+ * The system Clock is configured as follows :
+ *    System Clock source            = PLL (HSE)
+ *    SYSCLK(Hz)                     = 168000000
+ *    HCLK(Hz)                       = 168000000
+ *    AHB Prescaler                  = 1
+ *    AHB Perypheral(Hz) Memory, DMA = 168000000
+ *    APB1 Prescaler                 = 4
+ *    APB1 Perypheral(Hz)            = 42000000
+ *    APB2 Prescaler                 = 2
+ *    APB2 Perypheral(Hz)            = 84000000
+ *    HSE Frequency(Hz)              = 8000000
+ *    PLL_M                          = 8
+ *    PLL_N                          = 336
+ *    PLL_P                          = 2
+ *    PLL_Q                          = 7
+ *    VDD(V)                         = 3.3
+ *    Main regulator output voltage  = Scale1 mode
+ *    Flash Latency(WS)              = 5
+ */
+static void SystemClock_Config(void);
 
 /**
  * @brief Lambda getFilename
@@ -53,8 +80,8 @@ void UserButtonManager::process()
     }
 }
 
-LedManager::LedManager(Subject& t_subject, uint32_t t_ledMask, const PinController& t_led)
-    : m_subject(t_subject), m_pin_mask(t_ledMask), m_led(t_led)
+LedManager::LedManager(Subject& t_subject, uint32_t t_ledMask, IGPIOPin* t_led)
+    : m_subject(t_subject), m_pin_mask(t_ledMask), m_ledPtr(t_led)
 {
     m_subject.registerObserver(this);
 }
@@ -72,16 +99,14 @@ void LedManager::process()
     if (m_pending)
     {
         m_pending = false;
-        m_led.toggle();
+        m_ledPtr->toggle();
     }
 }
 
 /**
  * @brief Static declaration
- *          AppInit_cpp
  */
-static void AppInit();
-static void AppIntroduction();
+static void AppIntro();
 
 /**
  * @brief Global Objects
@@ -96,20 +121,39 @@ extern "C" void WatchdogFeed(void)
     watchdog.feed();
 }
 
+GpioManager gpioManager;
+
 /**
  * Main application entry point for C++ code
  */
-extern "C" void App(void)
+extern "C" int main(void)
 {
-    /** Initialization code for C++ application can be added here */
-    AppInit();
+    SystemClock_Config();
+    HAL_Init();
 
+    /** Initialization code for C++ application can be added here */
+    gpioManager.initialize(gpioPinConfigs);
+    auto userButton = gpioManager.getPin(PinId::BUTTON);
+
+    auto led = gpioManager.getPin(PinId::LD_ORA);
+
+    if (led)
+    {
+        led->set();
+    }
+
+    ADC_Internal_Init();
+
+    debugInit();
     WatchdogFeed();
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
-    LedManager        usrLed(exti0_Subject, GPIO_PIN_0, ioDispatcher.get("LED_BLUE"));
+    LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpioManager.getPin(PinId::LD_BLU));
 
-    AppIntroduction();
+    AppIntro();
+
+    // Enable global interrupts
+    __enable_irq();
 
     /** App Main loop */
     for (;;)
@@ -121,26 +165,75 @@ extern "C" void App(void)
     }
 }
 
-/**
- * Initialization function for C++ application
- */
-static void AppInit()
+static void AppIntro()
 {
-    gpioConfig(ioPinConfigDefArray);
-    ADC_Internal_Init();
-
-    debugInit();
-
-    /** Any initialization code can be added here */
-}
-
-static void AppIntroduction()
-{
-    printf("HA-CTRL:\n\r Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
+    printf("HA-CTRL-APP\t Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
            FIRMWARE_VERSION.minor);
 }
 
 void consoleNotify(uint8_t t_item)
 {
     console.receivedData(t_item);
+}
+
+static void Error_App_Handler(void);
+
+static void SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {};
+
+    /** Configure the main internal regulator output voltage */
+    __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    /** Initializes the RCC Oscillators according to the specified parameters
+    in the RCC_OscInitTypeDef structure. */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM       = 8;
+    RCC_OscInitStruct.PLL.PLLN       = 336;
+    RCC_OscInitStruct.PLL.PLLP       = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ       = 7;
+
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        Error_App_Handler();
+    }
+
+    /** Initializes the CPU, AHB and APB buses clocks */
+    RCC_ClkInitStruct.ClockType =
+        RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider  = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+    {
+        Error_App_Handler();
+    }
+}
+
+/**
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
+static void Error_App_Handler(void)
+{
+    uint32_t loop = 0;
+    __disable_irq();
+    while (1)
+    {
+        ++loop;
+    }
+}
+
+extern "C" int _getentropy(void* buffer, size_t length) __attribute__((weak));
+
+int _getentropy(void* buffer, size_t length)
+{
+    return -1; // Always fail, as expected
 }

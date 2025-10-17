@@ -1,0 +1,17 @@
+@startuml
+actor User
+participant GpioManager
+participant gpioHalConfig
+participant GpioPin_STM32
+
+User -> GpioManager : initialize(configs)
+GpioManager -> gpioHalConfig : gpioHalConfig(cfg)
+GpioManager -> GpioPin_STM32 : create(port, pin)
+GpioManager -> GpioManager : store pin reference
+
+User -> GpioManager : getPin(PinId::LD_RED)
+GpioManager -> GpioPin_STM32 : return pointer
+
+User -> GpioPin_STM32 : set()
+GpioPin_STM32 -> GpioPin_STM32 : LL_GPIO_SetOutputPin()
+@enduml
