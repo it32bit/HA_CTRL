@@ -72,7 +72,7 @@ struct PinConfig
 
     enum PortStm32 : uint8_t
     {
-        PortA = 0, // e.g., for STM32 and similar MCUs
+        PortA = 0, // for STM32 and similar MCUs
         PortB = 1,
         PortC = 2,
         PortD = 3,

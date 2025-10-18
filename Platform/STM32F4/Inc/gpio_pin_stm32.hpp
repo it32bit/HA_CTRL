@@ -6,8 +6,8 @@
  * @date        2025-10-15
  * @brief       GPIO pin control implementation for STM32F4 microcontrollers.
  *
- *              Provides methods to manipulate GPIO pins (set, reset, toggle, read)
- *              using the STM32 HAL library. Implements the IGPIOPin interface.
+ *              Provides methods to manipulate GPIO pins (set, reset, toggle, read).
+ *              Implements the IGPIOPin interface.
  *
  * @note        This class does not handle pin configuration (mode, pull, speed, etc.).
  *              Configuration should be performed separately using the PinConfig structure
@@ -28,17 +28,7 @@
 #include "stm32f4xx_hal.h"
 #include <string_view>
 
-/**
- * @brief GPIO pin implementation for STM32F4 microcontrollers.
- * This class provides methods to control a GPIO pin (set, reset, toggle, read)
- * using the STM32 HAL library. It implements the IGPIOPin interface.
- * @note This class does not manage the pin configuration (mode, pull-up/down, speed, etc.).
- *       Pin configuration should be done separately using the PinConfig structure
- *       and appropriate HAL functions.
- * @see IGPIOPin for the interface definition.
- * @see PinConfig for pin configuration options.
 
- */
 class GpioPin_STM32 : public IGPIOPin
 {
   public:
