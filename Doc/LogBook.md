@@ -1366,3 +1366,51 @@ Added /Platform/Architecture/GPIO.puml
 PlantUML online Server
 
 <https://www.plantuml.com/plantuml/uml/>
+
+## INFO-45 ALGINAS NEW
+
+What’s Happening with new (m_storage) Watchdog_STM32(timeout_ms);
+
+Using placement new, which constructs an object at a specific memory location — in this case, inside statically allocated buffer m_storage.
+
+```c
+alignas(MaxWatchdogAlign) std::byte m_storage[MaxWatchdogSize];
+```
+
+### This buffer is
+
+- Allocated at compile-time (i.e., its memory is reserved in the .bss or .data section depending on initialization).
+- Located in RAM (typically SRAM on STM32).
+- Sized and aligned to hold your Watchdog_STM32 object safely.
+
+### Then, at run-time, you construct the object in-place
+
+```c
+m_watchdog = new (m_storage) Watchdog_STM32(timeout_ms);
+```
+
+This does not allocate memory — it simply calls the constructor at the address of m_storage.
+
+### Summary: Compile-Time vs Run-Time
+
+| Aspect               | Timing      | Description                                      |
+|----------------------|-------------|--------------------------------------------------|
+| m_storage allocation | Compile-time| Memory reserved statically in RAM               |
+| Object construction  | Run-time    | Constructor runs at runtime using placement new |
+| Object lifetime      | Run-time    | Begins when new(...) is called                  |
+| Memory location      | RAM         | Typically in .bss or .data section              |
+
+### Why This Is Useful in Embedded Systems
+
+- Avoids dynamic allocation (new/delete)
+- Guarantees memory layout and alignment
+- Enables deterministic behavior and testability
+
+## INFO-46 Clock Configuration
+
+- Create a reusable and hidden STM32F4 clock setup module.
+- Avoid global SystemClock_Config() in main.
+- Provide a clean ClockManager interface.
+- No dynamic memory (all static).
+- Hide STM32 HAL details from user code.
+
