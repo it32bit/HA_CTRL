@@ -26,23 +26,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # =========================================================================
+# Output Directory
+# =========================================================================
+set(CMAKE_BINARY_DIR_BIN ${CMAKE_BINARY_DIR}/../bin)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
+
+# =========================================================================
 # Toolchain and Build Type Setup
 # Firmware Build (Only when NOT testing)
 # =========================================================================
 if(NOT BUILD_TESTING)
     include("cmake/gcc-arm-none-eabi.cmake")
+    include(${CMAKE_SOURCE_DIR}/cmake/utilities.cmake)
 
     # Load auto-generated sources, includes, and flags
     # vscode_generated.cmake" included in subdirectories boot and app
 endif()
 
 message("Build type: ${CMAKE_BUILD_TYPE}")
-
-# =========================================================================
-# Output Directory
-# =========================================================================
-set(CMAKE_BINARY_DIR_BIN ${CMAKE_BINARY_DIR}/../bin)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
 
 # =========================================================================
 # Platform-Specific Settings
@@ -239,6 +240,19 @@ if(NOT BUILD_TESTING)
         # USES_TERMINAL
     )
     add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
+
+    #
+    # add_custom_target(ha-ctrl-combined ALL
+    #     COMMAND ${CMAKE_COMMAND} -E echo "Combining bootloader and app..."
+    #     COMMAND cat ${CMAKE_BINARY_DIR_BIN}/ha-ctrl-boot.bin ${CMAKE_BINARY_DIR_BIN}/ha-ctrl-app.bin > ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_image.bin
+    #     DEPENDS ha-ctrl-boot ha-ctrl-app
+    #     COMMENT "Generating combined binary (boot + app)"
+    # )
+
+    # Add combined binary target
+    add_combined_binary(ha-ctrl-boot ha-ctrl-app ${PROJECT_NAME}_combined_image)
+
+
 endif()
 
 # =========================================================================

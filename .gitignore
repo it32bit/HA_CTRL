@@ -6,3 +6,6 @@ bin/
 clangd*
 Doc/ToDo.md
 Doc/TMemo.md
+*/tmp/
+Tools/*_ignore.txt
+Tools/*.sh
