@@ -53,6 +53,7 @@ add_subdirectory(Platform/${PLATFORM_MCU})
 
 # PIL (platform-independent)
 add_subdirectory(Platform/Interface/PilAdc)
+add_subdirectory(Platform/Interface/PilUart)
 add_subdirectory(Platform/Interface/PilClock)
 add_subdirectory(Platform/Interface/PilGpio)
 add_subdirectory(Platform/Interface/PilWatchdog)

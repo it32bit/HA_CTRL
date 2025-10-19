@@ -14,10 +14,11 @@
 #include "app.hpp"
 #include "clock_manager_stm32.hpp"
 #include "watchdog_manager_stm32.hpp"
-
+#include "uart_manager_stm32.hpp"
 
 #include "api_debug.hpp"
 #include "console.hpp"
+#include "uart_redirect.hpp"
 
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx.h"
@@ -31,14 +32,12 @@ static void ClockErrorHandler();
 /**
  * @brief Global Objects
  */
-ClockManager    clock;
-GpioManager     gpio;
-WatchdogManager watchdog;
-AdcManager      adc;
-Console         console;
-
-// float temp = adc.readTemperature();
-// printf("Temperature: %.2f°C\n", temp);
+ClockManager       clock;
+GpioManager        gpio;
+WatchdogManager    watchdog;
+AdcManager         adc;
+static UartManager uart2;
+Console            console;
 
 /**
  * @brief Main Application entry point for C++ code
@@ -54,7 +53,8 @@ extern "C" int main(void)
     gpio.initialize(gpioPinConfigs);
     adc.initialize();
 
-    debugInit();
+    uart2.initialize(UartId::Uart2, 115200);
+    setUartRedirect(uart2);
 
     UserButtonManager usrButton(exti0_Subject, GPIO_PIN_0);
     LedManager        usrLed(exti0_Subject, GPIO_PIN_0, gpio.getPin(PinId::LD_BLU));
@@ -134,9 +134,10 @@ void UserButtonManager::process()
 {
     if (m_pending)
     {
-        m_pending = false;
+        m_pending  = false;
         float temp = adc.readTemperature();
-        printf("[%s:%d]:%3d:Temperature: %3.2f[*C]\n\r", getFilename(), __LINE__, static_cast<int>(++m_press_counter), temp);
+        printf("[%s:%d]:%3d:Temperature: %3.2f[*C]\n\r", getFilename(), __LINE__,
+               static_cast<int>(++m_press_counter), temp);
     }
 }
 

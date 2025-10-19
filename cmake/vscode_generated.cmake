@@ -16,6 +16,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/App/Src/app.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
 	${CMAKE_SOURCE_DIR}/App/Src/console.cpp
+	${CMAKE_SOURCE_DIR}/App/Src/uart_redirect.cpp
 	${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_manager_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_pin_stm32.cpp
