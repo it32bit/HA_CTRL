@@ -1,0 +1,25 @@
+@startuml watchdog_class_diagram
+
+title Watchdog Driver Class Diagram - ha-ctrl project
+
+interface IWatchdog {
+    +initialize(timeoutMs: uint32_t)
+    +feed()
+}
+
+class Watchdog_STM32 {
+    +initialize(timeoutMs: uint32_t)
+    +feed()
+}
+
+class WatchdogManager {
+    -m_storage : std::byte[]
+    -m_watchdog : IWatchdog*
+    +initialize(timeoutMs: uint32_t)
+    +feed()
+}
+
+IWatchdog <|.. Watchdog_STM32
+IWatchdog <|.. WatchdogManager : uses
+
+@enduml

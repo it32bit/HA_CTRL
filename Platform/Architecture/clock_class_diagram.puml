@@ -1,0 +1,22 @@
+@startuml clock_class_diagram
+
+title Clock Driver Class Diagram - ha-ctrl project
+
+interface IClock {
+    +initialize(errorHandler: void(*)())
+}
+
+class Clock_STM32 {
+    +initialize(errorHandler: void(*)())
+}
+
+class ClockManager {
+    -m_storage : std::byte[]
+    -m_clock : IClock*
+    +initialize(errorHandler: void(*)())
+}
+
+IClock <|.. Clock_STM32
+IClock <|.. ClockManager : uses
+
+@enduml

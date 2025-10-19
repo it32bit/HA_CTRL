@@ -1,0 +1,24 @@
+@startuml adc_driver_sequence_diagram
+
+title ADC Temperature Read Sequence - ha-ctrl project
+
+actor App
+participant AdcManager
+participant Adc_STM32
+participant "ADC1 Peripheral" as ADC1
+
+App -> AdcManager : initialize()
+AdcManager -> Adc_STM32 : init()
+Adc_STM32 -> ADC1 : enableAdcClock()
+Adc_STM32 -> ADC1 : configureAdc()
+
+App -> AdcManager : readTemperature()
+AdcManager -> Adc_STM32 : readTemperature()
+Adc_STM32 -> ADC1 : startConversion()
+Adc_STM32 -> ADC1 : waitEOC()
+Adc_STM32 -> ADC1 : read temp_raw
+Adc_STM32 -> ADC1 : read vref_raw
+Adc_STM32 -> AdcManager : return temperature
+AdcManager -> App : return float
+
+@enduml

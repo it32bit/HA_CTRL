@@ -1,0 +1,25 @@
+@startuml adc_driver_class_diagram
+
+title ADC Driver Class Diagram - ha-ctrl project
+
+interface IAdc {
+    +init()
+    +readTemperature() : float
+}
+
+class Adc_STM32 {
+    +init()
+    +readTemperature() : float
+}
+
+class AdcManager {
+    -m_storage : std::byte[]
+    -m_adc : IAdc*
+    +initialize()
+    +readTemperature() : float
+}
+
+IAdc <|.. Adc_STM32
+IAdc <|.. AdcManager : uses
+
+@enduml
