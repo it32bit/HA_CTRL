@@ -4,7 +4,7 @@
 #include "patterns.hpp"
 #include "gpio_manager_stm32.hpp"
 
-extern GpioManager gpioManager;
+extern GpioManager gpio;
 
 typedef struct
 {
@@ -12,8 +12,8 @@ typedef struct
     uint8_t minor;
 } firmwareVersionS;
 
-__attribute__((section(".firmware_version"), used))
-constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 3};
+__attribute__((section(".firmware_version"), used)) constexpr firmwareVersionS FIRMWARE_VERSION = {
+    .major = 0, .minor = 3};
 
 class Debouncer
 {
@@ -74,9 +74,9 @@ class LedManager : public Observer
     mutable volatile bool m_pending{false};
 };
 
-void consoleNotify(uint8_t t_item);
+void ConsoleNotify(uint8_t t_item);
 
-inline constexpr StaticObserver<uint8_t> staticObservers[] = {{consoleNotify}};
+inline constexpr StaticObserver<uint8_t> staticObservers[] = {{ConsoleNotify}};
 
 inline constexpr StaticObserverList<uint8_t>
     uart2_Observers(staticObservers, sizeof(staticObservers) / sizeof(staticObservers[0]));

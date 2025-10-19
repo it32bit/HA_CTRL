@@ -71,20 +71,20 @@ function(add_firmware_packaging target_app target_boot project_name)
     )
 
     # Create zip with both versions in name
-add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/_firmware/${project_name}_firmware.zip
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/_firmware
-    COMMAND ${CMAKE_SOURCE_DIR}/cmake/package_firmware.sh
-            ${APP_VERSION_TXT}
-            ${BOOT_VERSION_TXT}
-            ${CMAKE_BINARY_DIR_BIN}
-            ${CMAKE_SOURCE_DIR}/_firmware
-            ${project_name}
-    DEPENDS extract_versions ${CMAKE_BINARY_DIR_BIN}/${project_name}_combined_image.bin
-    COMMENT "Packaging bin folder into versioned zip and moving to _firmware"
-)
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/_firmware/${project_name}_firmware.zip
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/_firmware
+        COMMAND ${CMAKE_SOURCE_DIR}/cmake/package_firmware.sh
+                ${APP_VERSION_TXT}
+                ${BOOT_VERSION_TXT}
+                ${CMAKE_BINARY_DIR_BIN}
+                ${CMAKE_SOURCE_DIR}/_firmware
+                ${project_name}
+        DEPENDS extract_versions ${CMAKE_BINARY_DIR_BIN}/${project_name}_combined_image.bin
+        COMMENT "Packaging bin folder into versioned zip and moving to _firmware"
+    )
 
-add_custom_target(package_firmware ALL
-    DEPENDS ${CMAKE_SOURCE_DIR}/_firmware/${project_name}_firmware.zip
-)
+    add_custom_target(package_firmware ALL
+        DEPENDS ${CMAKE_SOURCE_DIR}/_firmware/${project_name}_firmware.zip
+    )
 endfunction()

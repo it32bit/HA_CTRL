@@ -1,14 +1,16 @@
 /**
- * @file Platform/STM32F4/Clock/clock_stm32.cpp
- * @author it32bit
- * @brief Implements the Clock_STM32F4 class for configuring the system clock on STM32F4 devices.
- *        Uses the STM32 HAL to initialize HSE and PLL settings, and applies clock dividers for AHB and APB buses.
- *        Supports optional error handling via user-provided callback.
+ ******************************************************************************
+ * @file        clock_stm32.cpp
+ * @author      it32bit
+ * @brief       Implements the Clock_STM32F4 class for configuring the system clock on STM32F4 devices.
+ *              Uses the STM32 HAL to initialize HSE and PLL settings, and applies clock dividers for AHB and APB buses.
+ *              Supports optional error handling via user-provided callback.
  *
- * @version 1.0
- * @date 2025-10-19
- * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
- *            (c) 2025 ha-ctrl project authors.
+ * @version     1.0
+ * @date        2025-10-19
+ * @attention   This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *              (c) 2025 ha-ctrl project authors.
+ ******************************************************************************
  */
 #include "clock_stm32.hpp"
 #include "stm32f4xx_hal.h"
