@@ -90,6 +90,14 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  /* Firmware version section into "FLASH" Rom type memory */
+  .firmware_version :
+  {
+    . = ALIGN(4);
+    KEEP(*(.firmware_version))
+    . = ALIGN(4);
+  } >FLASH
+
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);

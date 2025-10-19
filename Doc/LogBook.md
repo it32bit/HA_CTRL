@@ -1414,3 +1414,6 @@ This does not allocate memory — it simply calls the constructor at the address
 - No dynamic memory (all static).
 - Hide STM32 HAL details from user code.
 
+## INFO-47 Binary files
+
+<https://software-dl.ti.com/ccs/esd/documents/sdto_cgt_an_introduction_to_binary_files.html>

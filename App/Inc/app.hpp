@@ -12,6 +12,7 @@ typedef struct
     uint8_t minor;
 } firmwareVersionS;
 
+__attribute__((section(".firmware_version"), used))
 constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 3};
 
 class Debouncer

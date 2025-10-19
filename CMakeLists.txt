@@ -241,17 +241,10 @@ if(NOT BUILD_TESTING)
     )
     add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
 
-    #
-    # add_custom_target(ha-ctrl-combined ALL
-    #     COMMAND ${CMAKE_COMMAND} -E echo "Combining bootloader and app..."
-    #     COMMAND cat ${CMAKE_BINARY_DIR_BIN}/ha-ctrl-boot.bin ${CMAKE_BINARY_DIR_BIN}/ha-ctrl-app.bin > ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_image.bin
-    #     DEPENDS ha-ctrl-boot ha-ctrl-app
-    #     COMMENT "Generating combined binary (boot + app)"
-    # )
-
     # Add combined binary target
     add_combined_binary(ha-ctrl-boot ha-ctrl-app ${PROJECT_NAME}_combined_image)
 
+    add_firmware_packaging(ha-ctrl-app ha-ctrl-boot ${PROJECT_NAME})
 
 endif()
 

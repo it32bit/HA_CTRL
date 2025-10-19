@@ -41,3 +41,50 @@ function(add_combined_binary target_boot target_app output_name)
         DEPENDS ${COMBINED_BIN}
     )
 endfunction()
+
+# Function to extract firmware version from ELF and create a versioned zip in _firmware/
+function(add_firmware_packaging target_app target_boot project_name)
+    set(APP_VERSION_TXT "${CMAKE_BINARY_DIR}/firmware_version_app.txt")
+    set(BOOT_VERSION_TXT "${CMAKE_BINARY_DIR}/firmware_version_boot.txt")
+
+    set(APP_ELF $<TARGET_FILE:${target_app}>)
+    set(BOOT_ELF $<TARGET_FILE:${target_boot}>)
+
+    # Extract version from app ELF
+    add_custom_command(
+        OUTPUT ${APP_VERSION_TXT}
+        COMMAND ${CMAKE_SOURCE_DIR}/cmake/extract_version.sh ${APP_ELF} > ${APP_VERSION_TXT}
+        DEPENDS ${target_app}
+        COMMENT "Extracting firmware version from app ELF"
+    )
+
+    # Extract version from boot ELF
+    add_custom_command(
+        OUTPUT ${BOOT_VERSION_TXT}
+        COMMAND ${CMAKE_SOURCE_DIR}/cmake/extract_version.sh ${BOOT_ELF} > ${BOOT_VERSION_TXT}
+        DEPENDS ${target_boot}
+        COMMENT "Extracting firmware version from boot ELF"
+    )
+
+    add_custom_target(extract_versions ALL
+        DEPENDS ${APP_VERSION_TXT} ${BOOT_VERSION_TXT}
+    )
+
+    # Create zip with both versions in name
+add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/_firmware/${project_name}_firmware.zip
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/_firmware
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/package_firmware.sh
+            ${APP_VERSION_TXT}
+            ${BOOT_VERSION_TXT}
+            ${CMAKE_BINARY_DIR_BIN}
+            ${CMAKE_SOURCE_DIR}/_firmware
+            ${project_name}
+    DEPENDS extract_versions ${CMAKE_BINARY_DIR_BIN}/${project_name}_combined_image.bin
+    COMMENT "Packaging bin folder into versioned zip and moving to _firmware"
+)
+
+add_custom_target(package_firmware ALL
+    DEPENDS ${CMAKE_SOURCE_DIR}/_firmware/${project_name}_firmware.zip
+)
+endfunction()
