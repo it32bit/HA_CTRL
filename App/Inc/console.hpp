@@ -1,5 +1,5 @@
-#ifndef _CONSOLE_HPP_
-#define _CONSOLE_HPP_
+#ifndef CONSOLE_HPP
+#define CONSOLE_HPP
 
 #include <stdint-gcc.h>
 #include <stddef.h>
@@ -74,4 +74,4 @@ inline constexpr ConsoleCommand cmdConfigArray[CONSOLE_COMMAND_SIZE] = {
     {4, "watchdog", &Console::watchdogTest, "Watchdog Test: while(1){}"},
 };
 
-#endif // _CONSOLE_HPP_
+#endif // CONSOLE_HPP

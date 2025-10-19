@@ -1,5 +1,5 @@
-#ifndef APP_HPP__
-#define APP_HPP__
+#ifndef APP_HPP
+#define APP_HPP
 
 #include "patterns.hpp"
 #include "gpio_manager_stm32.hpp"
@@ -83,4 +83,4 @@ inline constexpr StaticObserver<uint8_t> staticObservers[] = {{ConsoleNotify}};
 inline constexpr StaticObserverList<uint8_t>
     uart2_Observers(staticObservers, sizeof(staticObservers) / sizeof(staticObservers[0]));
 
-#endif // APP_HPP__
+#endif // APP_HPP

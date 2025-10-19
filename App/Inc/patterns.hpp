@@ -1,5 +1,5 @@
-#ifndef _DESIGN_PATTERNS_
-#define _DESIGN_PATTERNS_
+#ifndef DESIGN_PATTERNS
+#define DESIGN_PATTERNS
 
 #include <list>
 #include <stdint-gcc.h>
@@ -72,4 +72,4 @@ class StaticObserverList
     size_t m_size;
 };
 
-#endif // _DESIGN_PATTERNS_
+#endif // DESIGN_PATTERNS

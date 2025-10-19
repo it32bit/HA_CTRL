@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file        gpio_hal_stm32.hpp
+ * @file        gpio_stm32.hpp
  * @author      it32bit
  * @version     1.0
  * @date        2025-10-15
@@ -15,8 +15,8 @@
  *              This software is provided "as is", without warranty of any kind.
  ******************************************************************************
  */
-#ifndef _GPIO_HAL_STM32_HPP_
-#define _GPIO_HAL_STM32_HPP_
+#ifndef GPIO_STM32_HPP
+#define GPIO_STM32_HPP
 
 #include <cstddef>
 #include <stdint-gcc.h>
@@ -121,4 +121,4 @@ constexpr std::array<GPIO_TypeDef*, 9> gpioPortsStm32 = {GPIOA, GPIOB, GPIOC, GP
     return t_index < gpioPortsStm32.size() ? gpioPortsStm32[t_index] : nullptr;
 }
 
-#endif // _GPIO_HAL_STM32_HPP_
+#endif // GPIO_STM32_HPP

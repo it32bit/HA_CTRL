@@ -21,7 +21,7 @@
 #include <stdint-gcc.h>
 #include <cstddef>
 #include "stm32f4xx_ll_gpio.h" // IWYU pragma: keep
-#include "gpio_hal_stm32.hpp"
+#include "gpio_stm32.hpp"
 #include "pil_pin_config.hpp"
 
 static bool clockEnable(const GPIO_TypeDef* port);

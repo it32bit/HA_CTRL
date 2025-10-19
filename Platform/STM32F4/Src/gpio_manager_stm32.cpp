@@ -14,7 +14,7 @@
  */
 #include "gpio_pin_stm32.hpp"
 #include "gpio_manager_stm32.hpp"
-#include "gpio_hal_stm32.hpp"
+#include "gpio_stm32.hpp"
 
 void GpioManager::initialize(std::span<const PinConfig> t_configs)
 {

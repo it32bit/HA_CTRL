@@ -2,15 +2,7 @@
 # App target
 set(PLATFORM_TARGET Platform_STM32F4)
 
-
-
 add_library(${PLATFORM_TARGET} STATIC
-    Src/gpio_manager_stm32.cpp
-    Src/gpio_pin_stm32.cpp
-    Src/gpio_hal_stm32.cpp
-    Src/adc_manager_stm32.cpp
-    Src/adc_stm32.cpp
-    Src/watchdog_stm32.cpp
     # Add other .cpp files
     Src/hal_uart.cpp
 )
@@ -42,4 +34,3 @@ target_link_libraries(Platform_STM32F4 PUBLIC pil_adc)
 target_link_libraries(Platform_STM32F4 PUBLIC pil_clock)
 target_link_libraries(Platform_STM32F4 PUBLIC pil_gpio)
 target_link_libraries(Platform_STM32F4 PUBLIC pil_watchdog)
-

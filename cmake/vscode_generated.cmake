@@ -19,7 +19,7 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_manager_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_pin_stm32.cpp
-	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_hal_stm32.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/watchdog_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/watchdog_manager_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/clock_stm32.cpp
