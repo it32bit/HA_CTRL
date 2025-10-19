@@ -13,10 +13,10 @@
 #include <stdio.h>
 #include "app.hpp"
 #include "clock_manager_stm32.hpp"
-#include "gpio_manager_stm32.hpp"
 #include "watchdog_manager_stm32.hpp"
+
+
 #include "api_debug.hpp"
-#include "hal_adc.hpp"
 #include "console.hpp"
 
 #include "stm32f4xx_hal.h"
@@ -34,7 +34,11 @@ static void ClockErrorHandler();
 ClockManager    clock;
 GpioManager     gpio;
 WatchdogManager watchdog;
+AdcManager      adc;
 Console         console;
+
+// float temp = adc.readTemperature();
+// printf("Temperature: %.2f°C\n", temp);
 
 /**
  * @brief Main Application entry point for C++ code
@@ -48,8 +52,7 @@ extern "C" int main(void)
     /** Initialization code for C++ application can be added here */
     watchdog.initialize(1000); // 1 second timeout
     gpio.initialize(gpioPinConfigs);
-
-    ADC_Internal_Init();
+    adc.initialize();
 
     debugInit();
 
@@ -132,7 +135,8 @@ void UserButtonManager::process()
     if (m_pending)
     {
         m_pending = false;
-        printf("[%s:%d]:%d\n\r", getFilename(), __LINE__, static_cast<int>(++m_press_counter));
+        float temp = adc.readTemperature();
+        printf("[%s:%d]:%3d:Temperature: %3.2f[*C]\n\r", getFilename(), __LINE__, static_cast<int>(++m_press_counter), temp);
     }
 }
 

@@ -1,8 +1,11 @@
-#include "hal_adc.hpp"
-#include "console.hpp"
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+#include "console.hpp"
+#include "adc_manager_stm32.hpp"
+
 #include "stm32f4xx_ll_usart.h"
+
+extern AdcManager adc;
 
 void Console::receivedData(uint8_t byte) noexcept
 {
@@ -123,7 +126,7 @@ void Console::echo(const char* t_item)
 
 void Console::temperature(const char* t_item)
 {
-    float temp = getAdcTemp();
+    float temp = adc.readTemperature();
     printf("Temperature: %3.2f[*C] \r\n", temp);
 }
 

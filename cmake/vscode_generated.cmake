@@ -25,7 +25,8 @@ set(sources_SRCS ${sources_SRCS}
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/clock_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/clock_manager_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/hal_uart.cpp
-	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/hal_adc.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_stm32.cpp
+	${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_manager_stm32.cpp
 	${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
 	${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
 	${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c

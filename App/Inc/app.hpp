@@ -3,8 +3,10 @@
 
 #include "patterns.hpp"
 #include "gpio_manager_stm32.hpp"
+#include "adc_manager_stm32.hpp"
 
 extern GpioManager gpio;
+extern AdcManager  adc;
 
 typedef struct
 {
