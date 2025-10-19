@@ -2,9 +2,18 @@
 # App target
 set(PLATFORM_TARGET Platform_STM32F4)
 
-add_library(${PLATFORM_TARGET} STATIC
-    # Add other .cpp files
-    Src/hal_uart.cpp
+
+file(GLOB PLATFORM_SOURCES
+    Src/*.cpp
+)
+
+add_library(${PLATFORM_TARGET} STATIC ${PLATFORM_SOURCES})
+
+target_compile_options(${PLATFORM_TARGET} PRIVATE
+    -mthumb
+    -mcpu=cortex-m4
+    -mfpu=fpv4-sp-d16
+    -mfloat-abi=hard
 )
 
 target_include_directories(${PLATFORM_TARGET} PUBLIC
