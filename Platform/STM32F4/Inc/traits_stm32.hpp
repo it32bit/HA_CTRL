@@ -13,7 +13,7 @@
 #ifndef TRAITS_STM32_HPP
 #define TRAITS_STM32_HPP
 
-#include "gpio_hal_stm32.hpp"
+#include "gpio_stm32.hpp"
 #include "gpio_pin_stm32.hpp"
 #include "gpio_manager_stm32.hpp"
 
@@ -26,6 +26,25 @@ struct STM32Traits
     static GPIO_TypeDef* portFromIndex(uint8_t idx) { return getPortStm32FromIndex(idx); }
 
     // Provide other mappings needed (e.g. clock enable)
+};
+
+template <typename Traits>
+class PlatformGpio
+{
+  public:
+    void init(std::span<const PinConfig> configs)
+    {
+        Traits::ManagerType manager;
+        manager.initialize(configs);
+    }
+
+    typename Traits::PinType* getPin(PinId id)
+    {
+        return static_cast<typename Traits::PinType*>(manager.getPin(id));
+    }
+
+  private:
+    typename Traits::ManagerType manager;
 };
 
 #endif

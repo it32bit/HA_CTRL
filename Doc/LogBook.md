@@ -1333,7 +1333,7 @@ git push origin --delete feature/bootloader
 │       ├── CMakeLists.txt
 │       ├── Inc
 │       │   ├── gpio_config_stm32.hpp
-│       │   ├── gpio_hal_stm32.hpp
+│       │   ├── gpio_stm32.hpp
 │       │   ├── gpio_manager_stm32.hpp
 │       │   ├── gpio_pin_stm32.hpp
 │       │   ├── hal_adc.hpp
@@ -1417,3 +1417,91 @@ This does not allocate memory — it simply calls the constructor at the address
 ## INFO-47 Binary files
 
 <https://software-dl.ti.com/ccs/esd/documents/sdto_cgt_an_introduction_to_binary_files.html>
+
+## INFO-48 Architecture Strategy
+
+### Layered Design
+
+- Portability: Swap Platform Layer for STM32 or ESP32
+- Testability: Mock PIL interfaces for unit tests
+- RTOS Flexibility: Add FreeRTOS support in Platform Layer without touching Application
+
+### Driver Design Principles
+
+#### C++20 Features
+
+- consteval for compile-time configuration
+- concepts for interface enforcement
+- constexpr for static configuration
+- std::span for buffer handling (no dynamic allocation)
+- enum class for type-safe flags and modes
+
+#### Memory Model
+
+- No dynamic allocation
+- Use static memory pools or placement new if needed
+- Avoid STL containers that allocate (e.g., std::vector, std::string)
+
+#### RTOS Compatibility
+
+To support FreeRTOS later:
+
+- Add optional PlatformTask wrappers in Platform Layer
+- Use compile-time flags to switch between bare-metal and RTOS
+- Avoid blocking calls in drivers; use callbacks or polling
+
+#### Portability Strategy
+
+Shared Codebase
+
+- Use #ifdef STM32F4 / #ifdef ESP32 only in Platform Layer
+- Keep Application and PIL completely platform-agnostic
+- Use constexpr traits to define board capabilities
+
+#### Peripheral Drivers
+
+```cpp
+// Platform Interface Layer
+struct IUart {
+    virtual void init() = 0;
+    virtual void write(std::span<const uint8_t> data) = 0;
+    virtual void read(std::span<uint8_t> buffer) = 0;
+    virtual bool isReady() const = 0;
+    virtual ~IUart() = default;
+};
+
+// STM32F4 Implementation
+class STM32Uart : public IUart {
+public:
+    void init() override;
+    void write(std::span<const uint8_t> data) override;
+    void read(std::span<uint8_t> buffer) override;
+    bool isReady() const override;
+private:
+    static inline volatile USART_TypeDef* uart = USART1;
+};
+```
+
+## INFO-49 Traits
+
+Traits are compile-time structures (usually structs or classes) that encapsulate platform-specific or type-specific behavior, constants, or types. They allow you to write generic code that adapts to different platforms or configurations without runtime overhead.
+
+Think of traits as a way to say: “For this platform or type, here’s how things behave.”
+
+### Using Traits
+
+This is a classic trait: it binds STM32-specific types and functions to a generic interface.
+
+```cpp
+struct STM32Traits {
+    using PinType     = GpioPin_STM32;
+    using ManagerType = GpioManager;
+    static GPIO_TypeDef* portFromIndex(uint8_t idx) { return getPortStm32FromIndex(idx); }
+};
+```
+
+### Why Traits Are Useful
+
+- Portability: You can write generic code that works for STM32 and ESP32 by swapping traits.
+- Compile-time abstraction: No virtual functions, no dynamic dispatch — fast and safe.
+- Configurability: You can specialize traits for different boards, peripherals, or modes.
