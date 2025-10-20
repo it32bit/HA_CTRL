@@ -1577,3 +1577,65 @@ That’s likely because:
     ```
 
 - Clean and Rebuild: This ensures no stale `-fPIE` flags remain.
+
+## INFO-52 DEBUG TRACE
+
+### Verify with `nm` to inspect the symbol table of the compiled ELF file — which is incredibly useful in embedded development for debugging, verification, and optimization
+
+The nm tool lists all symbols (functions, variables, interrupt handlers, etc.) in the ELF file, along with:
+
+- Memory addresses where each symbol is placed
+- Size of each symbol (if used with --print-size)
+- Type of symbol (e.g. T for text/code, D for data, B for BSS, W for weak)
+
+```bash
+$ arm-none-eabi-nm ha-ctrl-boot.elf | grep HAL_
+08001134 W HAL_GetTick
+080010dc W HAL_InitTick
+080017ec T HAL_NVIC_SetPriority
+08001614 T HAL_RCC_ClockConfig
+08001538 W HAL_RCC_GetSysClockFreq
+08001140 W HAL_RCC_OscConfig
+0800180c T HAL_SYSTICK_Config
+
+$ arm-none-eabi-nm ha-ctrl-boot.elf | grep libc_init_array
+08002ed4 T __libc_init_array
+$ arm-none-eabi-nm ha-ctrl-boot.elf --print-size  | grep libc_init_array
+08002ed4 00000048 T __libc_init_array
+```
+
+#### Why It’s Useful in Embedded Projects
+
+1. Check for Missing or Mislinked Symbols. If HAL_Init is missing, or constructors like `_GLOBAL__sub_I_clock` are misordered, `nm` helps you catch it immediately.
+2. Inspect Interrupt Vector Table. It can see if handlers like HardFault_Handler, SysTick_Handler, etc. are aliased to Default_Handler or properly defined.
+3. Debug Hard Faults and Crashes. By comparing symbol addresses, you can trace whether the fault occurred before or after HAL_Init, or during a global constructor.
+4. Optimize Memory Usage. With --size-sort, you can identify large symbols and optimize them to reduce FLASH or RAM usage.
+5. Verify Startup Sequence, it can confirm that critical functions are present and placed correctly in memory. Function like:
+
+- Reset_Handler
+- SystemInit
+- HAL_Init
+- __libc_init_array
+- main
+
+### Verify with `readelf` to confirm ABI consistency
+
+```bash
+$ arm-none-eabi-readelf -A ha-ctrl-boot.elf
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "7E-M"
+  Tag_CPU_arch: v7E-M
+  Tag_CPU_arch_profile: Microcontroller
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_FP_arch: VFPv4-D16
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_enum_size: small
+  Tag_ABI_HardFP_use: SP only
+  Tag_ABI_VFP_args: VFP registers <----------- using hardware float correctly
+  Tag_CPU_unaligned_access: v6
+```
