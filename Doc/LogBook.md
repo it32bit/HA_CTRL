@@ -1639,3 +1639,36 @@ File Attributes
   Tag_ABI_VFP_args: VFP registers <----------- using hardware float correctly
   Tag_CPU_unaligned_access: v6
 ```
+
+## INFO-53 GIT HEAD detached
+
+```bash
+$ git checkout -b temp-changes
+Switched to a new branch 'temp-changes'
+
+$ git fetch origin
+
+$ git checkout feature/bin-to-flash
+Switched to branch 'feature/bin-to-flash'
+Your branch is up to date with 'origin/feature/bin-to-flash'.
+
+$ git merge temp-changes
+Updating 3b37b55..1d0e54b
+Fast-forward
+ Bootloader/CMakeLists.txt       |   4 +-
+ Bootloader/Src/boot.cpp         |  15 ++--
+...
+ 7 files changed, 165 insertions(+), 39 deletions(-)
+
+$ git push origin feature/bin-to-flash
+
+$ git branch -d temp-changes
+Deleted branch temp-changes (was 1d0e54b).
+
+$ git status
+On branch feature/bin-to-flash
+Your branch is up to date with 'origin/feature/bin-to-flash'.
+
+nothing to commit, working tree clean
+
+```
