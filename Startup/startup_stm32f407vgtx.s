@@ -21,7 +21,7 @@
   *
   ******************************************************************************
   */
- 
+
   .syntax unified
   .cpu cortex-m4
   .fpu softvfp
@@ -59,6 +59,7 @@ Reset_Handler:
   mov   sp, r0          /* set stack pointer */
 /* Call the clock system initialization function.*/
   bl  SystemInit
+  bl  HAL_Init
 
 /* Copy the data segment initializers from flash to SRAM */
   ldr r0, =_sdata

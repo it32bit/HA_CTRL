@@ -1,7 +1,8 @@
 # Platform/STM32F4/CMakeLists.txt
-# App target
-set(PLATFORM_TARGET Platform_STM32F4)
 
+include("${CMAKE_SOURCE_DIR}/cmake/project-sources.cmake")
+
+set(PLATFORM_TARGET Platform_STM32F4)
 
 file(GLOB PLATFORM_SOURCES
     Src/*.cpp
@@ -10,10 +11,7 @@ file(GLOB PLATFORM_SOURCES
 add_library(${PLATFORM_TARGET} STATIC ${PLATFORM_SOURCES})
 
 target_compile_options(${PLATFORM_TARGET} PRIVATE
-    -mthumb
-    -mcpu=cortex-m4
-    -mfpu=fpv4-sp-d16
-    -mfloat-abi=hard
+    ${cpu_PARAMS}
 )
 
 target_include_directories(${PLATFORM_TARGET} PUBLIC

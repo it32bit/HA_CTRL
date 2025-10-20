@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
-include("${CMAKE_SOURCE_DIR}/cmake/vscode_generated.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/platform-traits.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/project-sources.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/compiler-warnings.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/utilities.cmake")
 
@@ -16,17 +17,12 @@ set(boot_linker_script_SRC ${boot_linker_script_SRC}
 set(bootloader_sources "")
 
 foreach(src ${sources_SRCS})
-    if(src MATCHES ".*/Bootloader/.*")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Platform/STM32F4/Src/.*")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Core/Src/system_stm32f4xx.c")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Core/Src/syscall.c")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Startup/startup_stm32f407vgtx.s")
-        list(APPEND bootloader_sources ${src})
-    elseif(src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
+    if(src MATCHES ".*/Bootloader/.*" OR
+       src MATCHES ".*/Platform/STM32F4/Src/.*" OR
+       src MATCHES ".*/Core/Src/system_stm32f4xx.c" OR
+       src MATCHES ".*/Core/Src/syscall.c" OR
+       src MATCHES ".*/Startup/startup_stm32f407vgtx.s" OR
+       src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
         list(APPEND bootloader_sources ${src})
     endif()
 endforeach()
@@ -56,17 +52,12 @@ target_include_directories(${BOOT_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Bootloader/Inc
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
-    ${CMAKE_SOURCE_DIR}/Platform/STM32F4/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
-    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include
+    ${MCU_INCLUDE_DIRS}
 )
 
 # Compiler defines
 target_compile_definitions(${BOOT_TARGET} PRIVATE
-    STM32F407xx
-    USE_HAL_DRIVER
-    USE_FULL_LL_DRIVER
+    ${MCU_DEFINES}
 )
 
 # Linker script (set externally from parent CMakeLists)

@@ -23,16 +23,20 @@ static void ClockErrorHandler();
 /**
  * @brief Global Objects
  */
-ClockManager clock;
-GpioManager  gpio;
+ClockManager* clock = nullptr;
+GpioManager*  gpio  = nullptr;
 
 extern "C" int main(void)
 {
-    clock.initialize(ClockErrorHandler);
+    // HAL_Init(); // Ensure HAL is ready
 
-    gpio.initialize(gpioPinConfigs);
+    clock = new ClockManager();
+    clock->initialize(ClockErrorHandler);
 
-    auto red = gpio.getPin(PinId::LD_RED);
+    gpio = new GpioManager();
+    gpio->initialize(gpioPinConfigs);
+
+    auto red = gpio->getPin(PinId::LD_RED);
 
     if (red)
     {
@@ -166,4 +170,34 @@ extern "C" int _getentropy(void* buffer, size_t length) __attribute__((weak));
 int _getentropy(void* buffer, size_t length)
 {
     return -1; // Always fail, as expected
+}
+
+void HardFault_Handler(void)
+{
+    while (1)
+        ; // Optionally blink LED or log fault
+}
+
+void UsageFault_Handler(void)
+{
+    while (1)
+        ;
+}
+
+void MemManage_Handler(void)
+{
+    while (1)
+        ;
+}
+
+void BusFault_Handler(void)
+{
+    while (1)
+        ;
+}
+
+void WWDG_IRQHandler(void)
+{
+    while (1)
+        ; // Or clear interrupt flag if WWDG is used
 }
