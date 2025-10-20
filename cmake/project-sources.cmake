@@ -1,6 +1,8 @@
 # =========================================================================
 # Project Sources and Configuration
 # =========================================================================
+include("${CMAKE_SOURCE_DIR}/cmake/platform-traits.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/platform-traits.cmake")
 
 # CPU and FPU configuration for STM32F407
 set(cpu_PARAMS
@@ -12,12 +14,19 @@ set(cpu_PARAMS
 
 # Source files used by App and Bootloader
 set(sources_SRCS
-    ${CMAKE_SOURCE_DIR}/App/Src/app.cpp
-    ${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
-    ${CMAKE_SOURCE_DIR}/App/Src/console.cpp
-    ${CMAKE_SOURCE_DIR}/App/Src/uart_redirect.cpp
+    ${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
+    ${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
+    ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
+    ${CMAKE_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
 
-    ${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal.c
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc.c
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_gpio.c
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_cortex.c
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc_ex.c
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_exti.c
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_rcc.c
+    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_utils.c
 
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_manager_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/gpio_pin_stm32.cpp
@@ -29,21 +38,13 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_manager_stm32.cpp
 
-    ${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
-    ${CMAKE_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
-
     ${CMAKE_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
+    ${CMAKE_SOURCE_DIR}/App/Src/app.cpp
+    ${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
+    ${CMAKE_SOURCE_DIR}/App/Src/console.cpp
+    ${CMAKE_SOURCE_DIR}/App/Src/uart_redirect.cpp
 
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal.c
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc.c
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_gpio.c
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_cortex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_hal_rcc_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_exti.c
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_rcc.c
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Src/stm32f4xx_ll_utils.c
+    ${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
 )
 
 # Include directories
@@ -61,6 +62,3 @@ set(include_HEADERS_DIRS
 # Compiler and linker options (can be extended per target)
 set(compiler_OPTS ${compiler_OPTS})
 set(linker_OPTS ${linker_OPTS})
-
-# Generating compile_command.jsn
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compilation commands into compile_commands.json")

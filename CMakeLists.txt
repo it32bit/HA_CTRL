@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Enables IDE support, static analysis, and debugging - generating compile_command.json
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compilation commands into compile_commands.json")
+
 # =========================================================================
 # Language Standards
 # =========================================================================

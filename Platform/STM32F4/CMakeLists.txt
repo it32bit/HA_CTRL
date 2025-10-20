@@ -29,11 +29,8 @@ target_include_directories(${PLATFORM_TARGET} PRIVATE
 
 # Compiler defines
 target_compile_definitions(${PLATFORM_TARGET} PRIVATE
-    STM32F407xx
-    USE_HAL_DRIVER
-    USE_FULL_LL_DRIVER
+    ${MCU_DEFINES}
 )
-# TODO: remove USE_HAL_DRIVER when HAL is fully gone
 
 # Link CUSTOM_HAL/LL libraries here if needed
 # target_link_libraries(${PLATFORM_TARGET} PRIVATE stm32_hal)

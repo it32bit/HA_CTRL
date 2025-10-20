@@ -49,10 +49,10 @@ set_target_properties(${BOOT_TARGET} PROPERTIES
 
 # Include paths
 target_include_directories(${BOOT_TARGET} PRIVATE
-    ${CMAKE_SOURCE_DIR}/Bootloader/Inc
+    ${MCU_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
-    ${MCU_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/Bootloader/Inc
 )
 
 # Compiler defines

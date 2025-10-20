@@ -1505,3 +1505,75 @@ struct STM32Traits {
 - Portability: You can write generic code that works for STM32 and ESP32 by swapping traits.
 - Compile-time abstraction: No virtual functions, no dynamic dispatch — fast and safe.
 - Configurability: You can specialize traits for different boards, peripherals, or modes.
+
+## ISSUE-50 CMAKE_POSITION_INDEPENDENT_CODE
+
+When I had the CMAKE_POSITION_INDEPENDENT_CODE flag enabled, the bootloader would immediately jump back to the Reset_Handler right after entering main().
+
+This behavior was caused by the fact that __libc_init_array, which invokes global C++ constructors, was executed before HAL_Init. As a result, some global objects accessed hardware peripherals before the HAL (Hardware Abstraction Layer) was properly initialized, leading to undefined behavior and a system fault.
+
+### What HAL_Init Does
+
+HAL_Init() is a critical initialization function provided by the STM32 HAL library. It performs the following tasks:
+
+- Configures the SysTick timer for timekeeping and delays
+- Initializes the NVIC (interrupt controller) with default priorities
+- Resets peripheral states to ensure a clean startup
+- Prepares the HAL infrastructure so that all subsequent HAL drivers (GPIO, RCC, UART, etc.) work correctly
+
+If HAL_Init() is skipped or executed too late, any access to HAL-based peripherals (like clocks, GPIOs, or timers) may result in a fault — especially during static object construction.
+
+## ISSUE-51 Why set(CMAKE_POSITION_INDEPENDENT_CODE ON) might be interfering with bootloader’s startup sequence and HAL initialization
+
+When
+
+```cmake
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+```
+
+CMake adds the `-fPIC` or `-fPIE` flag to your compiler options. This tells the compiler to generate position-independent code, meaning the code can run at any memory address.
+
+On embedded systems like STM32, this is not typically needed — because:
+
+- Code runs from a fixed FLASH address
+- You don’t use shared libraries or dynamic loading
+- The startup sequence and vector table rely on absolute addresses
+
+### Why It Breaks Bootloader
+
+#### Startup Code and Vector Table Misalignment
+
+Position-independent code can interfere with:
+
+- The placement of Reset_Handler and interrupt vectors
+- The assumption that main() is at a fixed address
+- The correct execution of SystemInit, HAL_Init, and __libc_init_array
+
+If -fPIE is applied to your startup assembly or HAL files, it may:
+
+- Alter symbol visibility or linkage
+- Prevent HAL_Init from being called correctly
+- Cause constructors to run before HAL is ready
+
+#### Incorrect Ordering of Initialization
+
+HAL_Init is not executed in correct order before __libc_init_array
+
+That’s likely because:
+
+- Your startup file (startup_stm32f407vgtx.s) does not call HAL_Init
+- And with `-fPIE`, the linker may reorder or misplace symbols like Reset_Handler, causing unexpected behavior
+
+### How to Fix It
+
+- Turn Off Position-Independent Code: set(CMAKE_POSITION_INDEPENDENT_CODE `OFF`) in top-level CMakeLists.txt
+- Verify Startup Sequence: In startup_stm32f407vgtx.s, make sure Reset_Handler includes:
+
+    ```ASM
+    bl SystemInit
+    bl HAL_Init          ; <-Must be here
+    bl __libc_init_array
+    bl main
+    ```
+
+- Clean and Rebuild: This ensures no stale `-fPIE` flags remain.

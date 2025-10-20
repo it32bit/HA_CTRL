@@ -23,20 +23,17 @@ static void ClockErrorHandler();
 /**
  * @brief Global Objects
  */
-ClockManager* clock = nullptr;
-GpioManager*  gpio  = nullptr;
+ClockManager clock;
+GpioManager  gpio;
 
 extern "C" int main(void)
 {
-    // HAL_Init(); // Ensure HAL is ready
+    HAL_Init(); // Ensure HAL is ready
 
-    clock = new ClockManager();
-    clock->initialize(ClockErrorHandler);
+    clock.initialize(ClockErrorHandler);
+    gpio.initialize(gpioPinConfigs);
 
-    gpio = new GpioManager();
-    gpio->initialize(gpioPinConfigs);
-
-    auto red = gpio->getPin(PinId::LD_RED);
+    auto red = gpio.getPin(PinId::LD_RED);
 
     if (red)
     {
