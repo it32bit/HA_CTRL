@@ -6,7 +6,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/compiler-warnings.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/utilities.cmake")
 
 # Secendary Bootloader target
-set(BSEC_TARGET ha-ctrl-bsec)
+set(BSEC_TARGET ha-ctrl-sec)
 
 # Linker script
 set(bsec_linker_script_SRC ${bsec_linker_script_SRC}

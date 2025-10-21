@@ -29,8 +29,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/size-report.cmake")
 cmake_policy(SET CMP0007 NEW)
 
 # Input files
-set(BPRIM_SIZE_FILE "${SCRIPT_OUTPUT_DIR}/ha-ctrl-bprim_size.txt")
-set(BSEC_SIZE_FILE  "${SCRIPT_OUTPUT_DIR}/ha-ctrl-bsec_size.txt")
+set(BPRIM_SIZE_FILE "${SCRIPT_OUTPUT_DIR}/ha-ctrl-prim_size.txt")
+set(BSEC_SIZE_FILE  "${SCRIPT_OUTPUT_DIR}/ha-ctrl-sec_size.txt")
 set(APP_SIZE_FILE   "${SCRIPT_OUTPUT_DIR}/ha-ctrl-app_size.txt")
 
 # Parse size files

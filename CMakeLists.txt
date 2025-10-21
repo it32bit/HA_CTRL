@@ -107,7 +107,7 @@ if(NOT BUILD_TESTING)
     # Combined Size Check Target (after both bootloader and app are built)
     # ========================================================================
     # ALL → ensures this runs every time you build
-    # DEPENDS → ensures ha-ctrl-app, ha-ctrl-bsec, ha-ctrl-bprim are built first
+    # DEPENDS → ensures ha-ctrl-app, ha-ctrl-sec, ha-ctrl-prim are built first
     # -Dtarget=... → passes the target name to your script
     # -P → tells CMake to run the script
 
@@ -118,20 +118,20 @@ if(NOT BUILD_TESTING)
             -P ${CMAKE_SOURCE_DIR}/cmake/utilities-check-size.cmake
         COMMENT "Running combined size check after build"
     )
-    add_dependencies(check_size ha-ctrl-bprim ha-ctrl-bsec ha-ctrl-app)
+    add_dependencies(check_size ha-ctrl-prim ha-ctrl-sec ha-ctrl-app)
 
     # Add combined binary target
     add_combined_binary(
-        ha-ctrl-bprim     # Target name for Bootloader Primary
-        ha-ctrl-bsec      # Target name for Bootloader Secondary
+        ha-ctrl-prim     # Target name for Bootloader Primary
+        ha-ctrl-sec      # Target name for Bootloader Secondary
         ha-ctrl-app       # Target name for Application
         ${PROJECT_NAME}_combined_image  # Output name for combined binary (without .bin)
     )
 
     add_firmware_packaging(
         ha-ctrl-app
-        ha-ctrl-bsec
-        ha-ctrl-bprim
+        ha-ctrl-sec
+        ha-ctrl-prim
         ${PROJECT_NAME}
     )
 

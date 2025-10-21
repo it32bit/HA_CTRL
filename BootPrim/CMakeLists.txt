@@ -6,7 +6,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/compiler-warnings.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/utilities.cmake")
 
 # Primary Bootloader target
-set(BPRIM_TARGET ha-ctrl-bprim)
+set(BPRIM_TARGET ha-ctrl-prim)
 
 # Linker script
 set(bprim_linker_script_SRC ${bprim_linker_script_SRC}
