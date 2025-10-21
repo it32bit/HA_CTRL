@@ -74,7 +74,24 @@ The project uses the following external dependencies:
 
 ## Clock configuration
 
-<img src="./Doc/HaCtrl-ClockConfig.png" alt="Clock configuration">
+<!-- <img src="./Doc/HaCtrl-ClockConfig.png" alt="Clock configuration"> -->
+
+| Parameter                  | Value        | Notes                            |
+|---------------------------|--------------|----------------------------------|
+| System Clock Source       | PLL (HSE)    | Phase-locked loop using HSE      |
+| SYSCLK                    | 168 MHz      | System clock                     |
+| HCLK                      | 168 MHz      | AHB bus clock                    |
+| AHB Prescaler             | 1            | No division                      |
+| APB1 Prescaler            | 4            | APB1 clock = 42 MHz              |
+| APB2 Prescaler            | 2            | APB2 clock = 84 MHz              |
+| HSE Frequency             | 8 MHz        | External crystal frequency       |
+| PLL_M                     | 8            | Input divider                    |
+| PLL_N                     | 336          | Multiplier                       |
+| PLL_P                     | 2            | Output divider for SYSCLK        |
+| PLL_Q                     | 7            | For USB, RNG, etc.               |
+| VDD                       | 3.3 V        | Core voltage                     |
+| Regulator Output          | Scale1 mode  | Max performance power scale      |
+| Flash Latency             | 5 WS         | Flash wait states for 168 MHz    |
 
 ## Project Status
 
@@ -86,5 +103,25 @@ At this stage, only basic LED blinking functionality has been implemented. No co
 - Develop a robust and modular control application
 - Ensure reliable communication between host and embedded system
 - Transition to a custom HAL for optimized performance and flexibility
+
+### Flash Memory Map (STM32F4 - 1MB Flash)
+
+This layout splits internal flash into two equal halves:
+
+| Component             | Start       | Size    | End         |
+|-----------------------|-------------|---------|-------------|
+| Bootloader I          | 0x08000000  | 16 KB   | 0x08003FFF  |
+| Bootloader II         | 0x08004000  | 48 KB   | 0x0800BFFF  |
+| Application           | 0x0800C000  | 448 KB  | 0x0807FFFF  |
+| New Application       | 0x08080000  | 448 KB  | 0x080F7FFF  |
+| Metadata              | 0x080F8000  | 1 KB    | 0x080F83FF  |
+| Firmware Certificate  | 0x080F8400  | 1 KB    | 0x080F87FF  |
+| Reserved / Align      | 0x080F8800  | 1 KB    | 0x080F8BFF  |
+| New Bootloader II     | 0x080F8C00  | 48 KB   | 0x080FA7FF  |
+| Configuration         | 0x080FA800  | 2 KB    | 0x080FA9FF  |
+| Reserved Area         | 0x080FAA00  | 6 KB    | 0x080FBFFF  |
+| Private Certificate   | 0x080FC000  | 1 KB    | 0x080FC3FF  |
+| Error Log             | 0x080FC400  | 4 KB    | 0x080FD3FF  |
+| **Flash Total**           | **0x08000000**  | **1 MB**    | **0x080FFFFF**  |
 
 *Stay tuned for updates as the project evolves!*
