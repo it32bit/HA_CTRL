@@ -22,7 +22,7 @@ project(ha-ctrl LANGUAGES C CXX ASM)
 # Options to Enable/Disable Parts of Build
 # =========================================================================
 option(BUILD_APP "Build the main application" ON)
-option(BUILD_BOOTLOADER "Build the bootloader" ON)
+option(BUILD_BOOTLOADER "Build the bootloaders: Prim+Sec" ON)
 option(BUILD_TESTING "Build unit tests" OFF)
 option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" OFF)
 
@@ -58,23 +58,25 @@ elseif(PLATFORM_MCU STREQUAL "NRF52")
 endif()
 
 add_subdirectory(Platform/${PLATFORM_MCU})
-
+add_subdirectory(Boot)
 # PIL (platform-independent)
 add_subdirectory(Platform/Interface/PilAdc)
+add_subdirectory(Platform/Interface/PilFlash)
 add_subdirectory(Platform/Interface/PilUart)
 add_subdirectory(Platform/Interface/PilClock)
 add_subdirectory(Platform/Interface/PilGpio)
 add_subdirectory(Platform/Interface/PilWatchdog)
 
 # =========================================================================
-# Add Subdirectories (Targets: Bootloader and App)
+# Add Subdirectories (Targets: Bootloader's and App)
 # =========================================================================
-if(BUILD_APP)
-    add_subdirectory(App)
+if(BUILD_BOOTLOADER)
+    add_subdirectory(BootPrim)
+    add_subdirectory(BootSec)
 endif()
 
-if(BUILD_BOOTLOADER)
-    add_subdirectory(Bootloader)
+if(BUILD_APP)
+    add_subdirectory(App)
 endif()
 
 # =========================================================================
@@ -97,7 +99,7 @@ endif()
 # Build Checks
 # =========================================================================
 if(NOT BUILD_APP AND NOT BUILD_BOOTLOADER AND NOT BUILD_TESTING)
-    message(FATAL_ERROR "All build options (APP, BOOTLOADER, TESTS) are disabled. Nothing to build.")
+    message(FATAL_ERROR "All build options (APP, BOOTLOADERS, TESTS) are disabled. Nothing to build.")
 endif()
 
 if(NOT BUILD_TESTING)
@@ -105,7 +107,7 @@ if(NOT BUILD_TESTING)
     # Combined Size Check Target (after both bootloader and app are built)
     # ========================================================================
     # ALL → ensures this runs every time you build
-    # DEPENDS → ensures ha-ctrl-app and ha-ctrl-boot are built first
+    # DEPENDS → ensures ha-ctrl-app, ha-ctrl-bsec, ha-ctrl-bprim are built first
     # -Dtarget=... → passes the target name to your script
     # -P → tells CMake to run the script
 
@@ -115,14 +117,24 @@ if(NOT BUILD_TESTING)
             -DSCRIPT_OUTPUT_DIR=${CMAKE_BINARY_DIR_BIN}
             -P ${CMAKE_SOURCE_DIR}/cmake/utilities-check-size.cmake
         COMMENT "Running combined size check after build"
-        # DEPENDS ha-ctrl-boot ha-ctrl-app # This will ensure boot and app are built first.
     )
-    add_dependencies(check_size ha-ctrl-boot ha-ctrl-app)
+    add_dependencies(check_size ha-ctrl-bprim ha-ctrl-bsec ha-ctrl-app)
 
     # Add combined binary target
-    add_combined_binary(ha-ctrl-boot ha-ctrl-app ${PROJECT_NAME}_combined_image)
+    add_combined_binary(
+        ha-ctrl-bprim     # Target name for Bootloader Primary
+        ha-ctrl-bsec      # Target name for Bootloader Secondary
+        ha-ctrl-app       # Target name for Application
+        ${PROJECT_NAME}_combined_image  # Output name for combined binary (without .bin)
+    )
 
-    add_firmware_packaging(ha-ctrl-app ha-ctrl-boot ${PROJECT_NAME})
+    add_firmware_packaging(
+        ha-ctrl-app
+        ha-ctrl-bsec
+        ha-ctrl-bprim
+        ${PROJECT_NAME}
+    )
+
 endif()
 
 # =========================================================================

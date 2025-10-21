@@ -1,35 +1,76 @@
 #!/bin/bash
+set -e
+
+# === Input Arguments ===
 APP_ELF="$1"
-BOOT_ELF="$2"
-BOOT_BIN="$3"
+BOOT_SEC_ELF="$2"
+BOOT_PRIM_ELF="$3"
 APP_BIN="$4"
-PAD_BIN="$5"
-COMBINED_BIN="$6"
+BOOT_SEC_BIN="$5"
+BOOT_PRIM_BIN="$6"
+OUT_BIN="$7"
 
-# Extract app start address from .text section
-APP_START=$(arm-none-eabi-objdump -h "$APP_ELF" | grep '.text' | awk '{print $4}')
-BOOT_SIZE=$(arm-none-eabi-size "$BOOT_ELF" | tail -n 1 | awk '{print $1 + $2 + $3}')
-APP_START_DEC=$((0x$APP_START))
-BOOT_END=$((0x08000000 + $BOOT_SIZE))
+# === Helper: Extract start address of .text section ===
+get_text_addr() {
+    arm-none-eabi-objdump -h "$1" | awk '/\.text/ {print $4}' | head -n 1
+}
 
-# Validate alignment
-if [ "$BOOT_END" -gt "$APP_START_DEC" ]; then
-    echo ">>> ERROR: Bootloader overlaps with application!"
-    echo "Bootloader ends at: 0x$(printf '%08X' $BOOT_END)"
-    echo "App starts at     : 0x$APP_START"
+# === Helper: Get size of text + data + bss ===
+get_elf_size() {
+    arm-none-eabi-size "$1" | tail -n 1 | awk '{print $1 + $2 + $3}'
+}
+
+# === Extract start addresses from ELF files ===
+APP_START_HEX=$(get_text_addr "$APP_ELF")
+BOOT_SEC_START_HEX=$(get_text_addr "$BOOT_SEC_ELF")
+BOOT_PRIM_START_HEX=$(get_text_addr "$BOOT_PRIM_ELF")
+
+APP_START=$((0x$APP_START_HEX))
+BOOT_SEC_START=$((0x$BOOT_SEC_START_HEX))
+BOOT_PRIM_START=$((0x$BOOT_PRIM_START_HEX))
+
+# === Extract sizes ===
+APP_SIZE=$(get_elf_size "$APP_ELF")
+BOOT_SEC_SIZE=$(get_elf_size "$BOOT_SEC_ELF")
+BOOT_PRIM_SIZE=$(get_elf_size "$BOOT_PRIM_ELF")
+
+APP_END=$((APP_START + APP_SIZE))
+BOOT_SEC_END=$((BOOT_SEC_START + BOOT_SEC_SIZE))
+BOOT_PRIM_END=$((BOOT_PRIM_START + BOOT_PRIM_SIZE))
+
+# === Print extracted info ===
+echo "App        : Start=0x$(printf '%08X' $APP_START), Size=${APP_SIZE} bytes, End=0x$(printf '%08X' $APP_END)"
+echo "BootSec    : Start=0x$(printf '%08X' $BOOT_SEC_START), Size=${BOOT_SEC_SIZE} bytes, End=0x$(printf '%08X' $BOOT_SEC_END)"
+echo "BootPrim   : Start=0x$(printf '%08X' $BOOT_PRIM_START), Size=${BOOT_PRIM_SIZE} bytes, End=0x$(printf '%08X' $BOOT_PRIM_END)"
+
+# === Validate that addresses are in correct order ===
+if (( BOOT_PRIM_END > BOOT_SEC_START )); then
+    echo "ERROR: BootPrim overlaps with BootSec"
     exit 1
 fi
 
-# Calculate padding
-PAD_SIZE=$((APP_START_DEC - BOOT_END))
-
-if [ "$PAD_SIZE" -eq 0 ]; then
-    echo "No padding needed — bootloader ends exactly at app start."
-else
-    echo "Padding required: $PAD_SIZE bytes"
-    dd if=/dev/zero bs=1 count=$PAD_SIZE of="$PAD_BIN"
+if (( BOOT_SEC_END > APP_START )); then
+    echo "ERROR: BootSec overlaps with App"
+    exit 1
 fi
 
-# Combine binaries
-cat "$BOOT_BIN" "$PAD_BIN" "$APP_BIN" > "$COMBINED_BIN"
-echo "Combined binary created at $COMBINED_BIN"
+# === Calculate padding ===
+PAD1_SIZE=$((BOOT_SEC_START - BOOT_PRIM_END))
+PAD2_SIZE=$((APP_START - BOOT_SEC_END))
+
+echo "Padding between BootPrim → BootSec: ${PAD1_SIZE} bytes"
+echo "Padding between BootSec → App    : ${PAD2_SIZE} bytes"
+
+# === Create temporary padding files ===
+PAD1_BIN=$(mktemp)
+PAD2_BIN=$(mktemp)
+
+dd if=/dev/zero bs=1 count=$PAD1_SIZE of="$PAD1_BIN" status=none
+dd if=/dev/zero bs=1 count=$PAD2_SIZE of="$PAD2_BIN" status=none
+
+# === Combine binaries ===
+cat "$BOOT_PRIM_BIN" "$PAD1_BIN" "$BOOT_SEC_BIN" "$PAD2_BIN" "$APP_BIN" > "$OUT_BIN"
+echo "Combined binary created: $OUT_BIN"
+
+# === Cleanup ===
+rm -f "$PAD1_BIN" "$PAD2_BIN"

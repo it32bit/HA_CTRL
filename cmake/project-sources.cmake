@@ -37,6 +37,7 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/clock_manager_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_manager_stm32.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/flash_writer_stm32.cpp
 
     ${CMAKE_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
     ${CMAKE_SOURCE_DIR}/App/Src/app.cpp
@@ -44,13 +45,17 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/App/Src/console.cpp
     ${CMAKE_SOURCE_DIR}/App/Src/uart_redirect.cpp
 
-    ${CMAKE_SOURCE_DIR}/Bootloader/Src/boot.cpp
+    ${CMAKE_SOURCE_DIR}/Boot/Src/boot.cpp
+    ${CMAKE_SOURCE_DIR}/BootPrim/Src/boot_prim.cpp
+    ${CMAKE_SOURCE_DIR}/BootSec/Src/boot_sec.cpp
 )
 
 # Include directories
 set(include_HEADERS_DIRS
     ${CMAKE_SOURCE_DIR}/App/Inc
-    ${CMAKE_SOURCE_DIR}/Bootloader/Inc
+    ${CMAKE_SOURCE_DIR}/Boot/Inc
+    ${CMAKE_SOURCE_DIR}/BootPrim/Inc
+    ${CMAKE_SOURCE_DIR}/BootSec/Inc
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Inc

@@ -29,12 +29,14 @@ include("${CMAKE_CURRENT_LIST_DIR}/size-report.cmake")
 cmake_policy(SET CMP0007 NEW)
 
 # Input files
-set(BOOT_SIZE_FILE "${SCRIPT_OUTPUT_DIR}/ha-ctrl-boot_size.txt")
-set(APP_SIZE_FILE  "${SCRIPT_OUTPUT_DIR}/ha-ctrl-app_size.txt")
+set(BPRIM_SIZE_FILE "${SCRIPT_OUTPUT_DIR}/ha-ctrl-bprim_size.txt")
+set(BSEC_SIZE_FILE  "${SCRIPT_OUTPUT_DIR}/ha-ctrl-bsec_size.txt")
+set(APP_SIZE_FILE   "${SCRIPT_OUTPUT_DIR}/ha-ctrl-app_size.txt")
 
 # Parse size files
-parse_size_file("${BOOT_SIZE_FILE}" BOOT)
-parse_size_file("${APP_SIZE_FILE}" APP)
+parse_size_file("${BPRIM_SIZE_FILE}" BPRIM)
+parse_size_file("${BSEC_SIZE_FILE}"  BSEC)
+parse_size_file("${APP_SIZE_FILE}"   APP)
 
 # Compute totals and percentages
 compute_size_totals()

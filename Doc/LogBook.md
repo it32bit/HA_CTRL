@@ -1672,3 +1672,20 @@ Your branch is up to date with 'origin/feature/bin-to-flash'.
 nothing to commit, working tree clean
 
 ```
+
+## INFO-54 arm-none-eabi-objdump for .firmware_version
+
+VMA (0807fff8) is the flash address where .firmware_version is located.
+
+```bash
+arm-none-eabi-objdump -h your-app.elf | grep .firmware_version
+
+Idx Name              Size      VMA       LMA       File off  Algn
+ 10 .firmware_version 00000008  0807fff8  0807fff8  0017fff8  2**2
+```
+
+## INFO-55 How to get Firmware version
+
+```cpp
+extern const firmwareVersionS FIRMWARE_VERSION __attribute__((section(".firmware_version")));
+```

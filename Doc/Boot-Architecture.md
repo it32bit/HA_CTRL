@@ -162,8 +162,6 @@ Hybrid model is designed for:
 - Portability: Works across STM32, ESP32, Nordic — no need for dual-slot complexity.
 - Simplicity: Fixed addresses mean predictable vector tables and easier debugging.
 
-
-
 ## Firmware Validation
 
 Integrity:
@@ -263,6 +261,15 @@ Total: 512 KB + 512 KB = 1024 KB
 | OpenOCD    | Flash/debug STM32F4                   |
 | Python     | Firmware packaging tool               |
 | mbedTLS    | Optional crypto (C++ wrapper)         |
+
+## Bootloader Architecture Overview
+
+| Layer       | Role                                                                 |
+|-------------|----------------------------------------------------------------------|
+| Bootloader/ | High-level logic: metadata handling, update orchestration, jump control |
+| Platform/   | Hardware-specific implementations: flash access, VTOR config, sector layout |
+| BootPrim/   | Minimal bootloader: sets VTOR, verifies BootSec, jumps to it         |
+| BootSec/    | Full-featured bootloader: validates firmware, applies update         |
 
 ## Next Steps
 
