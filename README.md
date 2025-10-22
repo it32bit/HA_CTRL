@@ -6,6 +6,11 @@ This project is a home automation control unit built around the **STM32F4-DISC1*
 - Gate control
 - Air conditioning
 
+## Project Status
+
+The board is currently in its initial state.
+At this stage, only basic LED blinking functionality has been implemented. No control logic or peripheral interaction is in place yet.
+
 ## Software Stack
 
 - Embedded Platform: `STM32F4-DISC1`
@@ -93,11 +98,6 @@ The project uses the following external dependencies:
 | Regulator Output          | Scale1 mode  | Max performance power scale      |
 | Flash Latency             | 5 WS         | Flash wait states for 168 MHz    |
 
-## Project Status
-
-The board is currently in its initial state.
-At this stage, only basic LED blinking functionality has been implemented. No control logic or peripheral interaction is in place yet.
-
 ## Goals
 
 - Develop a robust and modular control application
@@ -124,4 +124,4 @@ This layout splits internal flash into two equal halves:
 | Error Log             | 0x080FC400  | 4 KB    | 0x080FD3FF  |
 | **Flash Total**           | **0x08000000**  | **1 MB**    | **0x080FFFFF**  |
 
-*Stay tuned for updates as the project evolves!*
+[*Stay tuned for updates as the project evolves!*](https://team3m.atlassian.net/jira/software/projects/HA/boards/2/backlog)
