@@ -1689,3 +1689,14 @@ Idx Name              Size      VMA       LMA       File off  Algn
 ```cpp
 extern const firmwareVersionS FIRMWARE_VERSION __attribute__((section(".firmware_version")));
 ```
+
+## INFO-56 RAM memory after jump to app
+
+If you want to preserve data across jumps, place it in a reserved RAM region and mark it NOINIT in the linker script.
+
+| RAM Used by BootPrim     | After Jump to App                             |
+|--------------------------|-----------------------------------------------|
+| Static/global objects     | Overwritten by App `.data` / `.bss`          |
+| Stack                    | Replaced by App’s stack                       |
+| Heap (if used)           | Lost unless explicitly preserved              |
+| Reserved regions         | Available if coordinated via linker          |

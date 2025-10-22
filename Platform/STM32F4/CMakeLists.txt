@@ -29,6 +29,7 @@ target_include_directories(${PLATFORM_TARGET} PRIVATE
 
 # Compiler defines
 target_compile_definitions(${PLATFORM_TARGET} PRIVATE
+    USE_HAL_DRIVER
     ${MCU_DEFINES}
 )
 

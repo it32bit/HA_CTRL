@@ -14,14 +14,15 @@
 #include "flash_layout.hpp"
 #include "pil_flash_writer.hpp"
 
+// ASCII-encoded 4-character status markers for flash-backed boot state
 enum class BootState : std::uint32_t
 {
-    // These values are four-character ASCII strings encoded as 32-bit integers
     Idle     = 0x00000000,
     Staged   = 0x53544147, // 'STAG'
     Verified = 0x56455249, // 'VERI'
     Applied  = 0x4150504C, // 'APPL'
-    Failed   = 0x4641494C  // 'FAIL'
+    Failed   = 0x4641494C, // 'FAIL'
+    BLANK    = 0xFFFFFFFF
 };
 
 class BootFlagManager
@@ -35,8 +36,9 @@ class BootFlagManager
 
   private:
     IFlashWriter*                   m_writer;
-    static constexpr std::uintptr_t FLAG_ADDR     = FlashLayout::CONFIG_START;
-    static constexpr std::uint8_t   CONFIG_SECTOR = 11; // Adjust based on address
+    static constexpr std::uintptr_t FLAG_ADDR = FlashLayout::CONFIG_START;
+    static constexpr std::uint8_t   CONFIG_SECTOR =
+        FlashLayout::sectorFromAddress(FLAG_ADDR); // Adjust based on address
 };
 
 #endif // BOOT_FLAG_MANAGER_HPP

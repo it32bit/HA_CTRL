@@ -38,7 +38,7 @@ class ClockManager
     void initialize(void (*handler)());
 
   private:
-    static constexpr std::size_t MaxClockSize  = sizeof(uint32_t) * 8;
+    static constexpr std::size_t MaxClockSize = sizeof(uint32_t) * 8;
 
     // Ensures proper memory alignment for safe placement of the object
     static constexpr std::size_t MaxClockAlign = alignof(uint32_t);

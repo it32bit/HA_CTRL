@@ -16,6 +16,33 @@
  */
 namespace FlashLayout
 {
+constexpr std::uint8_t sectorFromAddress(std::uintptr_t addr)
+{
+    if (addr < 0x08004000)
+        return 0;
+    if (addr < 0x08008000)
+        return 1;
+    if (addr < 0x0800C000)
+        return 2;
+    if (addr < 0x08010000)
+        return 3;
+    if (addr < 0x08020000)
+        return 4;
+    if (addr < 0x08040000)
+        return 5;
+    if (addr < 0x08060000)
+        return 6;
+    if (addr < 0x08080000)
+        return 7;
+    if (addr < 0x080A0000)
+        return 8;
+    if (addr < 0x080C0000)
+        return 9;
+    if (addr < 0x080E0000)
+        return 10;
+    return 11;
+}
+
 constexpr std::uintptr_t FLASH_BASE_ADDR  = 0x08000000;
 constexpr std::size_t    FLASH_TOTAL_SIZE = 1024 * 1024; // 1 MB
 

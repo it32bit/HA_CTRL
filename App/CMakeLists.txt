@@ -57,6 +57,7 @@ target_include_directories(${APP_TARGET} PRIVATE
 
 # Compiler defines
 target_compile_definitions(${APP_TARGET} PRIVATE
+    USE_HAL_DRIVER
     ${MCU_DEFINES}
 )
 

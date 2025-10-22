@@ -7,15 +7,10 @@
 
 #include <cstdint>
 #include "stm32f4xx.h"
-
 #include "boot_flag_manager.hpp"
+#include "clock_manager_stm32.hpp"
 #include "flash_writer_stm32.hpp"
 #include "flash_layout.hpp"
-/**
- * Embed in binary section best for: Production firmware
- */
-__attribute__((section(".boot_flag_init"))) const std::uint32_t boot_flag_default =
-    0x53544147; // 'STAG'
 
 /**
  * Another option is to set in main() on first boot best for: Development
@@ -45,15 +40,27 @@ static void JumpToBootSec()
     entry();
 }
 
+ClockManager clock;
+
 extern "C" int main()
 {
     FlashWriterSTM32F4 writer;
     BootFlagManager    flags(&writer);
 
+    clock.initialize(nullptr);
+
+    if ((flags.getState() == BootState::BLANK) || (flags.getState() == BootState::Idle))
+    {
+        // ISSUE-1: Not able to write and read if valid
+        // flags.setState(BootState::Staged);
+        JumpToBootSec();
+    }
+
+    auto isStaged = flags.getState();
     /**
      * Flash-backed boot flags using BootState
      */
-    if (flags.getState() == BootState::Staged)
+    if (isStaged == BootState::Staged)
     {
         JumpToBootSec();
     }

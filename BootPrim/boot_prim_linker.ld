@@ -78,11 +78,6 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .boot_flag_init :
-  {
-      KEEP(*(.boot_flag_init))
-  } >FLASH AT(FlashLayout::CONFIG_START)
-
   .firmware_version :
   {
     . = ALIGN(4);

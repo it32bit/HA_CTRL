@@ -59,6 +59,7 @@ target_include_directories(${BSEC_TARGET} PRIVATE
 
 # Compiler defines
 target_compile_definitions(${BSEC_TARGET} PRIVATE
+    USE_HAL_DRIVER
     ${MCU_DEFINES}
 )
 

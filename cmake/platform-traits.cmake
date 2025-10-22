@@ -26,7 +26,6 @@ math(EXPR MCU_RAM_LIMIT   "${MCU_RAM_TOTAL} * 90 / 100")     # 131072
 # Compiler defines
 set(MCU_DEFINES
     STM32F407xx
-    USE_HAL_DRIVER
     USE_FULL_LL_DRIVER
 )
 

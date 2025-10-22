@@ -59,6 +59,8 @@ target_include_directories(${BPRIM_TARGET} PRIVATE
 
 # Compiler defines
 target_compile_definitions(${BPRIM_TARGET} PRIVATE
+    BOOT_PRIM
+    USE_HAL_DRIVER
     ${MCU_DEFINES}
 )
 

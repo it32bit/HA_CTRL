@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Bootloader",
+            "name": "Debug Boot-Prim",
             "cwd": "${workspaceFolder}",
             "type": "cortex-debug",
             "request": "launch",
@@ -13,7 +13,33 @@
             "device": "STM32F407VGTx",
             "interface": "swd",
             "runToEntryPoint": "main",
-            "executable": "${workspaceFolder}/build/bin/ha-ctrl-boot.elf",
+            "executable": "${workspaceFolder}/build/bin/ha-ctrl-prim.elf",
+            "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32F407.svd",
+            "v1": false,
+            "serverpath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
+            "stm32cubeprogrammer": "${config:STM32VSCodeExtension.cubeCLT.path}/STM32CubeProgrammer/bin",
+            "stlinkPath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
+            "armToolchainPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin",
+            "gdbPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+            "serverArgs": [
+                "-m",
+                "0"
+            ],
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            }
+        },
+        {
+            "name": "Debug Boot-Sec",
+            "cwd": "${workspaceFolder}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "stlink",
+            "device": "STM32F407VGTx",
+            "interface": "swd",
+            "runToEntryPoint": "main",
+            "executable": "${workspaceFolder}/build/bin/ha-ctrl-sec.elf",
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32F407.svd",
             "v1": false,
             "serverpath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
