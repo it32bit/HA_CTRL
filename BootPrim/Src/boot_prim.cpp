@@ -51,7 +51,7 @@ extern "C" int main()
 
     if ((flags.getState() == BootState::BLANK) || (flags.getState() == BootState::Idle))
     {
-        // ISSUE-1: Not able to write and read if valid
+        // TODO: ISSUE-1: BootState - Not able to write and validate
         // flags.setState(BootState::Staged);
         JumpToBootSec();
     }
