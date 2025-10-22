@@ -46,6 +46,7 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/App/Src/uart_redirect.cpp
 
     ${CMAKE_SOURCE_DIR}/Boot/Src/boot.cpp
+    ${CMAKE_SOURCE_DIR}/Boot/Src/boot_flag_manager.cpp
     ${CMAKE_SOURCE_DIR}/BootPrim/Src/boot_prim.cpp
     ${CMAKE_SOURCE_DIR}/BootSec/Src/boot_sec.cpp
 )

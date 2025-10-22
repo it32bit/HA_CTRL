@@ -12,26 +12,35 @@ void FlashWriterSTM32F4::unlock()
     }
 }
 
-void FlashWriterSTM32F4::eraseSector(std::uint8_t sector)
+void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
 {
-    FLASH->CR &= ~FLASH_CR_PSIZE;
-    FLASH->CR |= FLASH_CR_PSIZE_1;
-    FLASH->CR |= FLASH_CR_SER | (sector << FLASH_CR_SNB_Pos);
-    FLASH->CR |= FLASH_CR_STRT;
     while (FLASH->SR & FLASH_SR_BSY)
     {
     }
+
+    FLASH->CR &= ~FLASH_CR_SNB;
+    FLASH->CR |= FLASH_CR_SER | (t_sector << FLASH_CR_SNB_Pos);
+    FLASH->CR |= FLASH_CR_STRT;
+
+    while (FLASH->SR & FLASH_SR_BSY)
+    {
+    }
+
     FLASH->CR &= ~FLASH_CR_SER;
 }
 
-void FlashWriterSTM32F4::writeWord(std::uintptr_t address, std::uint32_t data)
+void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address, std::uint32_t t_data)
 {
-    FLASH->CR &= ~FLASH_CR_PSIZE;
-    FLASH->CR |= FLASH_CR_PSIZE_1;
-    FLASH->CR |= FLASH_CR_PG;
-    *reinterpret_cast<volatile std::uint32_t*>(address) = data;
     while (FLASH->SR & FLASH_SR_BSY)
     {
     }
+
+    FLASH->CR |= FLASH_CR_PG;
+    *reinterpret_cast<volatile std::uint32_t*>(t_address) = t_data;
+
+    while (FLASH->SR & FLASH_SR_BSY)
+    {
+    }
+
     FLASH->CR &= ~FLASH_CR_PG;
 }

@@ -17,6 +17,7 @@ set(app_linker_script_SRC ${app_linker_script_SRC}
 set(app_sources "")
 foreach(src ${sources_SRCS})
     if(src MATCHES ".*/App/.*" OR
+       src MATCHES ".*/Boot/Src/boot_flag_manager.cpp" OR
        src MATCHES ".*/Platform/STM32F4/Src/.*" OR
        src MATCHES ".*/Core/Src/.*" OR
        src MATCHES ".*/Startup/startup_stm32f407vgtx.s" OR
@@ -50,6 +51,7 @@ target_include_directories(${APP_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/App/Inc
 	${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
+    ${CMAKE_SOURCE_DIR}/Boot/Inc
     ${MCU_INCLUDE_DIRS}
 )
 

@@ -1,8 +1,31 @@
 // boot_prim.cpp
+/**
+ * BootPrim → BootSec → Application
+ * Flash-backed boot flags using BootState
+ * Direct flash access via your IFlashWriter interface
+ */
+
 #include <cstdint>
 #include "stm32f4xx.h"
-#include "flash_layout.hpp"
 
+#include "boot_flag_manager.hpp"
+#include "flash_writer_stm32.hpp"
+#include "flash_layout.hpp"
+/**
+ * Embed in binary section best for: Production firmware
+ */
+__attribute__((section(".boot_flag_init"))) const std::uint32_t boot_flag_default =
+    0x53544147; // 'STAG'
+
+/**
+ * Another option is to set in main() on first boot best for: Development
+ *  if (flags.getState() != BootState::Staged &&
+ *      flags.getState() != BootState::Verified &&
+ *      flags.getState() != BootState::Applied)
+ *      {
+ *          flags.setState(BootState::Staged);
+ *      }
+ */
 namespace BootPrim
 {
 
@@ -20,16 +43,21 @@ static void JumpToBootSec()
 
     auto entry = reinterpret_cast<void (*)()>(reset_ptr);
     entry();
-
-    while (true)
-    {
-    }
 }
 
 extern "C" int main()
 {
-    HAL_Init(); // Optional
-    JumpToBootSec();
+    FlashWriterSTM32F4 writer;
+    BootFlagManager    flags(&writer);
+
+    /**
+     * Flash-backed boot flags using BootState
+     */
+    if (flags.getState() == BootState::Staged)
+    {
+        JumpToBootSec();
+    }
+
     while (true)
     {
     }

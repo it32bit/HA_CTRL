@@ -12,6 +12,7 @@
 #include <cstring>
 #include <stdio.h>
 #include "app.hpp"
+#include "boot_flag_manager.hpp"
 #include "clock_manager_stm32.hpp"
 #include "watchdog_manager_stm32.hpp"
 #include "uart_manager_stm32.hpp"
@@ -20,6 +21,7 @@
 #include "console.hpp"
 #include "uart_redirect.hpp"
 
+#include "flash_writer_stm32.hpp"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx.h"
 
@@ -44,9 +46,17 @@ Console            console;
  */
 extern "C" int main(void)
 {
+    //HAL_Init();
+
     clock.initialize(ClockErrorHandler);
 
-    HAL_Init();
+    FlashWriterSTM32F4 writer;
+    BootFlagManager    flags(&writer);
+
+    if (flags.getState() == BootState::Applied) {
+        // Confirm update success
+        flags.clear(); // Reset to Idle
+    }
 
     /** Initialization code for C++ application can be added here */
     watchdog.initialize(1000); // 1 second timeout

@@ -49,8 +49,9 @@ function(print_size_summary)
     message(STATUS "FLASH usage: ${FLASH_TOTAL} bytes (${FLASH_USAGE_PERCENT}%)")
     message(STATUS "RAM usage: ${RAM_TOTAL} bytes (${RAM_USAGE_PERCENT}%)")
 
-    if(FLASH_USAGE_PERCENT GREATER 90)
-        message(FATAL_ERROR "FLASH usage exceeds 90% (${FLASH_USAGE_PERCENT}%) — build failed.")
+    # Flash usage 50% == App + Boot-Sec + Boot-Prim, secend half is for other purpose
+    if(FLASH_USAGE_PERCENT GREATER 50)
+        message(FATAL_ERROR "FLASH usage exceeds 50% (${FLASH_USAGE_PERCENT}%) — build failed.")
     endif()
     if(RAM_USAGE_PERCENT GREATER 90)
         message(FATAL_ERROR "RAM usage exceeds 90% (${RAM_USAGE_PERCENT}%) — build failed.")
