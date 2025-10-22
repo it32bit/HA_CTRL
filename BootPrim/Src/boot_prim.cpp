@@ -1,10 +1,17 @@
-// boot_prim.cpp
 /**
- * BootPrim → BootSec → Application
- * Flash-backed boot flags using BootState
- * Direct flash access via your IFlashWriter interface
+ * @file      BootPrim/Src/boot_prim.cpp
+ * @author    it32bit
+ * @brief     Primary bootloader stage for Platform (STM32F4, ESP32, etc.).
+ *            Initializes system clock, manages flash-backed BootState flags,
+ *            and jumps to the secondary bootloader (BootSec).
+ * @note      Flash-backed boot flags using BootState
+ *            Direct flash access via your IFlashWriter interface
+ *
+ * @version   1.0
+ * @date      2025-10-23
+ * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *            (c) 2025 ha-ctrl project authors.
  */
-
 #include <cstdint>
 #include "stm32f4xx.h"
 #include "boot_flag_manager.hpp"
@@ -57,6 +64,7 @@ extern "C" int main()
     }
 
     auto isStaged = flags.getState();
+
     /**
      * Flash-backed boot flags using BootState
      */

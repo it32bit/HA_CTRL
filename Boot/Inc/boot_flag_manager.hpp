@@ -1,12 +1,15 @@
-// boot_flag_manager.hpp
 /**
- * BootFlagManager class to track update status across resets.
- * This mechanism complements bootloader architecture and is essential for:
- *    - Tracking firmware update status (e.g., staged, verified, applied)
- *    - Supporting rollback or recovery
- *    - Coordinating BootPrim → BootSec → App transitions
+ * @file      Boot/Inc/boot_flag_manager.hpp
+ * @author    it32bit
+ * @brief     Manages persistent boot state across resets using flash-backed flags.
+ *            Tracks firmware update progression (staged, verified, applied)
+ *            to coordinate BootPrim → BootSec → Application transitions.
+ *
+ * @version   1.0
+ * @date      2025-10-23
+ * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *            (c) 2025 ha-ctrl project authors.
  */
-
 #ifndef BOOT_FLAG_MANAGER_HPP
 #define BOOT_FLAG_MANAGER_HPP
 
