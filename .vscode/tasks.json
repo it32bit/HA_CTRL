@@ -20,43 +20,51 @@
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Build Primary Bootloader",
       "dependsOrder": "sequence",
-      "dependsOn": ["Configure"],
+      "dependsOn": [
+        "Configure"
+      ],
       "type": "cmake",
       "command": "build",
-      "targets": ["ha-ctrl-prim"],
+      "targets": [
+        "ha-ctrl-prim"
+      ],
       "preset": "debug",
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Build Secondary Bootloader",
       "dependsOrder": "sequence",
-      "dependsOn": ["Configure"],
+      "dependsOn": [
+        "Configure"
+      ],
       "type": "cmake",
       "command": "build",
-      "targets": ["ha-ctrl-sec"],
+      "targets": [
+        "ha-ctrl-sec"
+      ],
       "preset": "debug",
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Build App",
       "dependsOrder": "sequence",
-      "dependsOn": ["Configure"],
+      "dependsOn": [
+        "Configure"
+      ],
       "type": "cmake",
       "command": "build",
-      "targets": ["ha-ctrl-app"],
+      "targets": [
+        "ha-ctrl-app"
+      ],
       "preset": "debug",
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Build All-T",
       "dependsOrder": "sequence",
@@ -67,19 +75,51 @@
       ],
       "type": "cmake",
       "command": "build",
-      "targets": ["check_size"],
+      "targets": [
+        "check_size"
+      ],
       "preset": "debug",
       "group": "build",
       "problemMatcher": []
     },
-
+    {
+      "label": "FlashHalt",
+      "type": "shell",
+      "command": "STM32_Programmer_CLI",
+      "args": [
+        "-c",
+        "port=SWD",
+        "-halt"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "FlashEraseAll",
+      "type": "shell",
+      "command": "STM32_Programmer_CLI",
+      "args": [
+        "-c",
+        "port=SWD",
+        "-halt",
+        "-e all"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
     {
       "label": "Flash Primary Bootloader",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "FlashHalt"
+      ],
       "type": "shell",
       "command": "STM32_Programmer_CLI",
       "args": [
-        "-c", "port=SWD",
-        "-d", "${workspaceFolder}/build/bin/ha-ctrl-prim.elf",
+        "-c",
+        "port=SWD",
+        "-d",
+        "${workspaceFolder}/build/bin/ha-ctrl-prim.elf",
         "-hardRst",
         "-rst",
         "--start"
@@ -87,14 +127,19 @@
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Flash Secondary Bootloader",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "FlashHalt"
+      ],
       "type": "shell",
       "command": "STM32_Programmer_CLI",
       "args": [
-        "-c", "port=SWD",
-        "-d", "${workspaceFolder}/build/bin/ha-ctrl-sec.elf",
+        "-c",
+        "port=SWD",
+        "-d",
+        "${workspaceFolder}/build/bin/ha-ctrl-sec.elf",
         "-hardRst",
         "-rst",
         "--start"
@@ -102,14 +147,19 @@
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Flash App",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "FlashHalt"
+      ],
       "type": "shell",
       "command": "STM32_Programmer_CLI",
       "args": [
-        "-c", "port=SWD",
-        "-d", "${workspaceFolder}/build/bin/ha-ctrl-app.elf",
+        "-c",
+        "port=SWD",
+        "-d",
+        "${workspaceFolder}/build/bin/ha-ctrl-app.elf",
         "-hardRst",
         "-rst",
         "--start"
@@ -117,7 +167,6 @@
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "ReBuildFlashAll",
       "dependsOrder": "sequence",
@@ -125,57 +174,60 @@
         "Build Primary Bootloader",
         "Build Secondary Bootloader",
         "Build App",
-        "Flash Primary Bootloader",
         "Flash Secondary Bootloader",
-        "Flash App"
+        "Flash App",
+        "Flash Primary Bootloader"
       ],
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Clean",
       "type": "cmake",
       "command": "build",
-      "targets": ["clean-extra"],
+      "targets": [
+        "clean-extra"
+      ],
       "preset": "${command:cmake.activeBuildPresetName}",
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Clang-Tidy",
       "type": "cmake",
       "command": "build",
-      "targets": ["clang_tidy_both"],
+      "targets": [
+        "clang_tidy_both"
+      ],
       "preset": "${command:cmake.activeBuildPresetName}",
       "group": "build",
       "detail": "Static Analysis Tool Output: Console and File",
       "problemMatcher": []
     },
-
     {
       "label": "Clang-Tidy File",
       "type": "cmake",
       "command": "build",
-      "targets": ["clang_tidy_log"],
+      "targets": [
+        "clang_tidy_log"
+      ],
       "preset": "${command:cmake.activeBuildPresetName}",
       "group": "build",
       "detail": "Static Analysis Tool Output: /bin/clang-tidy-warn.log",
       "problemMatcher": []
     },
-
     {
       "label": "Clang-Tidy Console",
       "type": "cmake",
       "command": "build",
-      "targets": ["clang_tidy_console"],
+      "targets": [
+        "clang_tidy_console"
+      ],
       "preset": "${command:cmake.activeBuildPresetName}",
       "group": "build",
       "detail": "Static Analysis Tool Output: Console",
       "problemMatcher": []
     },
-
     {
       "label": "Clang-Tidy HTML",
       "type": "shell",
@@ -184,16 +236,16 @@
       "detail": "Static Analysis Tool Output: LOG & HTML",
       "problemMatcher": []
     },
-
     {
       "label": "List all available communication interfaces",
       "type": "shell",
       "command": "STM32_Programmer_CLI",
-      "args": ["--list"],
+      "args": [
+        "--list"
+      ],
       "group": "build",
       "problemMatcher": []
     },
-
     {
       "label": "Build and Run Unit Tests",
       "type": "shell",

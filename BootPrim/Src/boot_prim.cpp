@@ -58,19 +58,19 @@ extern "C" int main()
 
     auto isStaged = flags.getState();
 
-    if ((isStaged == BootState::BLANK) || (isStaged == BootState::Idle))
+    if (isStaged != BootState::Staged && isStaged != BootState::Verified &&
+        isStaged != BootState::Applied)
     {
         // TODO: ISSUE-1: BootState - Not able to write and validate
-        flags.setState(BootState::Staged);
-        JumpToBootSec();
+        // flags.setState(BootState::Staged);
     }
 
-    isStaged = BootState::Staged; // TODO: to be removed when ISSUE-1 will be Fixed
+    isStaged = flags.getState(); // TODO: to be removed when ISSUE-1 will be Fixed
 
     /**
      * Flash-backed boot flags using BootState
      */
-    if (isStaged == BootState::Staged)
+    // if (isStaged == BootState::Staged)
     {
         JumpToBootSec();
     }

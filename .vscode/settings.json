@@ -108,7 +108,8 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "variant": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "cfenv": "cpp"
     },
     "cortex-debug.stlinkPath": "/opt/stm32cubeclt_1.19.0/STLink-gdb-server/bin/ST-LINK_gdbserver",
     "cortex-debug.armToolchainPath": "/opt/stm32cubeclt_1.19.0/GNU-tools-for-STM32/bin",

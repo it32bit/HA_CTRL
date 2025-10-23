@@ -53,7 +53,8 @@ extern "C" int main(void)
     FlashWriterSTM32F4 writer;
     BootFlagManager    flags(&writer);
 
-    if (flags.getState() == BootState::Applied) {
+    if (flags.getState() == BootState::Applied)
+    {
         // Confirm update success
         flags.clear(); // Reset to Idle
     }
@@ -144,10 +145,12 @@ void UserButtonManager::process()
 {
     if (m_pending)
     {
-        m_pending  = false;
-        float temp = adc.readTemperature();
-        printf("[%s:%d]:%3d:Temperature: %3.2f[*C]\n\r", getFilename(), __LINE__,
-               static_cast<int>(++m_press_counter), temp);
+        m_pending         = false;
+        float    temp     = adc.readTemperature();
+        uint32_t bootFlag = *(__IO uint32_t*)FlashLayout::CONFIG_START;
+
+        printf("[%s:%d]:%3d:Temperature: %3.2f[*C] %d\n\r", getFilename(), __LINE__,
+               static_cast<int>(++m_press_counter), temp, bootFlag);
     }
 }
 

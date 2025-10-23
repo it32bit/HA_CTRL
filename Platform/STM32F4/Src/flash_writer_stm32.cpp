@@ -18,6 +18,12 @@ void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
     {
     }
 
+    // Clear error flags
+    FLASH->SR |= FLASH_SR_EOP | FLASH_SR_PGAERR | FLASH_SR_PGPERR | FLASH_SR_PGSERR;
+
+    FLASH->CR &= ~FLASH_CR_PSIZE;
+    FLASH->CR |= FLASH_CR_PSIZE_1; // 32-bit programming
+
     FLASH->CR &= ~FLASH_CR_SNB;
     FLASH->CR |= FLASH_CR_SER | (t_sector << FLASH_CR_SNB_Pos);
     FLASH->CR |= FLASH_CR_STRT;
@@ -29,19 +35,32 @@ void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
     FLASH->CR &= ~FLASH_CR_SER;
 }
 
-__attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address,
-                                                                        std::uint32_t  t_data)
+// __attribute__((section(".ramfunc")))
+void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address, std::uint32_t t_data)
 {
+    // Wait for no ongoing operation
     while (FLASH->SR & FLASH_SR_BSY)
     {
     }
 
+    // Clear all error flags
+    FLASH->SR |= FLASH_SR_EOP | FLASH_SR_PGAERR | FLASH_SR_PGPERR | FLASH_SR_PGSERR;
+
+    // Set programming parallelism = 32 bits
+    FLASH->CR &= ~FLASH_CR_PSIZE;
+    FLASH->CR |= FLASH_CR_PSIZE_1; // 10b = 32-bit word programming
+
+    // Enable programming
     FLASH->CR |= FLASH_CR_PG;
-    *reinterpret_cast<volatile std::uint32_t*>(t_address) = t_data;
 
+    // Write the data
+    *(__IO uint32_t*)t_address = t_data;
+
+    // Wait until done
     while (FLASH->SR & FLASH_SR_BSY)
     {
     }
 
+    // Clear PG bit
     FLASH->CR &= ~FLASH_CR_PG;
 }
