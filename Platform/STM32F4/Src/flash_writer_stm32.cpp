@@ -29,7 +29,8 @@ void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
     FLASH->CR &= ~FLASH_CR_SER;
 }
 
-void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address, std::uint32_t t_data)
+__attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address,
+                                                                        std::uint32_t  t_data)
 {
     while (FLASH->SR & FLASH_SR_BSY)
     {

@@ -182,11 +182,13 @@ SECTIONS
   {
     . = ALIGN(4);
     _sramfunc = .;
-    *(.ramfunc)
-    *(.ramfunc*)
+    KEEP(*(.ramfunc))
+    KEEP(*(.ramfunc*))
     . = ALIGN(4);
     _eramfunc = .;
   } >RAM AT> FLASH
+
+  _sidata_ramfunc = LOADADDR(.ramfunc);
 
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
