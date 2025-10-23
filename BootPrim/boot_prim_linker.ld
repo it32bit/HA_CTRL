@@ -114,6 +114,17 @@ SECTIONS
     _edata = .;
   } >RAM AT> FLASH
 
+  /* RAM-executed flash functions */
+  .ramfunc :
+  {
+    . = ALIGN(4);
+    _sramfunc = .;
+    *(.ramfunc)
+    *(.ramfunc*)
+    . = ALIGN(4);
+    _eramfunc = .;
+  } >RAM AT> FLASH
+
   .bss :
   {
     _sbss = .;

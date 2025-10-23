@@ -114,6 +114,17 @@ SECTIONS
     _edata = .;
   } >RAM AT> FLASH
 
+  /* RAM-executed flash functions */
+  .ramfunc :
+  {
+    . = ALIGN(4);
+    _sramfunc = .;
+    *(.ramfunc)
+    *(.ramfunc*)
+    . = ALIGN(4);
+    _eramfunc = .;
+  } >RAM AT> FLASH
+
   .bss :
   {
     _sbss = .;
@@ -133,33 +144,33 @@ SECTIONS
   /* Reserved regions for BootSec access (NOLOAD) */
   .config_region (NOLOAD) :
   {
-    __config_start__ = 0x0800C000; /* Sector 3 */
+    __config_start__ = 0x0800C000;
   } >FLASH
 
   .error_log_region (NOLOAD) :
   {
-    __error_log_start__ = 0x08008000; /* Sector 2 */
+    __error_log_start__ = 0x08008000;
   } >FLASH
 
   .cert_private_region (NOLOAD) :
   {
-    __cert_private_start__ = 0x08004000; /* Sector 1 */
+    __cert_private_start__ = 0x08004000;
   } >FLASH
 
   .cert_public_region (NOLOAD) :
   {
-    __cert_public_start__ = 0x080F8400; /* Sector 11 */
+    __cert_public_start__ = 0x080F8400;
   } >FLASH
 
   .metadata_cert_region (NOLOAD) :
   {
-    __metadata_start__ = 0x0807FC00; /* End of app region */
+    __metadata_start__ = 0x0807FC00;
     __cert_start__     = 0x0807FE00;
   } >FLASH
 
   .update_metadata_cert_region (NOLOAD) :
   {
-    __new_metadata_start__ = 0x080FFC00; /* End of update app */
+    __new_metadata_start__ = 0x080FFC00;
     __new_cert_start__     = 0x080FFE00;
   } >FLASH
 

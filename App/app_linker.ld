@@ -177,6 +177,17 @@ SECTIONS
     _eccmram = .;       /* create a global symbol at ccmram end */
   } >CCMRAM AT> FLASH
 
+  /* RAM-executed flash functions */
+  .ramfunc :
+  {
+    . = ALIGN(4);
+    _sramfunc = .;
+    *(.ramfunc)
+    *(.ramfunc*)
+    . = ALIGN(4);
+    _eramfunc = .;
+  } >RAM AT> FLASH
+
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .bss :
