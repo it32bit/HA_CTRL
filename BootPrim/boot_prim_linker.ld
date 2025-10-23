@@ -33,7 +33,7 @@ MEMORY
 /* Symbol for end of BootPrim region */
 __boot_prim_end__ = ORIGIN(FLASH) + LENGTH(FLASH);
 
-/SECTIONS/
+SECTIONS
 {
   .isr_vector :
   {

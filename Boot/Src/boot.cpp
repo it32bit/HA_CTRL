@@ -12,7 +12,7 @@ void Bootloader::applyUpdate()
     const auto& meta = m_metadata();
 
     auto src = std::span<const std::uint8_t>(
-        reinterpret_cast<const std::uint8_t*>(FlashLayout::NEW_APP_START), meta.size);
+        reinterpret_cast<const std::uint8_t*>(FlashLayout::NEW_APP_START), meta.firmwareSize);
 
     std::uintptr_t dst = FlashLayout::APP_START;
 

@@ -56,14 +56,16 @@ extern "C" int main()
 
     clock.initialize(nullptr);
 
-    if ((flags.getState() == BootState::BLANK) || (flags.getState() == BootState::Idle))
+    auto isStaged = flags.getState();
+
+    if ((isStaged == BootState::BLANK) || (isStaged == BootState::Idle))
     {
         // TODO: ISSUE-1: BootState - Not able to write and validate
-        // flags.setState(BootState::Staged);
+        flags.setState(BootState::Staged);
         JumpToBootSec();
     }
 
-    auto isStaged = flags.getState();
+    isStaged = BootState::Staged; // TODO: to be removed when ISSUE-1 will be Fixed
 
     /**
      * Flash-backed boot flags using BootState
