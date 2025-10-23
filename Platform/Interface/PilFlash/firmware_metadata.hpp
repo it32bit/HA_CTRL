@@ -10,14 +10,17 @@ namespace Firmware
 {
 constexpr uint32_t METADATA_MAGIC = 0xDEADBEEF;
 
+// Total size: 512 bytes (with padding)
+// Place this at APP_METADATA_START or NEW_APP_METADATA_START
+// Hash should cover APP_START to APP_METADATA_START - 1
 struct Metadata
 {
-    uint32_t magic;        // Must be METADATA_MAGIC
-    uint32_t version;      // Semantic version or build ID
-    uint32_t size;         // Firmware image size in bytes
-    uint32_t crc32;        // CRC32 checksum of firmware
-    uint32_t flags;        // Status flags (e.g., update pending, verified)
-    uint8_t  reserved[12]; // Padding for future use
+    std::uint32_t magic;
+    std::uint32_t version;           // Semantic version encoded as 0xMMmmpp (Major.Minor.Patch)
+    std::uint32_t buildTimestamp;    // Unix timestamp of build time
+    std::uint32_t firmwareSize;      // Size of firmware in bytes (excluding metadata + cert)
+    std::uint8_t  firmwareHash[32];  // SHA-256 hash of firmware region
+    std::uint32_t reserved[3];       // Reserved for future use or alignment
 } __attribute__((packed));
 
 } // namespace Firmware

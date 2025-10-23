@@ -46,8 +46,11 @@ MEMORY
 {
   CCMRAM (xrw): ORIGIN = 0x10000000, LENGTH = 64K
   RAM    (xrw): ORIGIN = 0x20000000, LENGTH = 128K
-  FLASH  (rx) : ORIGIN = 0x0800C000, LENGTH = 448K
+  FLASH  (rx) : ORIGIN = 0x08020000, LENGTH = 384K - 1K
 }
+
+/* Place metadata and cert manually */
+__app_end = ORIGIN(FLASH) + LENGTH(FLASH);
 
 /* Sections */
 SECTIONS
@@ -200,10 +203,17 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  /* Symbols for metadata and certificate regions */
-  .metadata_region (NOLOAD) :
+  /* Optional: Update region metadata + cert */
+  .metadata_cert_region (NOLOAD) :
   {
-    __metadata_start__ = 0x080F8000;
+    __metadata_start__ = 0x0807FC00;
+    __cert_start__     = 0x0807FE00;
+  } >FLASH
+
+  .update_metadata_cert_region (NOLOAD) :
+  {
+    __new_metadata_start__ = 0x080FFC00;
+    __new_cert_start__     = 0x080FFE00;
   } >FLASH
 
   .cert_public_region (NOLOAD) :
@@ -213,12 +223,17 @@ SECTIONS
 
   .cert_private_region (NOLOAD) :
   {
-    __cert_private_start__ = 0x080FC000;
+    __cert_private_start__ = 0x08004000;
   } >FLASH
 
   .error_log_region (NOLOAD) :
   {
-    __error_log_start__ = 0x080FC400;
+    __error_log_start__ = 0x08008000;
+  } >FLASH
+
+  .config_region (NOLOAD) :
+  {
+    __config_start__ = 0x0800C000;
   } >FLASH
 
   /* Remove information from the compiler libraries */

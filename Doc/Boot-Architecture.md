@@ -209,58 +209,7 @@ Then implement FlashDriver for STM32, ESP32, Nordic — all using direct registe
 
 ## Flash Memory Map (STM32F4 Example)
 
-+-----------------------------+ 0x08000000
-| Bootloader I               | 16 KB
-| - Fixed, minimal           |
-| - Sets VTOR                |
-+-----------------------------+ 0x08004000
-| Bootloader II              | 48 KB
-| - Validates firmware       |
-| - Applies update           |
-| - Configures device        |
-+-----------------------------+ 0x0800C000
-| Application                | 448 KB
-| - Main firmware            |
-| - Receives update          |
-+-----------------------------+ 0x08080000
-| New Application            | 448 KB
-| - Staged firmware image    |
-+-----------------------------+ 0x080F8000
-| Metadata                   | 1 KB
-| - CRC, version, flags      |
-+-----------------------------+ 0x080F8400
-| Firmware Certificate       | 1 KB
-| - Public key               |
-+-----------------------------+ 0x080F8800
-| Reserved / Alignment       | 1 KB
-+-----------------------------+ 0x080F8C00
-| New Bootloader II          | 48 KB
-| - Staged Boot2 binary      |
-+-----------------------------+ 0x080FA800
-| Configuration              | 2 KB
-| - Device settings          |
-+-----------------------------+ 0x080FAA00
-| Reserved Area              | 6 KB
-| - Rollback, telemetry, etc.|
-+-----------------------------+ 0x080FC000
-| Private Certificate        | 1 KB
-| - Device-specific key      |
-+-----------------------------+ 0x080FC400
-| Error Log                  | 4 KB
-| - Boot/update diagnostics  |
-+-----------------------------+ 0x080FFFFF
-
-Total: 512 KB + 512 KB = 1024 KB
-
-## Toolchain & Build System
-
-| Tool       | Purpose                              |
-|------------|---------------------------------------|
-| CMake      | Cross-platform build system           |
-| GCC/Clang  | C++20 support for ARM targets         |
-| OpenOCD    | Flash/debug STM32F4                   |
-| Python     | Firmware packaging tool               |
-| mbedTLS    | Optional crypto (C++ wrapper)         |
+depreciated
 
 ## Bootloader Architecture Overview
 
@@ -271,10 +220,104 @@ Total: 512 KB + 512 KB = 1024 KB
 | BootPrim/   | Minimal bootloader: sets VTOR, verifies BootSec, jumps to it         |
 | BootSec/    | Full-featured bootloader: validates firmware, applies update         |
 
-## Next Steps
+## New Aproach to Flash Layout 23.10.2025
 
-- Define FirmwareHeader and CRC32 logic in C++20
-- Write Bootloader I in pure C++20 with direct register access
-- Build Bootloader II with FirmwareUpdater, FlashDriver, and platform abstraction
-- Create firmware packaging tool in Python
-- Port Bootloader II to ESP32 and Nordic
+### Firmware update mode
+
+- Per-vendor certificate
+- Metadata + certificate embedded at the end of each application
+- Sector-aware layout to avoid erase conflicts
+- Combine_bin packaging for monolithic image generation
+
+### Flash Layout
+
++-------------------------------------------------+ 0x08000000
+| PRIMARY BOOTLOADER AREA                         | 16 KB (Sector 0)
+| - Fixed, minimal startup code                   |
+| - Initializes system and jumps to Bootloader2   |
++-------------------------------------------------+ 0x08004000
+| PRIVATE CERTIFICATE AREA                        | 16 KB (Sector 1)
+| - Stores device-unique or private certificate   |
++-------------------------------------------------+ 0x08008000
+| ERROR LOG AREA                                  | 16 KB (Sector 2)
+| - Boot and runtime error logs                   |
++-------------------------------------------------+ 0x0800C000
+| CONFIGURATION / BOOT FLAGS                      | 16 KB (Sector 3)
+| - Boot control flags, configuration data        |
++-------------------------------------------------+ 0x08010000
+| SECONDARY BOOTLOADER                            | 64 KB (Sector 4)
+| - Main bootloader logic                         |
+| - Validates, decrypts, and updates firmware     |
++-------------------------------------------------+ 0x08020000
+| MAIN APPLICATION                                | 383 KB (Sectors 5–7 minus 1 KB)
+| - Main operational firmware                     |
+| - Handles OTA updates and main features         |
+|                                                 |
+|   ├─ APP METADATA                               | 512 B @ 0x0807FC00–0x0807FDFF
+|   │  - Version, CRC, flags                      |
+|   └─ APP CERTIFICATE                            | 512 B @ 0x0807FE00–0x0807FFFF
+|      - Signature or verification key            |
++-------------------------------------------------+ 0x08090000
+| NEW SECONDARY BOOTLOADER                        | 64 KB (Sector 8 upper half)
+| - Updated Bootloader2 image (staging area)      |
++-------------------------------------------------+ 0x080A0000
+| NEW APPLICATION                                 | 383 KB (Sectors 9–11 minus 1 KB)
+| - Staged firmware image                         |
+|                                                 |
+|   ├─ NEW APP METADATA                           | 512 B @ 0x080FFC00–0x080FFDFF
+|   │  - Version, CRC, flags                      |
+|   └─ NEW APP CERTIFICATE                        | 512 B @ 0x080FFE00–0x080FFFFF
+|      - Signature or verification key            |
++-------------------------------------------------+ 0x080FFFFF
+
+### Bootloader Logic to Verify Hash + Certificate
+
+#### Read Metadata
+
+```cpp
+auto metadata = reinterpret_cast<const FirmwareMetadata*>(FlashLayout::APP_METADATA_START);
+
+```
+
+### Validate Magic and Size
+
+```cpp
+bool isValidMetadata =
+    metadata->magic == Firmware::METADATA_MAGIC &&
+    metadata->firmwareSize > 0 &&
+    metadata->firmwareSize <= FlashLayout::APP_SIZE;
+
+```
+
+#### Compute SHA-256 of firmware region (Use your crypto library (e.g. mbedTLS, tinycrypt))
+
+```cpp
+std::uint8_t computedHash[32];
+sha256_compute(reinterpret_cast<const std::uint8_t*>(FlashLayout::APP_START),
+               metadata->firmwareSize,
+               computedHash);
+```
+
+#### Compare hashes
+
+```cpp
+bool hashMatch = std::memcmp(computedHash, metadata->firmwareHash, 32) == 0;
+```
+
+#### Verify signature (optional for now)
+
+```cpp
+bool signatureValid = verify_signature(metadata->firmwareHash, cert, publicKey);
+```
+
+#### Jump to application if valid
+
+```cpp
+extern const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(__metadata_start__);
+
+if (hashMatch)
+{
+    JumpToApp(); // Set VTOR, MSP, and call reset vector
+}else
+{// Log error, stay in bootloader, or rollback}
+```
