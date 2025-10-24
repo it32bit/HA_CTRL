@@ -83,7 +83,7 @@
             }
         },
         {
-            "name": "Attach to Microcontroller - ST-Link",
+            "name": "Attach to App",
             "cwd": "${workspaceFolder}",
             "type": "cortex-debug",
             "request": "attach",
