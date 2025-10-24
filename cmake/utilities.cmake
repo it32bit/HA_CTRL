@@ -15,19 +15,34 @@ function(add_size_print target)
         COMMAND ${CMAKE_COMMAND} -E echo "******** Detailed Memory Usage:"
         COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${target}>
     )
-
 endfunction()
 
-# Function to create combined binary: Bootloader + Padding + App
-function(add_combined_binary_with_metadata target_app target_bsec app_metadata_bin sec_metadata_bin output_name)
+# Function to extract firmware version metadata from ELF files
+function(add_metadata_extraction target elf_output metadata_output)
+    add_custom_command(
+        OUTPUT ${metadata_output}
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
+                $<TARGET_FILE:${target}>
+                ${metadata_output}
+        DEPENDS ${target}
+        COMMENT "Extracting firmware version metadata from ${target} ELF"
+    )
+endfunction()
+
+# Function to create combined binary: App + App Metadata + BootSec + BootSec Metadata
+function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin sec_meta_bin output_name)
     set(APP_ELF       $<TARGET_FILE:${target_app}>)
     set(BOOT_SEC_ELF  $<TARGET_FILE:${target_bsec}>)
 
     set(APP_BIN       "${CMAKE_BINARY_DIR_BIN}/${target_app}.bin")
     set(BOOT_SEC_BIN  "${CMAKE_BINARY_DIR_BIN}/${target_bsec}.bin")
-    set(APP_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${app_metadata_bin}")
-    set(SEC_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${sec_metadata_bin}")
+    set(APP_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${app_meta_bin}")
+    set(SEC_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${sec_meta_bin}")
     set(COMBINED_BIN  "${CMAKE_BINARY_DIR_BIN}/${output_name}.bin")
+
+    # Metadata extraction
+    add_metadata_extraction(${target_app} ${APP_ELF} ${APP_META_BIN})
+    add_metadata_extraction(${target_bsec} ${BOOT_SEC_ELF} ${SEC_META_BIN})
 
     add_custom_command(
         OUTPUT ${COMBINED_BIN}
@@ -41,7 +56,7 @@ function(add_combined_binary_with_metadata target_app target_bsec app_metadata_b
                 ${BOOT_SEC_BIN}
                 ${SEC_META_BIN}
                 ${COMBINED_BIN}
-        DEPENDS ${target_app} ${target_bsec}
+        DEPENDS ${target_app} ${target_bsec} ${APP_META_BIN} ${SEC_META_BIN}
         COMMENT "Creating combined firmware binary with metadata: ${output_name}.bin"
     )
 
@@ -69,7 +84,7 @@ function(add_firmware_packaging target_app target_bsec target_bprim project_name
         COMMENT "Extracting firmware version from application ELF"
     )
 
-    # Extract boot version (BootPrim + BootSec, optional merge logic)
+    # Extract boot version (BootPrim)
     add_custom_command(
         OUTPUT ${BOOT_VERSION_TXT}
         COMMAND ${CMAKE_SOURCE_DIR}/cmake/extract_version.sh ${BOOT_PRIM_ELF} > ${BOOT_VERSION_TXT}

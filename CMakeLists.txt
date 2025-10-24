@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 
-# Enables IDE support, static analysis, and debugging - generating compile_command.json
+# =========================================================================
+# Project Setup
+# =========================================================================
+project(ha-ctrl LANGUAGES C CXX ASM)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compilation commands into compile_commands.json")
 
 # =========================================================================
@@ -13,13 +17,9 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-# =========================================================================
-# PROJECT
-# =========================================================================
-project(ha-ctrl LANGUAGES C CXX ASM)
 
 # =========================================================================
-# Options to Enable/Disable Parts of Build
+# Build Options
 # =========================================================================
 option(BUILD_APP "Build the main application" ON)
 option(BUILD_BOOTLOADER "Build the bootloaders: Prim+Sec" ON)
@@ -27,7 +27,7 @@ option(BUILD_TESTING "Build unit tests" OFF)
 option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis" OFF)
 
 # =========================================================================
-# Module Path for Custom CMake Files
+# Paths and Toolchain
 # =========================================================================
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -35,28 +35,26 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Output Directory
 # =========================================================================
 set(CMAKE_BINARY_DIR_BIN ${CMAKE_BINARY_DIR}/../bin)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN}) # Ensure the bin directory exists
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR_BIN})
 
-# =========================================================================
-# Toolchain and Build Type Setup
-# Firmware Build (Only when NOT testing)
-# =========================================================================
 if(NOT BUILD_TESTING)
     include("cmake/gcc-arm-none-eabi.cmake")
-    include(${CMAKE_SOURCE_DIR}/cmake/utilities.cmake)
-
+    include("cmake/utilities.cmake")
 endif()
 
 # =========================================================================
-# Platform-Specific Settings
+# Platform Traits
 # =========================================================================
 set(PLATFORM_MCU "STM32F4" CACHE STRING "Target MCU family")
 if(PLATFORM_MCU STREQUAL "STM32F4")
-    include("${CMAKE_SOURCE_DIR}/cmake/platform-traits.cmake")
+    include("cmake/platform-traits.cmake")
 elseif(PLATFORM_MCU STREQUAL "NRF52")
-    include("${CMAKE_SOURCE_DIR}/cmake/platform-traits-nrf52.cmake")
+    include("cmake/platform-traits-nrf52.cmake")
 endif()
 
+# =========================================================================
+# Subdirectories
+# =========================================================================
 add_subdirectory(Platform/${PLATFORM_MCU})
 add_subdirectory(Boot)
 # PIL (platform-independent)
@@ -68,7 +66,7 @@ add_subdirectory(Platform/Interface/PilGpio)
 add_subdirectory(Platform/Interface/PilWatchdog)
 
 # =========================================================================
-# Add Subdirectories (Targets: Bootloader's and App)
+# Subdirectories (Targets: Bootloader's and App)
 # =========================================================================
 if(BUILD_BOOTLOADER)
     add_subdirectory(BootPrim)
@@ -80,14 +78,14 @@ if(BUILD_APP)
 endif()
 
 # =========================================================================
-# Clang-Tidy Support (optional)
+# Clang-Tidy Integration
 # =========================================================================
 if(ENABLE_CLANG_TIDY AND NOT BUILD_TESTING)
-    include(cmake/clang-tidy.cmake)
+    include("cmake/clang-tidy.cmake")
 endif()
 
 # =========================================================================
-# CppUTest Unit Testing Support (host only)
+# Unit Testing
 # =========================================================================
 if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     enable_testing()
@@ -96,21 +94,17 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
 endif()
 
 # =========================================================================
-# Build Checks
+# Build Validation
 # =========================================================================
 if(NOT BUILD_APP AND NOT BUILD_BOOTLOADER AND NOT BUILD_TESTING)
     message(FATAL_ERROR "All build options (APP, BOOTLOADERS, TESTS) are disabled. Nothing to build.")
 endif()
 
+# =========================================================================
+# Firmware Build Flow
+# =========================================================================
 if(NOT BUILD_TESTING)
-    # ========================================================================
-    # Combined Size Check Target (after both bootloader and app are built)
-    # ========================================================================
-    # ALL → ensures this runs every time you build
-    # DEPENDS → ensures ha-ctrl-app, ha-ctrl-sec, ha-ctrl-prim are built first
-    # -Dtarget=... → passes the target name to your script
-    # -P → tells CMake to run the script
-
+    # Size Check
     add_custom_target(check_size ALL
         COMMAND ${CMAKE_COMMAND}
             -Dtarget=ha-ctrl-app
@@ -120,18 +114,40 @@ if(NOT BUILD_TESTING)
     )
     add_dependencies(check_size ha-ctrl-prim ha-ctrl-sec ha-ctrl-app)
 
-    # Add combined binary target
-    add_combined_binary_with_metadata(
-        ha_ctrl_app # Target Application
-        ha_ctrl_sec # Target Bootloader Secondary
-        app_metadata.bin
-        bootsec_metadata.bin
-        ${PROJECT_NAME}_combined_image # Output name for combined binary (without .bin)
+    # Metadata Extraction
+    add_custom_command(
+        OUTPUT ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
+                $<TARGET_FILE:ha-ctrl-app>
+                ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
+        DEPENDS ha-ctrl-app
+        COMMENT "Generating app metadata"
     )
 
-    DEPENDS extract_versions ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_image.bin
+    add_custom_command(
+        OUTPUT ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
+                $<TARGET_FILE:ha-ctrl-sec>
+                ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
+        DEPENDS ha-ctrl-sec
+        COMMENT "Generating boot-sec metadata"
+    )
 
-    # Firmware package
+    add_custom_target(generate_metadata ALL
+        DEPENDS ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
+                ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
+    )
+
+    # Combined Binary
+    add_combined_firmware_with_metadata(
+        ha-ctrl-app
+        ha-ctrl-sec
+        app_metadata.bin
+        bootsec_metadata.bin
+        ${PROJECT_NAME}_combined_image
+    )
+
+    # Firmware Packaging
     add_firmware_packaging(
         ha-ctrl-app
         ha-ctrl-sec
@@ -139,10 +155,16 @@ if(NOT BUILD_TESTING)
         ${PROJECT_NAME}
     )
 
+    # Flash Target
+    add_custom_target(combined-flash
+        DEPENDS ${PROJECT_NAME}_combined_image_combined
+        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_image.bin
+        COMMENT "Flashing combined firmware via ST-Link"
+    )
 endif()
 
 # =========================================================================
-# Print Summary of Build Options
+# Build Summary
 # =========================================================================
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "BUILD_APP:\t\t${BUILD_APP}")
@@ -151,7 +173,7 @@ message(STATUS "BUILD_TESTING:\t${BUILD_TESTING}")
 message(STATUS "CLANG_TIDY:\t\t${ENABLE_CLANG_TIDY}")
 
 # =========================================================================
-# Extra Cleaning Target
+# Cleanup Target
 # =========================================================================
 add_custom_target(clean-extra
     COMMAND ${CMAKE_COMMAND} -E rm -rf
