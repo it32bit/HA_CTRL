@@ -14,6 +14,7 @@
  */
 #include <cstdint>
 #include "stm32f4xx.h"
+#include "boot_prim.hpp"
 #include "boot_flag_manager.hpp"
 #include "clock_manager_stm32.hpp"
 #include "flash_writer_stm32.hpp"
@@ -62,7 +63,8 @@ extern "C" int main()
         isStaged != BootState::Applied)
     {
         // TODO: ISSUE-1: BootState - Not able to write and validate
-        // flags.setState(BootState::Staged);
+        flags.setState(BootState::Staged);
+        LEDControl::enableOrangeLED();
     }
 
     isStaged = flags.getState(); // TODO: to be removed when ISSUE-1 will be Fixed

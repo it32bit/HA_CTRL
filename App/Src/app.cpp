@@ -99,8 +99,15 @@ void ConsoleNotify(uint8_t t_item)
  */
 static void AppIntro()
 {
-    printf("HA-CTRL-APP\t Firmware Version: %d.%d \n\r", FIRMWARE_VERSION.major,
-           FIRMWARE_VERSION.minor);
+    uint32_t bootFlag = *(__IO uint32_t*)FlashLayout::CONFIG_START;
+
+    std::array<uint8_t, 4> bytes = {static_cast<uint8_t>((bootFlag >> 24) & 0xFF),
+                                    static_cast<uint8_t>((bootFlag >> 16) & 0xFF),
+                                    static_cast<uint8_t>((bootFlag >> 8) & 0xFF),
+                                    static_cast<uint8_t>((bootFlag >> 0) & 0xFF)};
+
+    printf("HA-CTRL-APP\tFirmware Version: %d.%d\tNew FW Status:'%c%c%c%c'\n\r",
+           FIRMWARE_VERSION.major, FIRMWARE_VERSION.minor, bytes[0], bytes[1], bytes[2], bytes[3]);
 }
 
 /**
@@ -145,12 +152,11 @@ void UserButtonManager::process()
 {
     if (m_pending)
     {
-        m_pending         = false;
-        float    temp     = adc.readTemperature();
-        uint32_t bootFlag = *(__IO uint32_t*)FlashLayout::CONFIG_START;
+        m_pending  = false;
+        float temp = adc.readTemperature();
 
-        printf("[%s:%d]:%3d:Temperature: %3.2f[*C] %d\n\r", getFilename(), __LINE__,
-               static_cast<int>(++m_press_counter), temp, bootFlag);
+        printf("[%s:%d]:%3d:Temperature: %3.2f[*C]\n\r", getFilename(), __LINE__,
+               static_cast<int>(++m_press_counter), temp);
     }
 }
 

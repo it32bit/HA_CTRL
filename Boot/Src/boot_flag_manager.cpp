@@ -2,6 +2,18 @@
 #include "stm32f4xx.h"
 #include "flash_layout.hpp"
 
+// TODO: To be removed, for debug purpose
+static void debugLedBlue()
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+    GPIOD->MODER &= ~(0b11 << (15 * 2)); // Clear mode
+    GPIOD->MODER |= (0b01 << (15 * 2));  // Set to output
+    GPIOD->OTYPER &= ~(1 << 15);
+    GPIOD->OSPEEDR |= (0b11 << (15 * 2));
+    GPIOD->PUPDR &= ~(0b11 << (15 * 2));
+    GPIOD->ODR |= (1 << 15);
+}
+
 BootFlagManager::BootFlagManager(IFlashWriter* writer) : m_writer(writer) {}
 
 BootState BootFlagManager::getState() const
@@ -22,7 +34,7 @@ void BootFlagManager::setState(BootState state)
     uint32_t readBack = *(__IO uint32_t*)FLAG_ADDR;
     if (readBack != static_cast<uint32_t>(state))
     {
-        // handle error or re-erase/retry
+        debugLedBlue();
     }
 }
 

@@ -54,7 +54,7 @@ target_include_directories(${BPRIM_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
     ${CMAKE_SOURCE_DIR}/Boot/Inc
-    ${CMAKE_SOURCE_DIR}/BootSec/Inc
+    ${CMAKE_SOURCE_DIR}/BootPrim/Inc
 )
 
 # Compiler defines
