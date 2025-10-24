@@ -28,8 +28,6 @@
 //     boot.jumpToApplication();
 // }
 
-
-
 static void DeinitPeripheralsBeforeJump();
 static void JumpToApp();
 static void ClockErrorHandler();
@@ -50,6 +48,9 @@ extern "C" int main()
         red->toggle();
     }
 
+    /**
+    * TODO: Firmware verification support should be added once the process of writing the new firmware to flash memory is completed.
+    *
     if (flags.getState() == BootState::Staged)
     {
         // TODO: Add CRC or signature verification here
@@ -61,7 +62,7 @@ extern "C" int main()
         // TODO: Apply update (e.g., copy NEW_APP to APP)
         flags.setState(BootState::Applied);
     }
-
+    */
     JumpToApp();
 
     while (true)

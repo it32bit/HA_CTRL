@@ -4,7 +4,7 @@
 class LEDControl
 {
   public:
-    static void enableOrangeLED()
+    static void toggleOrangeLED()
     {
         // 1. Enable GPIOD clock
         RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
@@ -22,11 +22,11 @@ class LEDControl
         // 5. Disable pull-up/pull-down
         GPIOD->PUPDR &= ~(0b11 << (13 * 2));
 
-        // 6. Turn on LED (set PD13 high)
-        GPIOD->ODR |= (1 << 13);
+        // 6. Toggle LED (PD13)
+        GPIOD->ODR ^= (1 << 13);
     }
 
-    static void enableBlueLED()
+    static void toggleBlueLED()
     {
         // 1. Enable GPIOD clock
         RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
@@ -44,7 +44,7 @@ class LEDControl
         // 5. Disable pull-up/pull-down
         GPIOD->PUPDR &= ~(0b11 << (15 * 2));
 
-        // 6. Turn on LED (set PD15 high)
-        GPIOD->ODR |= (1 << 15);
+        // 6. Toggle on LED (set PD15 high)
+        GPIOD->ODR ^= (1 << 15);
     }
 };

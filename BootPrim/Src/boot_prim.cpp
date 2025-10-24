@@ -20,15 +20,6 @@
 #include "flash_writer_stm32.hpp"
 #include "flash_layout.hpp"
 
-/**
- * Another option is to set in main() on first boot best for: Development
- *  if (flags.getState() != BootState::Staged &&
- *      flags.getState() != BootState::Verified &&
- *      flags.getState() != BootState::Applied)
- *      {
- *          flags.setState(BootState::Staged);
- *      }
- */
 namespace BootPrim
 {
 
@@ -54,6 +45,7 @@ extern "C" int main()
 {
     FlashWriterSTM32F4 writer;
     BootFlagManager    flags(&writer);
+    uint32_t           timer{};
 
     clock.initialize(nullptr);
 
@@ -62,23 +54,34 @@ extern "C" int main()
     if (isStaged != BootState::Staged && isStaged != BootState::Verified &&
         isStaged != BootState::Applied)
     {
-        // TODO: ISSUE-1: BootState - Not able to write and validate
         flags.setState(BootState::Staged);
-        LEDControl::enableOrangeLED();
+        LEDControl::toggleOrangeLED();
     }
-
-    isStaged = flags.getState(); // TODO: to be removed when ISSUE-1 will be Fixed
 
     /**
      * Flash-backed boot flags using BootState
      */
-    // if (isStaged == BootState::Staged)
+    isStaged = flags.getState();
+
+    if (isStaged == BootState::Staged)
     {
         JumpToBootSec();
     }
 
     while (true)
     {
+        /**
+         * @brief Blinking period depends on number of uC cycles per loop (~30 - 50):
+         *      Tc = 1/16MHz = 62.5ns,
+         *      Tloop = Tc x CyclePerLoop,
+         *      Ttoggle = Tloop x 1M,
+         *  Obserwed blinking period ~1Hz
+         */
+        if ((timer % 1000000) == 0)
+        {
+            LEDControl::toggleOrangeLED();
+        }
+        ++timer;
     }
 }
 

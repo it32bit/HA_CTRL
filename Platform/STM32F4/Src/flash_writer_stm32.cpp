@@ -35,7 +35,7 @@ void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
     FLASH->CR &= ~FLASH_CR_SER;
 }
 
-// __attribute__((section(".ramfunc")))
+__attribute__((section(".ramfunc")))
 void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address, std::uint32_t t_data)
 {
     // Wait for no ongoing operation
@@ -54,7 +54,7 @@ void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address, std::uint32_t t_dat
     FLASH->CR |= FLASH_CR_PG;
 
     // Write the data
-    *(__IO uint32_t*)t_address = t_data;
+    *(__IO uint32_t*)t_address = 0x53544147;//t_data;
 
     // Wait until done
     while (FLASH->SR & FLASH_SR_BSY)

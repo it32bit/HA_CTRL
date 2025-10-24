@@ -10,6 +10,7 @@ class FlashWriterSTM32F4 : public IFlashWriter
   public:
     void unlock() override;
     void eraseSector(std::uint8_t t_sector) override;
+    __attribute__((section(".ramfunc")))
     void writeWord(std::uintptr_t t_address, std::uint32_t t_data) override;
 };
 
