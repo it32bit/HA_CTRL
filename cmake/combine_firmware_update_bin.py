@@ -10,73 +10,52 @@
 # | Component            | Flash Address | Size   |
 # |----------------------|---------------|--------|
 # | Secondary Bootloader | 0x08010000    | 64 KB  |
+# | BootSec Metadata     | 0x0801FC00    | 512 B  |
 # | Application          | 0x08020000    | 383 KB |
-# | App Metadata         | 0x0807FC00    | 512 B  |
-# | BootSec Metadata     | 0x0807FE00    | 512 B  |
+# | App Metadata         | 0x0807FE00    | 512 B  |
 #
 # It pads each region with 0xFF to ensure proper alignment
 # and fills gaps between regions.
 
-
 import sys
 import os
-import struct
 
-# === Flash layout constants ===
-FLASH_BASE_ADDR = 0x08000000
+def pad_to_offset(f, target_offset):
+    current_size = f.tell()
+    if current_size > target_offset:
+        raise ValueError(f"Data exceeds target offset {target_offset}")
+    f.write(b'\xFF' * (target_offset - current_size))
 
-BOOTLOADER2_START = 0x08010000
-BOOTLOADER2_SIZE  = 64 * 1024
+def combine(app_bin, app_meta, sec_bin, sec_meta, output_path):
+    # Constants
+    APP_META_OFFSET = 458240       # 0x0807FE00
+    SEC_META_OFFSET = 64512        # 0x0801FC00
 
-APP_START         = 0x08020000
-APP_SIZE          = (128 + 128 + 128) * 1024 - 1024  # 383KB
-APP_METADATA_START = 0x0807FC00
-APP_METADATA_SIZE  = 512
-APP_CERT_START     = 0x0807FE00
-APP_CERT_SIZE      = 512
+    with open(app_bin, 'rb') as f_app, open(app_meta, 'rb') as f_app_meta, \
+         open(sec_bin, 'rb') as f_sec, open(sec_meta, 'rb') as f_sec_meta, \
+         open(output_path, 'wb') as out:
 
-# === Input arguments ===
-if len(sys.argv) != 6:
-    print(f"Usage: {sys.argv[0]} <app.bin> <app_metadata.bin> <boot_sec.bin> <boot_sec_metadata.bin> <out_combined.bin>")
-    sys.exit(1)
+        # Write secondary bootloader
+        sec_data = f_sec.read()
+        out.write(sec_data)
+        pad_to_offset(out, SEC_META_OFFSET)
+        out.write(f_sec_meta.read())
 
-app_bin_path         = sys.argv[1]
-app_metadata_path    = sys.argv[2]
-boot_sec_bin_path    = sys.argv[3]
-boot_sec_metadata_path = sys.argv[4]
-out_bin_path         = sys.argv[5]
+        # Pad to start of application
+        app_start_offset = 0x08020000 - 0x08000000  # Assuming app starts at 0x08020000
+        pad_to_offset(out, app_start_offset)
 
-# === Helper: Load binary and pad to expected size ===
-def load_and_pad(path, expected_size):
-    with open(path, "rb") as f:
-        data = f.read()
-    if len(data) > expected_size:
-        raise ValueError(f"{path} exceeds expected size ({len(data)} > {expected_size})")
-    return data + b'\xFF' * (expected_size - len(data))
+        # Write application
+        app_data = f_app.read()
+        out.write(app_data)
+        pad_to_offset(out, APP_META_OFFSET)
+        out.write(f_app_meta.read())
 
-# === Load binaries ===
-boot_sec_bin     = load_and_pad(boot_sec_bin_path, BOOTLOADER2_SIZE)
-boot_sec_meta    = load_and_pad(boot_sec_metadata_path, 512)
-app_bin          = load_and_pad(app_bin_path, APP_SIZE)
-app_metadata     = load_and_pad(app_metadata_path, 512)
+    print(f"Combined firmware written to {output_path}")
 
-# === Create memory map ===
-combined_size = (APP_CERT_START + APP_CERT_SIZE) - BOOTLOADER2_START
-combined_image = bytearray(b'\xFF' * combined_size)
+if __name__ == '__main__':
+    if len(sys.argv) != 6:
+        print("Usage: combine_firmware.py <app.bin> <app_metadata.bin> <sec.bin> <sec_metadata.bin> <output.bin>")
+        sys.exit(1)
 
-def write_to_flash(offset_addr, data, label):
-    offset = offset_addr - BOOTLOADER2_START
-    print(f"{label}: Flash Addr=0x{offset_addr:08X}, Offset={offset}, Size={len(data)}")
-    combined_image[offset:offset+len(data)] = data
-
-# === Write components ===
-write_to_flash(BOOTLOADER2_START, boot_sec_bin, "Secondary Bootloader")
-write_to_flash(APP_START, app_bin, "Application")
-write_to_flash(APP_METADATA_START, app_metadata, "App Metadata")
-write_to_flash(APP_CERT_START, boot_sec_meta, "BootSec Metadata")
-
-# === Save combined binary ===
-with open(out_bin_path, "wb") as f:
-    f.write(combined_image)
-
-print(f"\nCombined binary created: {out_bin_path}")
+    combine(*sys.argv[1:])

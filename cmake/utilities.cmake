@@ -17,19 +17,61 @@ function(add_size_print target)
     )
 endfunction()
 
-# Function to extract firmware version metadata from ELF files
-function(add_metadata_extraction target elf_output metadata_output)
-    add_custom_command(
-        OUTPUT ${metadata_output}
-        COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
-                $<TARGET_FILE:${target}>
-                ${metadata_output}
-        DEPENDS ${target}
-        COMMENT "Extracting firmware version metadata from ${target} ELF"
-    )
-endfunction()
+# =========================================================================
+# Metadata Extraction and Conversion
+# =========================================================================
 
-# Function to create combined binary: App + App Metadata + BootSec + BootSec Metadata
+# Extract app version from ELF
+set(APP_VERSION_TXT  "${CMAKE_BINARY_DIR}/firmware_version_app.txt")
+add_custom_command(
+    OUTPUT ${APP_VERSION_TXT}
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/extract_version.sh
+            $<TARGET_FILE:ha-ctrl-app> > ${APP_VERSION_TXT}
+    DEPENDS ha-ctrl-app
+    COMMENT "Extracting firmware version from application ELF"
+)
+
+# Extract boot-sec version from ELF
+set(BOOTSEC_VERSION_TXT  "${CMAKE_BINARY_DIR}/firmware_version_bootsec.txt")
+add_custom_command(
+    OUTPUT ${BOOTSEC_VERSION_TXT}
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/extract_version.sh
+            $<TARGET_FILE:ha-ctrl-sec> > ${BOOTSEC_VERSION_TXT}
+    DEPENDS ha-ctrl-sec
+    COMMENT "Extracting firmware version from BootSec ELF"
+)
+
+# Metadata Extraction
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
+            ${APP_VERSION_TXT}
+            ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
+    DEPENDS ${APP_VERSION_TXT}
+    COMMENT "Generating app metadata"
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
+            ${BOOTSEC_VERSION_TXT}
+            ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
+    DEPENDS ${BOOTSEC_VERSION_TXT}
+    COMMENT "Generating boot-sec metadata"
+)
+
+
+if(NOT TARGET generate_metadata)
+    add_custom_target(generate_metadata ALL
+        DEPENDS ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
+                ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
+    )
+endif()
+
+# =========================================================================
+# Combined Binary Creation
+# =========================================================================
+
 function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin sec_meta_bin output_name)
     set(APP_ELF       $<TARGET_FILE:${target_app}>)
     set(BOOT_SEC_ELF  $<TARGET_FILE:${target_bsec}>)
@@ -40,23 +82,19 @@ function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin
     set(SEC_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${sec_meta_bin}")
     set(COMBINED_BIN  "${CMAKE_BINARY_DIR_BIN}/${output_name}.bin")
 
-    # Metadata extraction
-    add_metadata_extraction(${target_app} ${APP_ELF} ${APP_META_BIN})
-    add_metadata_extraction(${target_bsec} ${BOOT_SEC_ELF} ${SEC_META_BIN})
-
     add_custom_command(
         OUTPUT ${COMBINED_BIN}
         COMMAND ${CMAKE_OBJCOPY} -O binary ${APP_ELF}      ${APP_BIN}
         COMMAND ${CMAKE_OBJCOPY} -O binary ${BOOT_SEC_ELF} ${BOOT_SEC_BIN}
         COMMAND ${CMAKE_COMMAND} -E echo "Combining firmware with metadata..."
         COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/cmake
-                python3 ${CMAKE_SOURCE_DIR}/cmake/combine_firmware.py
+                python3 ${CMAKE_SOURCE_DIR}/cmake/combine_firmware_update_bin.py
                 ${APP_BIN}
                 ${APP_META_BIN}
                 ${BOOT_SEC_BIN}
                 ${SEC_META_BIN}
                 ${COMBINED_BIN}
-        DEPENDS ${target_app} ${target_bsec} ${APP_META_BIN} ${SEC_META_BIN}
+        DEPENDS ${target_app} ${target_bsec} generate_metadata
         COMMENT "Creating combined firmware binary with metadata: ${output_name}.bin"
     )
 
@@ -65,18 +103,18 @@ function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin
     )
 endfunction()
 
-# Function to extract firmware versions from ELF files and create a versioned zip
-function(add_firmware_packaging target_app target_bsec target_bprim project_name)
-    # Paths to output version text files
-    set(APP_VERSION_TXT  "${CMAKE_BINARY_DIR}/firmware_version_app.txt")
-    set(BOOT_VERSION_TXT "${CMAKE_BINARY_DIR}/firmware_version_boot.txt")
+# =========================================================================
+# Firmware Packaging
+# =========================================================================
 
-    # ELF files from CMake targets
+function(add_firmware_packaging target_app target_bsec target_bprim project_name)
+    set(APP_VERSION_TXT  "${CMAKE_BINARY_DIR_BIN}/firmware_version_app.txt")
+    set(BOOT_VERSION_TXT "${CMAKE_BINARY_DIR_BIN}/firmware_version_boot.txt")
+
     set(APP_ELF      $<TARGET_FILE:${target_app}>)
     set(BOOT_SEC_ELF $<TARGET_FILE:${target_bsec}>)
     set(BOOT_PRIM_ELF $<TARGET_FILE:${target_bprim}>)
 
-    # Extract app version from APP_ELF
     add_custom_command(
         OUTPUT ${APP_VERSION_TXT}
         COMMAND ${CMAKE_SOURCE_DIR}/cmake/extract_version.sh ${APP_ELF} > ${APP_VERSION_TXT}
@@ -84,7 +122,6 @@ function(add_firmware_packaging target_app target_bsec target_bprim project_name
         COMMENT "Extracting firmware version from application ELF"
     )
 
-    # Extract boot version (BootPrim)
     add_custom_command(
         OUTPUT ${BOOT_VERSION_TXT}
         COMMAND ${CMAKE_SOURCE_DIR}/cmake/extract_version.sh ${BOOT_PRIM_ELF} > ${BOOT_VERSION_TXT}
@@ -92,15 +129,12 @@ function(add_firmware_packaging target_app target_bsec target_bprim project_name
         COMMENT "Extracting firmware version from BootPrim ELF"
     )
 
-    # Target to ensure version files are built
     add_custom_target(extract_versions ALL
         DEPENDS ${APP_VERSION_TXT} ${BOOT_VERSION_TXT}
     )
 
-    # Output zip location
     set(OUTPUT_ZIP "${CMAKE_SOURCE_DIR}/_firmware/${project_name}_firmware.zip")
 
-    # Create firmware zip with versioned name
     add_custom_command(
         OUTPUT ${OUTPUT_ZIP}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/_firmware
@@ -110,11 +144,11 @@ function(add_firmware_packaging target_app target_bsec target_bprim project_name
                 ${CMAKE_BINARY_DIR_BIN}
                 ${CMAKE_SOURCE_DIR}/_firmware
                 ${project_name}
-        DEPENDS extract_versions ${CMAKE_BINARY_DIR_BIN}/${project_name}_combined_image.bin
+        DEPENDS extract_versions ${CMAKE_BINARY_DIR_BIN}/${project_name}_combined_update_image.bin
+
         COMMENT "Packaging combined firmware into versioned zip: ${project_name}_firmware.zip"
     )
 
-    # Target to package the firmware
     add_custom_target(package_firmware ALL
         DEPENDS ${OUTPUT_ZIP}
     )

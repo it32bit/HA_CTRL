@@ -114,29 +114,14 @@ if(NOT BUILD_TESTING)
     )
     add_dependencies(check_size ha-ctrl-prim ha-ctrl-sec ha-ctrl-app)
 
-    # Metadata Extraction
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
-        COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
-                $<TARGET_FILE:ha-ctrl-app>
-                ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
-        DEPENDS ha-ctrl-app
-        COMMENT "Generating app metadata"
-    )
 
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
-        COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
-                $<TARGET_FILE:ha-ctrl-sec>
-                ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
-        DEPENDS ha-ctrl-sec
-        COMMENT "Generating boot-sec metadata"
-    )
 
-    add_custom_target(generate_metadata ALL
-        DEPENDS ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
-                ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
-    )
+    if(NOT TARGET generate_metadata)
+        add_custom_target(generate_metadata ALL
+            DEPENDS ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
+                    ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
+        )
+    endif()
 
     # Combined Binary
     add_combined_firmware_with_metadata(
@@ -144,8 +129,9 @@ if(NOT BUILD_TESTING)
         ha-ctrl-sec
         app_metadata.bin
         bootsec_metadata.bin
-        ${PROJECT_NAME}_combined_image
+        ${PROJECT_NAME}_combined_update_image
     )
+    add_dependencies(${PROJECT_NAME}_combined_update_image_combined generate_metadata)
 
     # Firmware Packaging
     add_firmware_packaging(
