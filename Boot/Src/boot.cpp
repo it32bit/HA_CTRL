@@ -1,3 +1,15 @@
+/**
+ * @file      BootCore/Src/boot.cpp
+ * @author    it32bit
+ * @brief     Bootloader core logic for firmware update management.
+ *            Handles copying of the new firmware image from the update
+ *            region to the main application area using low-level flash access.
+ *
+ * @version   1.0
+ * @date      2025-10-24
+ * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *            (c) 2025 ha-ctrl project authors.
+ */
 #include <cstdint>
 #include <cstring>
 #include <span>

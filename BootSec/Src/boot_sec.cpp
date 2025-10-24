@@ -1,5 +1,15 @@
-// boot_prim.cpp
-
+/**
+ * @file      BootSec/Src/boot_sec.cpp
+ * @author    it32bit
+ * @brief     Secendary bootloader stage for Platform (STM32F4, ESP32, etc.).
+ *            Initializes system clock, manages flash-backed BootState flags,
+ *            and jumps to the application (App).
+ *
+ * @version   1.0
+ * @date      2025-10-24
+ * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
+ *            (c) 2025 ha-ctrl project authors.
+ */
 #include <cstdint>
 #include "boot.hpp"
 #include "stm32f4xx_hal.h"

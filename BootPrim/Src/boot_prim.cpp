@@ -4,8 +4,6 @@
  * @brief     Primary bootloader stage for Platform (STM32F4, ESP32, etc.).
  *            Initializes system clock, manages flash-backed BootState flags,
  *            and jumps to the secondary bootloader (BootSec).
- * @note      Flash-backed boot flags using BootState
- *            Direct flash access via your IFlashWriter interface
  *
  * @version   1.0
  * @date      2025-10-23
@@ -13,9 +11,9 @@
  *            (c) 2025 ha-ctrl project authors.
  */
 #include <cstdint>
-#include "stm32f4xx.h"
 #include "boot_prim.hpp"
 #include "boot_flag_manager.hpp"
+#include "stm32f4xx.h"
 #include "clock_manager_stm32.hpp"
 #include "flash_writer_stm32.hpp"
 #include "flash_layout.hpp"
