@@ -46,6 +46,7 @@ add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
     COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
             ${APP_VERSION_TXT}
+            ${CMAKE_BINARY_DIR_BIN}/ha-ctrl-app.bin
             ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin
     DEPENDS ${APP_VERSION_TXT}
     COMMENT "Generating app metadata"
@@ -55,11 +56,11 @@ add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
     COMMAND python3 ${CMAKE_SOURCE_DIR}/Tools/gen_metadata.py
             ${BOOTSEC_VERSION_TXT}
+            ${CMAKE_BINARY_DIR_BIN}/ha-ctrl-sec.bin
             ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin
     DEPENDS ${BOOTSEC_VERSION_TXT}
     COMMENT "Generating boot-sec metadata"
 )
-
 
 if(NOT TARGET generate_metadata)
     add_custom_target(generate_metadata ALL
@@ -94,7 +95,7 @@ function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin
                 ${BOOT_SEC_BIN}
                 ${SEC_META_BIN}
                 ${COMBINED_BIN}
-        DEPENDS ${target_app} ${target_bsec} generate_metadata
+        DEPENDS generate_metadata ${target_app} ${target_bsec}
         COMMENT "Creating combined firmware binary with metadata: ${output_name}.bin"
     )
 
