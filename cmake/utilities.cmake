@@ -19,33 +19,32 @@ function(add_size_print target)
 endfunction()
 
 # Function to create combined binary: Bootloader + Padding + App
-function(add_combined_binary target_bprim target_bsec target_app output_name)
-    # Get ELF file paths from targets
-    set(BOOT_PRIM_ELF $<TARGET_FILE:${target_bprim}>)
-    set(BOOT_SEC_ELF  $<TARGET_FILE:${target_bsec}>)
+function(add_combined_binary_with_metadata target_app target_bsec app_metadata_bin sec_metadata_bin output_name)
     set(APP_ELF       $<TARGET_FILE:${target_app}>)
+    set(BOOT_SEC_ELF  $<TARGET_FILE:${target_bsec}>)
 
-    # Define output binary file paths
-    set(BOOT_PRIM_BIN "${CMAKE_BINARY_DIR_BIN}/${target_bprim}.bin")
-    set(BOOT_SEC_BIN  "${CMAKE_BINARY_DIR_BIN}/${target_bsec}.bin")
     set(APP_BIN       "${CMAKE_BINARY_DIR_BIN}/${target_app}.bin")
+    set(BOOT_SEC_BIN  "${CMAKE_BINARY_DIR_BIN}/${target_bsec}.bin")
+    set(APP_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${app_metadata_bin}")
+    set(SEC_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${sec_metadata_bin}")
     set(COMBINED_BIN  "${CMAKE_BINARY_DIR_BIN}/${output_name}.bin")
 
-    # Custom command to generate binaries and combine
     add_custom_command(
         OUTPUT ${COMBINED_BIN}
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${BOOT_PRIM_ELF} ${BOOT_PRIM_BIN}
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${BOOT_SEC_ELF}  ${BOOT_SEC_BIN}
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${APP_ELF}       ${APP_BIN}
-        COMMAND ${CMAKE_SOURCE_DIR}/cmake/combine_binaries.sh
-                ${APP_ELF} ${BOOT_SEC_ELF} ${BOOT_PRIM_ELF}
-                ${APP_BIN} ${BOOT_SEC_BIN} ${BOOT_PRIM_BIN}
+        COMMAND ${CMAKE_OBJCOPY} -O binary ${APP_ELF}      ${APP_BIN}
+        COMMAND ${CMAKE_OBJCOPY} -O binary ${BOOT_SEC_ELF} ${BOOT_SEC_BIN}
+        COMMAND ${CMAKE_COMMAND} -E echo "Combining firmware with metadata..."
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/cmake
+                python3 ${CMAKE_SOURCE_DIR}/cmake/combine_firmware.py
+                ${APP_BIN}
+                ${APP_META_BIN}
+                ${BOOT_SEC_BIN}
+                ${SEC_META_BIN}
                 ${COMBINED_BIN}
-        DEPENDS ${target_bprim} ${target_bsec} ${target_app}
-        COMMENT "Combining firmware: BootPrim + BootSec + App into ${output_name}.bin"
+        DEPENDS ${target_app} ${target_bsec}
+        COMMENT "Creating combined firmware binary with metadata: ${output_name}.bin"
     )
 
-    # Add custom target that depends on the combined binary
     add_custom_target(${output_name}_combined ALL
         DEPENDS ${COMBINED_BIN}
     )

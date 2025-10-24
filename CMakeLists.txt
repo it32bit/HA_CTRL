@@ -121,13 +121,17 @@ if(NOT BUILD_TESTING)
     add_dependencies(check_size ha-ctrl-prim ha-ctrl-sec ha-ctrl-app)
 
     # Add combined binary target
-    add_combined_binary(
-        ha-ctrl-prim     # Target name for Bootloader Primary
-        ha-ctrl-sec      # Target name for Bootloader Secondary
-        ha-ctrl-app       # Target name for Application
-        ${PROJECT_NAME}_combined_image  # Output name for combined binary (without .bin)
+    add_combined_binary_with_metadata(
+        ha_ctrl_app # Target Application
+        ha_ctrl_sec # Target Bootloader Secondary
+        app_metadata.bin
+        bootsec_metadata.bin
+        ${PROJECT_NAME}_combined_image # Output name for combined binary (without .bin)
     )
 
+    DEPENDS extract_versions ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_image.bin
+
+    # Firmware package
     add_firmware_packaging(
         ha-ctrl-app
         ha-ctrl-sec
