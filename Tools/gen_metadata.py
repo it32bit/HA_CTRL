@@ -11,6 +11,7 @@ import os
 import json
 import struct
 import hashlib
+import zlib
 import time
 
 def parse_version(version_str):
@@ -33,6 +34,7 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
     with open(firmware_bin_path, 'rb') as f:
         firmware_data = f.read()
 
+    firmware_crc32 = zlib.crc32(firmware_data) & 0xFFFFFFFF  # Ensure unsigned 32-bit
     firmware_size = len(firmware_data)
     firmware_hash = hashlib.sha256(firmware_data).digest()
 
@@ -44,14 +46,15 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
 
     # Pack binary metadata
     metadata_struct = struct.pack(
-        '<IIII32sIII',  # Corrected format string
+        '<IIII32sIIII',  # Corrected format string
         magic,
         version_encoded,
         timestamp,
         firmware_size,
         firmware_hash,
-        reserved[0],
         reserved[1],
+        reserved[0],
+        firmware_crc32,
         padded_size
     )
 
@@ -70,6 +73,7 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
         "firmwareSize": firmware_size,
         "firmwareHash": firmware_hash.hex(),
         "reserved": reserved,
+        "firmwareCRC": hex(firmware_crc32),
         "paddedSize": padded_size
     }
 
