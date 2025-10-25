@@ -168,7 +168,7 @@
       "problemMatcher": []
     },
     {
-      "label": "ReBuildFlashAll",
+      "label": "ReBuild Flash All",
       "dependsOrder": "sequence",
       "dependsOn": [
         "Build Primary Bootloader",
@@ -178,6 +178,23 @@
         "Flash App",
         "Flash Primary Bootloader"
       ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash Combined Image",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Build Primary Bootloader",
+        "Build Secondary Bootloader",
+        "Build App"
+      ],
+      "type": "cmake",
+      "command": "build",
+      "targets": [
+        "combined-flash"
+      ],
+      "preset": "debug",
       "group": "build",
       "problemMatcher": []
     },

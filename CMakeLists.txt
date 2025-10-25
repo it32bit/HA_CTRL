@@ -141,10 +141,35 @@ if(NOT BUILD_TESTING)
         ${PROJECT_NAME}
     )
 
+    # Extract Flash Address for Combined_Update_Image
+    # Read file
+    file(READ "${CMAKE_SOURCE_DIR}/Platform/${MCU_FAMILY}/Inc/flash_layout.hpp" FLASH_LAYOUT_CONTENTS)
+
+    # Replace CRLF just in case
+    # string(REPLACE "\r" "" FLASH_LAYOUT_CONTENTS "${FLASH_LAYOUT_CONTENTS}")
+
+    # Split into lines
+    string(REPLACE "\n" ";" FLASH_LAYOUT_LINES "${FLASH_LAYOUT_CONTENTS}")
+
+    set(NEW_BOOTLOADER2_FLASH_ADDRESS "")
+
+    foreach(line IN LISTS FLASH_LAYOUT_LINES)
+        # message(STATUS "Checking line: '${line}'")
+        string(REGEX MATCH ".*NEW_BOOTLOADER2_START[ \t]*=[ \t]*0x([0-9A-Fa-f]+)" _match "${line}")
+        if(_match)
+            message(STATUS "Regex match: '${_match}'")
+            message(STATUS "Captured group: '${CMAKE_MATCH_1}'")
+            set(NEW_BOOTLOADER2_FLASH_ADDRESS "0x${CMAKE_MATCH_1}")
+            break()
+        endif()
+    endforeach()
+
+    message(STATUS "Combined binary address: ${NEW_BOOTLOADER2_FLASH_ADDRESS}")
+
     # Flash Target
     add_custom_target(combined-flash
-        DEPENDS ${PROJECT_NAME}_combined_image_combined
-        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -d ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_image.bin
+        DEPENDS ${PROJECT_NAME}_combined_update_image_combined
+        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -w ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_update_image.bin 0x08090000 -v -rst
         COMMENT "Flashing combined firmware via ST-Link"
     )
 endif()
