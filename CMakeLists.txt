@@ -169,7 +169,7 @@ if(NOT BUILD_TESTING)
     # Flash Target
     add_custom_target(combined-flash
         DEPENDS ${PROJECT_NAME}_combined_update_image_combined
-        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -w ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_update_image.bin 0x08090000 -v -rst
+        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -w ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_update_image.bin ${NEW_BOOTLOADER2_FLASH_ADDRESS} -v -rst
         COMMENT "Flashing combined firmware via ST-Link"
     )
 endif()
