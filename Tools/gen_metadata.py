@@ -78,7 +78,7 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
         },
         "info": {
             "version": version_str,
-            "buildDate": time.strftime("%Y-%m-%d %H:%M:%S %Z", time.localtime(timestamp)),
+            "build_timestamp": time.strftime("%Y-%m-%d %H:%M:%S %Z", time.localtime(timestamp)),
             "firmware_size": firmware_size
         }
     }
