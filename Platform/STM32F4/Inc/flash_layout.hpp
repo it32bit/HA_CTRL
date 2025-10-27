@@ -149,6 +149,9 @@ constexpr std::size_t    APP_CERT_SIZE  = 512;
 constexpr std::uintptr_t NEW_BOOTLOADER2_START = 0x08090000;
 constexpr std::size_t    NEW_BOOTLOADER2_SIZE  = 64 * 1024;
 
+constexpr std::uintptr_t NEW_BOOTLOADER2_METADATA_START = 0x0809FC00;
+constexpr std::size_t    NEW_BOOTLOADER2_METADATA_SIZE  = 512;
+
 // Sectors 9–11: New Application
 constexpr std::uintptr_t NEW_APP_START         = 0x080A0000;
 constexpr std::size_t    NEW_APP_TOTAL_SIZE    = (128 + 128 + 128) * 1024;

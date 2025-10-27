@@ -73,7 +73,7 @@ endif()
 # Combined Binary Creation
 # =========================================================================
 
-function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin sec_meta_bin output_name)
+function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin sec_meta_bin flash_layout output_name)
     set(APP_ELF       $<TARGET_FILE:${target_app}>)
     set(BOOT_SEC_ELF  $<TARGET_FILE:${target_bsec}>)
 
@@ -82,6 +82,7 @@ function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin
     set(APP_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${app_meta_bin}")
     set(SEC_META_BIN  "${CMAKE_BINARY_DIR_BIN}/${sec_meta_bin}")
     set(COMBINED_BIN  "${CMAKE_BINARY_DIR_BIN}/${output_name}.bin")
+    set(FLASH_LAYOUT  "${flash_layout}")
 
     add_custom_command(
         OUTPUT ${COMBINED_BIN}
@@ -94,6 +95,7 @@ function(add_combined_firmware_with_metadata target_app target_bsec app_meta_bin
                 ${APP_META_BIN}
                 ${BOOT_SEC_BIN}
                 ${SEC_META_BIN}
+                ${FLASH_LAYOUT}
                 ${COMBINED_BIN}
         DEPENDS generate_metadata ${target_app} ${target_bsec}
         COMMENT "Creating combined firmware binary with metadata: ${output_name}.bin"

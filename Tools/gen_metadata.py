@@ -41,40 +41,46 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
     # Metadata fields
     magic = 0xDEADBEEF
     timestamp = int(time.time())
-    reserved = (0, 0)
-    padded_size = 512  # You can adjust this if needed
+    reserved = (0, 0, 0)
+
 
     # Pack binary metadata
     metadata_struct = struct.pack(
-        '<IIII32sIIII',  # Corrected format string
+        '<IIIIIIII32s',  # Corrected format string
         magic,
         version_encoded,
         timestamp,
         firmware_size,
-        firmware_hash,
+        firmware_crc32,
+        reserved[2],
         reserved[1],
         reserved[0],
-        firmware_crc32,
-        padded_size
+        firmware_hash,
     )
 
     with open(output_bin_path, 'wb') as out:
         out.write(metadata_struct)
 
+    print(f"Timestamp being written: {timestamp} → {time.ctime(timestamp)}")
     print(f"Structured metadata written to {output_bin_path} ({len(metadata_struct)} bytes)")
 
     # Write JSON companion
     output_json_path = os.path.splitext(output_bin_path)[0] + '.json'
     metadata_json = {
-        "magic": hex(magic),
-        "version": version_str,
-        "version_encoded": hex(version_encoded),
-        "buildTimestamp": timestamp,
-        "firmwareSize": firmware_size,
-        "firmwareHash": firmware_hash.hex(),
-        "reserved": reserved,
-        "firmwareCRC": hex(firmware_crc32),
-        "paddedSize": padded_size
+        "memory": {
+            "magic": hex(magic),
+            "version_encoded": hex(version_encoded),
+            "build_timestamp": hex(timestamp),
+            "firmware_size": hex(firmware_size),
+            "firmware_crc32": hex(firmware_crc32),
+            "reserved": list(reserved),
+            "firmware_sha256": firmware_hash.hex()
+        },
+        "info": {
+            "version": version_str,
+            "buildDate": time.strftime("%Y-%m-%d %H:%M:%S %Z", time.localtime(timestamp)),
+            "firmware_size": firmware_size
+        }
     }
 
     with open(output_json_path, 'w') as json_out:

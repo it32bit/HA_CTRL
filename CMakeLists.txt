@@ -129,6 +129,7 @@ if(NOT BUILD_TESTING)
         ha-ctrl-sec
         app_metadata.bin
         bootsec_metadata.bin
+        ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Inc/flash_layout.hpp
         ${PROJECT_NAME}_combined_update_image
     )
     add_dependencies(${PROJECT_NAME}_combined_update_image_combined generate_metadata)
@@ -157,14 +158,14 @@ if(NOT BUILD_TESTING)
         # message(STATUS "Checking line: '${line}'")
         string(REGEX MATCH ".*NEW_BOOTLOADER2_START[ \t]*=[ \t]*0x([0-9A-Fa-f]+)" _match "${line}")
         if(_match)
-            message(STATUS "Regex match: '${_match}'")
-            message(STATUS "Captured group: '${CMAKE_MATCH_1}'")
+            # message(STATUS "Regex match: '${_match}'")
+            # message(STATUS "Captured group: '${CMAKE_MATCH_1}'")
             set(NEW_BOOTLOADER2_FLASH_ADDRESS "0x${CMAKE_MATCH_1}")
             break()
         endif()
     endforeach()
 
-    message(STATUS "Combined binary address: ${NEW_BOOTLOADER2_FLASH_ADDRESS}")
+    message(STATUS "${PROJECT_NAME} combined update image address: ${NEW_BOOTLOADER2_FLASH_ADDRESS}")
 
     # Flash Target
     add_custom_target(combined-flash
