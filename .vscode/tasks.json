@@ -182,6 +182,17 @@
       "problemMatcher": []
     },
     {
+      "label": "Flash Metadata",
+      "type": "cmake",
+      "command": "build",
+      "targets": [
+        "add-metadata-flash"
+      ],
+      "preset": "debug",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
       "label": "Flash Combined Image",
       "dependsOrder": "sequence",
       "dependsOn": [

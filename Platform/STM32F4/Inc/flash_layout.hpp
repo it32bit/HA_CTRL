@@ -129,14 +129,17 @@ constexpr std::size_t    CONFIG_SIZE  = 16 * 1024;
 constexpr std::uintptr_t BOOTLOADER2_START = 0x08010000;
 constexpr std::size_t    BOOTLOADER2_SIZE  = 64 * 1024;
 
+constexpr std::uintptr_t BOOT2_METADATA_START = 0x0801FC00;
+constexpr std::size_t    BOOT2_METADATA_SIZE  = 512;
+
 // Sectors 5–7: Main Application
 constexpr std::uintptr_t APP_START         = 0x08020000;
 constexpr std::size_t    APP_TOTAL_SIZE    = (128 + 128 + 128) * 1024; // 384KB
 constexpr std::size_t    APP_RESERVED_SIZE = 1024;                     // Last 1KB reserved
 constexpr std::size_t    APP_SIZE          = APP_TOTAL_SIZE - APP_RESERVED_SIZE;
 
-constexpr std::uintptr_t APP_METADATA_START = 0x0807FC00;
-constexpr std::size_t    APP_METADATA_SIZE  = 512;
+constexpr std::uintptr_t APPLICATION_METADATA_START = 0x0807FC00;
+constexpr std::size_t    APPLICATION_METADATA_SIZE = 512;
 
 constexpr std::uintptr_t APP_CERT_START = 0x0807FE00;
 constexpr std::size_t    APP_CERT_SIZE  = 512;

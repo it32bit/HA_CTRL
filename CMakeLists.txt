@@ -151,8 +151,9 @@ if(NOT BUILD_TESTING)
 
     # Split into lines
     string(REPLACE "\n" ";" FLASH_LAYOUT_LINES "${FLASH_LAYOUT_CONTENTS}")
-
     set(NEW_BOOTLOADER2_FLASH_ADDRESS "")
+    set(BOOT2_METADATA_START "")
+    set(APPLICATION_METADATA_START "")
 
     foreach(line IN LISTS FLASH_LAYOUT_LINES)
         # message(STATUS "Checking line: '${line}'")
@@ -161,7 +162,20 @@ if(NOT BUILD_TESTING)
             # message(STATUS "Regex match: '${_match}'")
             # message(STATUS "Captured group: '${CMAKE_MATCH_1}'")
             set(NEW_BOOTLOADER2_FLASH_ADDRESS "0x${CMAKE_MATCH_1}")
-            break()
+            # break()
+        endif()
+
+        string(REGEX MATCH ".*BOOT2_METADATA_START[ \t]*=[ \t]*0x([0-9A-Fa-f]+)" _match2 "${line}")
+        if(_match2)
+            set(BOOT2_METADATA_START "0x${CMAKE_MATCH_1}")
+
+        endif()
+
+        string(REGEX MATCH ".*APPLICATION_METADATA_START[ \t]*=[ \t]*0x([0-9A-Fa-f]+)" _match3 "${line}")
+        if(_match3)
+            message(STATUS "Regex match: '${_match}'")
+            set(APPLICATION_METADATA_START "0x${CMAKE_MATCH_1}")
+
         endif()
     endforeach()
 
@@ -172,6 +186,17 @@ if(NOT BUILD_TESTING)
         DEPENDS ${PROJECT_NAME}_combined_update_image_combined
         COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -w ${CMAKE_BINARY_DIR_BIN}/${PROJECT_NAME}_combined_update_image.bin ${NEW_BOOTLOADER2_FLASH_ADDRESS} -v -rst
         COMMENT "Flashing combined firmware via ST-Link"
+    )
+
+    message(STATUS "BOOT2_METADATA_START address: ${BOOT2_METADATA_START}")
+    message(STATUS "APPLICATION_METADATA_START address: ${APPLICATION_METADATA_START}")
+
+        # Flash Target
+    add_custom_target(add-metadata-flash
+        DEPENDS ${PROJECT_NAME}_combined_update_image_combined
+        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD --skipErase -w ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin ${BOOT2_METADATA_START} -v
+        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD --skipErase -w ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin ${APPLICATION_METADATA_START} -v -rst
+        COMMENT "Flashing metadata firmware via ST-Link"
     )
 endif()
 
