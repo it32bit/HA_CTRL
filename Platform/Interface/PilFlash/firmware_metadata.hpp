@@ -20,7 +20,8 @@ struct Metadata
     std::uint32_t buildTimestamp;   // Unix timestamp of build time
     std::uint32_t firmwareSize;     // Size of firmware in bytes (excluding metadata + cert)
     std::uint32_t firmwareCRC;      // CRC32 of firmware region
-    std::uint32_t reserved[3];      // Reserved for future use or alignment
+    std::uint32_t reserved[2];      // Reserved for future use or alignment
+    std::uint32_t mcu_name;         // Name of used MCU e.g STMF407 = 'F','4','0','7'
     std::uint8_t  firmwareHash[32]; // SHA-256 hash of firmware region
 
 } __attribute__((packed));

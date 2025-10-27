@@ -41,8 +41,11 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
     # Metadata fields
     magic = 0xDEADBEEF
     timestamp = int(time.time())
-    reserved = (0, 0, 0)
+    reserved = (0, 0)
+    # STM32F407 = F 4 0 7
+    mcu_name = 0x46343037
 
+    mcu_name_ascii = mcu_name.to_bytes(4, byteorder='big').decode('ascii')
 
     # Pack binary metadata
     metadata_struct = struct.pack(
@@ -52,9 +55,9 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
         timestamp,
         firmware_size,
         firmware_crc32,
-        reserved[2],
         reserved[1],
         reserved[0],
+        mcu_name,
         firmware_hash,
     )
 
@@ -74,12 +77,14 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
             "firmware_size": hex(firmware_size),
             "firmware_crc32": hex(firmware_crc32),
             "reserved": list(reserved),
+            "mcu_name": hex(mcu_name),
             "firmware_sha256": firmware_hash.hex()
         },
         "info": {
             "version": version_str,
             "build_timestamp": time.strftime("%Y-%m-%d %H:%M:%S %Z", time.localtime(timestamp)),
-            "firmware_size": firmware_size
+            "firmware_size": firmware_size,
+            "mcu_name": mcu_name_ascii
         }
     }
 
