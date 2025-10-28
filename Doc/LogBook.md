@@ -1700,3 +1700,23 @@ If you want to preserve data across jumps, place it in a reserved RAM region and
 | Stack                    | Replaced by App’s stack                       |
 | Heap (if used)           | Lost unless explicitly preserved              |
 | Reserved regions         | Available if coordinated via linker          |
+
+## INFO-57 I need another logic Layer to separate Hardware logic and Application logic
+
+### Platform/Common
+
+| Reason | Benefit |
+|--------|----------|
+| Reusability | Shared across all firmware stages |
+| Encapsulation | Keeps CRC logic out of PIL and App logic |
+| Testability | Easy to unit test independently |
+| Security | Centralizes integrity logic for future upgrades (e.g. SHA256, signature) |
+
+## INFO-58 CRC Check
+
+STM32F4 uses polynomial 0x04C11DB7, no reflection, no final XOR, thats why I need to switch from zlib.crc32() to crcmod.mkCrcFun and this package need to be installed
+
+```bash
+apt install python3-crcmod
+```
+

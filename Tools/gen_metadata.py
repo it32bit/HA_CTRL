@@ -11,8 +11,9 @@ import os
 import json
 import struct
 import hashlib
-import zlib
+# import zlib
 import time
+import crcmod
 
 def parse_version(version_str):
     parts = version_str.strip().split('.')
@@ -34,7 +35,12 @@ def generate_metadata(version_txt_path, firmware_bin_path, output_bin_path):
     with open(firmware_bin_path, 'rb') as f:
         firmware_data = f.read()
 
-    firmware_crc32 = zlib.crc32(firmware_data) & 0xFFFFFFFF  # Ensure unsigned 32-bit
+    # firmware_crc32 = zlib.crc32(firmware_data) & 0xFFFFFFFF  # Ensure unsigned 32-bit
+
+    # It will match with STM32F4
+    app_crc32 = crcmod.mkCrcFun(0x104C11DB7, rev=False, initCrc=0xFFFFFFFF, xorOut=0x00000000)
+    firmware_crc32 = app_crc32(firmware_data)
+
     firmware_size = len(firmware_data)
     firmware_hash = hashlib.sha256(firmware_data).digest()
 
