@@ -158,6 +158,7 @@
       "args": [
         "-c",
         "port=SWD",
+        "-e [5 7]",
         "-d",
         "${workspaceFolder}/build/bin/ha-ctrl-app.elf",
         "-hardRst",

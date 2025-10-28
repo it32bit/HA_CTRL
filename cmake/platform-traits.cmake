@@ -32,6 +32,7 @@ set(MCU_DEFINES
 # Platform-specific include directories
 set(MCU_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/Platform/${MCU_FAMILY}/Inc
+    ${CMAKE_SOURCE_DIR}/Platform/Common/Integrity/Inc
     ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
     ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
     ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include

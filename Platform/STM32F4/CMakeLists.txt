@@ -18,6 +18,7 @@ target_include_directories(${PLATFORM_TARGET} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Inc
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
+    ${CMAKE_SOURCE_DIR}/Platform/Common/Itegrity/Inc
 )
 
 # Add HAL/CMSIS headers if needed (likely required)

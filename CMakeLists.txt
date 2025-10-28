@@ -53,7 +53,7 @@ elseif(PLATFORM_MCU STREQUAL "NRF52")
 endif()
 
 # =========================================================================
-# Subdirectories
+# Subdirectories (contain: CMakeLists.txt)
 # =========================================================================
 add_subdirectory(Platform/${PLATFORM_MCU})
 add_subdirectory(Boot)
@@ -194,8 +194,8 @@ if(NOT BUILD_TESTING)
         # Flash Target
     add_custom_target(add-metadata-flash
         DEPENDS ${PROJECT_NAME}_combined_update_image_combined
-        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD --skipErase -w ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin ${BOOT2_METADATA_START} -v
-        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD --skipErase -w ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin ${APPLICATION_METADATA_START} -v -rst
+        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -w ${CMAKE_BINARY_DIR_BIN}/bootsec_metadata.bin ${BOOT2_METADATA_START} -v --skipErase
+        COMMAND ${STM32CUBE_PROGRAMMER} -c port=SWD -w ${CMAKE_BINARY_DIR_BIN}/app_metadata.bin ${APPLICATION_METADATA_START} -v --skipErase -rst
         COMMENT "Flashing metadata firmware via ST-Link"
     )
 endif()

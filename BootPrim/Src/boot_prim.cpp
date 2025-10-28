@@ -17,6 +17,8 @@
 #include "clock_manager_stm32.hpp"
 #include "flash_writer_stm32.hpp"
 #include "flash_layout.hpp"
+#include "firmware_metadata.hpp"
+#include "crc32_check.hpp"
 
 namespace BootPrim
 {
@@ -45,6 +47,15 @@ extern "C" int main()
     BootFlagManager    flags(&writer);
     uint32_t           timer{};
 
+    const std::uint8_t* firmware_data =
+        reinterpret_cast<const std::uint8_t*>(FlashLayout::BOOTLOADER2_START);
+
+    const Firmware::Metadata* bootMeta =
+        reinterpret_cast<const Firmware::Metadata*>(FlashLayout::BOOT2_METADATA_START);
+
+    std::size_t   firmware_size = bootMeta->firmwareSize;
+    std::uint32_t expected_crc  = bootMeta->firmwareCRC;
+
     clock.initialize(nullptr);
 
     auto isStaged = flags.getState();
@@ -54,6 +65,12 @@ extern "C" int main()
     {
         flags.setState(BootState::Staged);
         LEDControl::toggleOrangeLED();
+    }
+
+    bool valid = Integrity::CRC32Checker::verify(firmware_data, firmware_size, expected_crc);
+    if (valid != true)
+    {
+        LEDControl::toggleBlueLED();
     }
 
     /**

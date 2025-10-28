@@ -14,6 +14,7 @@ set(cpu_PARAMS
 
 # Source files used by App and Bootloader
 set(sources_SRCS
+    ${CMAKE_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
     ${CMAKE_SOURCE_DIR}/Core/Src/syscall.c
     ${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
     ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
@@ -39,8 +40,9 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_manager_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/flash_writer_stm32.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/crc32_stm32.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/Common/Integrity/Src/crc32_check.cpp
 
-    ${CMAKE_SOURCE_DIR}/Startup/startup_stm32f407vgtx.s
     ${CMAKE_SOURCE_DIR}/App/Src/app.cpp
     ${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
     ${CMAKE_SOURCE_DIR}/App/Src/console.cpp
@@ -60,6 +62,7 @@ set(include_HEADERS_DIRS
     ${CMAKE_SOURCE_DIR}/BootSec/Inc
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
+    ${CMAKE_SOURCE_DIR}/Platform/Common/Integrity/Inc
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Inc
     ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
     ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
