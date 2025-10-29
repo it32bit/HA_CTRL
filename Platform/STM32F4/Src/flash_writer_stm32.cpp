@@ -80,7 +80,7 @@ __attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uin
     FLASH->CR |= FLASH_CR_PG;
 
     // Write the data
-    *(__IO uint32_t*)t_address = 0x53544147; //t_data;
+    *(__IO uint32_t*)t_address = t_data;
 
     // Wait until done
     while (FLASH->SR & FLASH_SR_BSY)
@@ -89,4 +89,16 @@ __attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uin
 
     // Clear PG bit
     FLASH->CR &= ~FLASH_CR_PG;
+}
+
+__attribute__((section(".ramfunc"))) void
+FlashWriterSTM32F4::copyFlashImage(std::uintptr_t t_address_src, std::uintptr_t t_address_dst,
+                                   std::size_t t_wordCount)
+{
+    for (std::size_t i = 0; i < t_wordCount; ++i)
+    {
+        std::uint32_t word =
+            *reinterpret_cast<const std::uint32_t*>(t_address_src + i * sizeof(std::uint32_t));
+        FlashWriterSTM32F4::writeWord(t_address_dst + i * sizeof(std::uint32_t), word);
+    }
 }

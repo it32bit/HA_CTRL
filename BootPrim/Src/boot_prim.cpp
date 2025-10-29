@@ -23,6 +23,8 @@
 namespace BootPrim
 {
 
+static bool checkMetaData(std::uintptr_t t_firmware, std::uintptr_t t_metadata);
+
 static void JumpToBootSec()
 {
     constexpr std::uintptr_t addr      = FlashLayout::BOOTLOADER2_START;
@@ -45,43 +47,48 @@ extern "C" int main()
 {
     FlashWriterSTM32F4 writer;
     BootFlagManager    flags(&writer);
-    uint32_t           timer{};
-
-    const std::uint8_t* firmware_data =
-        reinterpret_cast<const std::uint8_t*>(FlashLayout::BOOTLOADER2_START);
-
-    const Firmware::Metadata* bootMeta =
-        reinterpret_cast<const Firmware::Metadata*>(FlashLayout::BOOT2_METADATA_START);
-
-    std::size_t   firmware_size = bootMeta->firmwareSize;
-    std::uint32_t expected_crc  = bootMeta->firmwareCRC;
-
     clock.initialize(nullptr);
 
-    auto isStaged = flags.getState();
-
-    if (isStaged != BootState::Staged && isStaged != BootState::Verified &&
-        isStaged != BootState::Applied)
+    bool newBootSecCheck = checkMetaData(FlashLayout::NEW_BOOTLOADER2_START,
+                                         FlashLayout::NEW_BOOTLOADER2_METADATA_START);
+    if (newBootSecCheck == true)
     {
-        flags.setState(BootState::Staged);
-        LEDControl::toggleOrangeLED();
-    }
-
-    bool valid = Integrity::CRC32Checker::verify(firmware_data, firmware_size, expected_crc);
-    if (valid != true)
-    {
+        LEDControl::toggleBlueLED();
+        auto sectorToErase = FlashLayout::sectorFromAddress(FlashLayout::BOOTLOADER2_START);
+        writer.eraseSector(sectorToErase);
+        writer.copyFlashImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::BOOTLOADER2_START,
+                              FlashLayout::NEW_BOOTLOADER2_SIZE);
+        sectorToErase = FlashLayout::sectorFromAddress(FlashLayout::NEW_BOOTLOADER2_START);
+        writer.eraseSector(sectorToErase);
         LEDControl::toggleBlueLED();
     }
 
-    /**
-     * Flash-backed boot flags using BootState
-     */
-    isStaged = flags.getState();
+    bool newAppCheck =
+        checkMetaData(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_METADATA_START);
+    auto isStaged = flags.getState();
 
-    if (isStaged == BootState::Staged)
+    if (newAppCheck == true)
+    {
+        flags.setState(BootState::Staged);
+
+        LEDControl::toggleOrangeLED();
+    }
+
+    bool bootSecCheck =
+        checkMetaData(FlashLayout::BOOTLOADER2_START, FlashLayout::BOOT2_METADATA_START);
+
+    /**
+     * Secend Bootloader Integrity check
+     */
+    if (bootSecCheck == true)
     {
         JumpToBootSec();
     }
+
+    /**
+     * Secend Bootloader Integrity check FAIL
+     */
+    uint32_t timer{};
 
     while (true)
     {
@@ -98,6 +105,25 @@ extern "C" int main()
         }
         ++timer;
     }
+}
+
+static bool checkMetaData(std::uintptr_t t_firmware, std::uintptr_t t_metadata)
+{
+    const std::uint8_t* firmware_data = reinterpret_cast<const std::uint8_t*>(t_firmware);
+
+    const Firmware::Metadata* bootMeta = reinterpret_cast<const Firmware::Metadata*>(t_metadata);
+
+    bool result = false;
+
+    if (bootMeta->magic == Firmware::METADATA_MAGIC)
+    {
+        std::size_t   firmware_size = bootMeta->firmwareSize;
+        std::uint32_t expected_crc  = bootMeta->firmwareCRC;
+
+        result = Integrity::CRC32Checker::verify(firmware_data, firmware_size, expected_crc);
+    }
+
+    return result;
 }
 
 } // namespace BootPrim
