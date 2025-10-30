@@ -20,6 +20,7 @@ foreach(src ${sources_SRCS})
        src MATCHES ".*/Core/Src/.*" OR
        src MATCHES ".*/Boot/Src/boot_flag_manager.cpp" OR
        src MATCHES ".*/Platform/Common/Integrity/Src/.*" OR
+       src MATCHES ".*/Platform/Common/Image/Src/.*" OR
        src MATCHES ".*/Platform/STM32F4/Src/.*" OR
        src MATCHES ".*/Startup/startup_stm32f407vgtx.s" OR
        src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")

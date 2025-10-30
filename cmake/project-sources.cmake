@@ -42,6 +42,7 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/flash_writer_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/crc32_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/Common/Integrity/Src/crc32_check.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/Common/Image/Src/image_manager.cpp
 
     ${CMAKE_SOURCE_DIR}/App/Src/app.cpp
     ${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp
@@ -63,6 +64,7 @@ set(include_HEADERS_DIRS
     ${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
     ${CMAKE_SOURCE_DIR}/Platform/Common/Integrity/Inc
+    ${CMAKE_SOURCE_DIR}/Platform/Common/Image/Inc
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Inc
     ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
     ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include

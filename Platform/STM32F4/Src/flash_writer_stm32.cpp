@@ -92,7 +92,7 @@ __attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uin
 }
 
 __attribute__((section(".ramfunc"))) void
-FlashWriterSTM32F4::copyFlashImage(std::uintptr_t t_address_src, std::uintptr_t t_address_dst,
+FlashWriterSTM32F4::writeImage(std::uintptr_t t_address_src, std::uintptr_t t_address_dst,
                                    std::size_t t_wordCount)
 {
     for (std::size_t i = 0; i < t_wordCount; ++i)

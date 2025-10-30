@@ -100,6 +100,34 @@ constexpr std::uint8_t sectorFromAddress(std::uintptr_t addr)
     return 11;
 }
 
+// Size mapping for STM32F407VGTX (1MB flash)
+constexpr std::uint32_t sectorSize(std::uint8_t sector)
+{
+    switch (sector)
+    {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+            return 16 * 1024; // 16 KB
+
+        case 4:
+            return 64 * 1024; // 64 KB
+
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+            return 128 * 1024; // 128 KB
+
+        default:
+            return 0; // Invalid sector
+    }
+}
+
 // Flash boundaries
 constexpr std::uintptr_t FLASH_BASE_ADDR  = 0x08000000;
 constexpr std::size_t    FLASH_TOTAL_SIZE = 1024 * 1024;
@@ -139,7 +167,7 @@ constexpr std::size_t    APP_RESERVED_SIZE = 1024;                     // Last 1
 constexpr std::size_t    APP_SIZE          = APP_TOTAL_SIZE - APP_RESERVED_SIZE;
 
 constexpr std::uintptr_t APPLICATION_METADATA_START = 0x0807FC00;
-constexpr std::size_t    APPLICATION_METADATA_SIZE = 512;
+constexpr std::size_t    APPLICATION_METADATA_SIZE  = 512;
 
 constexpr std::uintptr_t APP_CERT_START = 0x0807FE00;
 constexpr std::size_t    APP_CERT_SIZE  = 512;

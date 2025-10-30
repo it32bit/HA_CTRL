@@ -20,6 +20,7 @@ foreach(src ${sources_SRCS})
     if(src MATCHES ".*/Boot/.*" OR
        src MATCHES ".*/BootPrim/.*" OR
        src MATCHES ".*/Platform/Common/Integrity/Src/.*" OR
+       src MATCHES ".*/Platform/Common/Image/Src/.*" OR
        src MATCHES ".*/Platform/STM32F4/Src/.*" OR
        src MATCHES ".*/Core/Src/system_stm32f4xx.c" OR
        src MATCHES ".*/Core/Src/syscall.c" OR

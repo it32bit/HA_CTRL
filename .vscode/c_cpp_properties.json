@@ -11,6 +11,8 @@
                 "${workspaceRoot}/**",
                 "${workspaceRoot}/Platform/Common/Integrity/Inc",
                 "${workspaceRoot}/Platform/Common/Integrity/Src",
+                "${workspaceRoot}/Platform/Common/Image/Inc",
+                "${workspaceRoot}/Platform/Common/Image/Src",
                 "${workspaceRoot}/Platform/Interface",
                 "${workspaceRoot}/Platform/Interface/PilAdc",
                 "${workspaceRoot}/Platform/Interface/PilClock",

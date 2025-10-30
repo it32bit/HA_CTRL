@@ -9,6 +9,7 @@
 namespace Firmware
 {
 constexpr uint32_t METADATA_MAGIC = 0xDEADBEEF;
+constexpr uint32_t METADATA_EMPTY = 0xFFFFFFFF;
 
 // Total size: 512 bytes (with padding)
 // Place this at APP_METADATA_START or NEW_APP_METADATA_START

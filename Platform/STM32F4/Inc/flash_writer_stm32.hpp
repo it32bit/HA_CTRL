@@ -22,9 +22,7 @@ class FlashWriterSTM32F4 : public IFlashWriter
     void                                      eraseSector(std::uint8_t t_sector) override;
     __attribute__((section(".ramfunc"))) void writeWord(std::uintptr_t t_address,
                                                         std::uint32_t  t_data) override;
-    __attribute__((section(".ramfunc"))) void copyFlashImage(std::uintptr_t t_address_src,
-                                                             std::uintptr_t t_address_dst,
-                                                             std::size_t    t_wordCount);
+    __attribute__((section(".ramfunc"))) void writeImage(std::uintptr_t t_address_src, std::uintptr_t t_address_dst, std::size_t t_wordCount) override;
 };
 
 #endif // FLASH_WRITER_HPP

@@ -19,6 +19,7 @@
 #include "flash_layout.hpp"
 #include "firmware_metadata.hpp"
 #include "crc32_check.hpp"
+#include "image_manager.hpp"
 
 namespace BootPrim
 {
@@ -47,19 +48,17 @@ extern "C" int main()
 {
     FlashWriterSTM32F4 writer;
     BootFlagManager    flags(&writer);
+    ImageManager       image(&writer);
     clock.initialize(nullptr);
 
     bool newBootSecCheck = checkMetaData(FlashLayout::NEW_BOOTLOADER2_START,
                                          FlashLayout::NEW_BOOTLOADER2_METADATA_START);
     if (newBootSecCheck == true)
     {
-        LEDControl::toggleBlueLED();
-        auto sectorToErase = FlashLayout::sectorFromAddress(FlashLayout::BOOTLOADER2_START);
-        writer.eraseSector(sectorToErase);
-        writer.copyFlashImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::BOOTLOADER2_START,
-                              FlashLayout::NEW_BOOTLOADER2_SIZE);
-        sectorToErase = FlashLayout::sectorFromAddress(FlashLayout::NEW_BOOTLOADER2_START);
-        writer.eraseSector(sectorToErase);
+        image.writeImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::BOOTLOADER2_START,
+                         FlashLayout::NEW_BOOTLOADER2_SIZE);
+        image.clearImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::NEW_BOOTLOADER2_SIZE);
+
         LEDControl::toggleBlueLED();
     }
 
@@ -69,17 +68,20 @@ extern "C" int main()
 
     if (newAppCheck == true)
     {
-        flags.setState(BootState::Staged);
+        if (isStaged != BootState::Staged)
+        {
+            flags.setState(BootState::Staged);
+        }
 
         LEDControl::toggleOrangeLED();
     }
 
-    bool bootSecCheck =
-        checkMetaData(FlashLayout::BOOTLOADER2_START, FlashLayout::BOOT2_METADATA_START);
-
     /**
      * Secend Bootloader Integrity check
      */
+    bool bootSecCheck =
+        checkMetaData(FlashLayout::BOOTLOADER2_START, FlashLayout::BOOT2_METADATA_START);
+
     if (bootSecCheck == true)
     {
         JumpToBootSec();
@@ -109,18 +111,18 @@ extern "C" int main()
 
 static bool checkMetaData(std::uintptr_t t_firmware, std::uintptr_t t_metadata)
 {
-    const std::uint8_t* firmware_data = reinterpret_cast<const std::uint8_t*>(t_firmware);
+    const std::uint8_t* firmware = reinterpret_cast<const std::uint8_t*>(t_firmware);
 
-    const Firmware::Metadata* bootMeta = reinterpret_cast<const Firmware::Metadata*>(t_metadata);
+    const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(t_metadata);
 
     bool result = false;
 
-    if (bootMeta->magic == Firmware::METADATA_MAGIC)
+    if (metadata->magic == Firmware::METADATA_MAGIC)
     {
-        std::size_t   firmware_size = bootMeta->firmwareSize;
-        std::uint32_t expected_crc  = bootMeta->firmwareCRC;
+        std::size_t   firmware_size = metadata->firmwareSize;
+        std::uint32_t expected_crc  = metadata->firmwareCRC;
 
-        result = Integrity::CRC32Checker::verify(firmware_data, firmware_size, expected_crc);
+        result = Integrity::CRC32Checker::verify(firmware, firmware_size, expected_crc);
     }
 
     return result;
