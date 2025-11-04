@@ -38,6 +38,11 @@ void FlashWriterSTM32F4::unlock()
     }
 }
 
+void FlashWriterSTM32F4::lock()
+{
+    FLASH->CR |= FLASH_CR_LOCK;
+}
+
 void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
 {
     while (FLASH->SR & FLASH_SR_BSY)
@@ -70,7 +75,7 @@ __attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uin
     }
 
     // Clear all error flags
-    FLASH->SR |= FLASH_SR_EOP | FLASH_SR_PGAERR | FLASH_SR_PGPERR | FLASH_SR_PGSERR;
+    FLASH->SR = FLASH_SR_EOP | FLASH_SR_PGAERR | FLASH_SR_PGPERR | FLASH_SR_PGSERR;
 
     // Set programming parallelism = 32 bits
     FLASH->CR &= ~FLASH_CR_PSIZE;
@@ -87,15 +92,21 @@ __attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uin
     {
     }
 
+    // Clear EOP flag (optional)
+    FLASH->SR = FLASH_SR_EOP;
+
     // Clear PG bit
     FLASH->CR &= ~FLASH_CR_PG;
 }
 
 __attribute__((section(".ramfunc"))) void
 FlashWriterSTM32F4::writeImage(std::uintptr_t t_address_src, std::uintptr_t t_address_dst,
-                                   std::size_t t_wordCount)
+                               std::size_t t_wordCount)
 {
-    for (std::size_t i = 0; i < t_wordCount; ++i)
+    std::size_t count = t_wordCount / 4;
+    count += (t_wordCount % 4) ? 1 : 0;
+
+    for (std::size_t i = 0; i < count; ++i)
     {
         std::uint32_t word =
             *reinterpret_cast<const std::uint32_t*>(t_address_src + i * sizeof(std::uint32_t));

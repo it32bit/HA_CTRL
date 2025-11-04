@@ -18,25 +18,13 @@
 #include "flash_layout.hpp"
 #include "clock_manager_stm32.hpp"
 #include "gpio_manager_stm32.hpp"
+#include "image_manager.hpp"
 
 // Access Metadata and Cert Regions
 // const auto* metadata     = reinterpret_cast<const Firmware::Metadata*>(FlashLayout::METADATA_START);
 // const auto* cert_pub     = reinterpret_cast<const uint8_t*>(FlashLayout::CERT_PUBLIC_START);
 // const auto* cert_priv    = reinterpret_cast<const uint8_t*>(FlashLayout::CERT_PRIVATE_START);
 // const auto* error_log    = reinterpret_cast<const uint8_t*>(FlashLayout::ERROR_LOG_START);
-
-// int main()
-// {
-//     FlashWriterSTM32F4 flash;
-//     Bootloader         boot(&flash);
-
-//     if (boot.isMetadataValid() && boot.verifyStagedFirmware())
-//     {
-//         boot.applyUpdate();
-//     }
-
-//     boot.jumpToApplication();
-// }
 
 static void DeinitPeripheralsBeforeJump();
 static void JumpToApp();
@@ -49,34 +37,75 @@ extern "C" int main()
 {
     FlashWriterSTM32F4 writer;
     BootFlagManager    flags(&writer);
+    ImageManager       image(&writer);
 
     clock.initialize(ClockErrorHandler);
     gpio.initialize(gpioPinConfigs);
 
     if (auto red = gpio.getPin(PinId::LD_RED))
     {
-        red->toggle();
+        red->set();
     }
 
     /**
-    * TODO: Firmware verification support should be added once the process of writing the new firmware to flash memory is completed.
-    *
+     * If flags == BootState::Staged then: App Image is compared with metadata
+     */
     if (flags.getState() == BootState::Staged)
     {
-        // TODO: Add CRC or signature verification here
-        flags.setState(BootState::Verified);
+        bool newAppCheck =
+            isImageAuthentic(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_METADATA_START);
+
+        if (newAppCheck == true)
+        {
+            // At this point, you can set the "Verified" flag, then check it in the application (e.g., via CLI).
+            // After verification, set the "Applied" flag — boot-sec will detect it, move the new image to the application area,
+            // and then jump to the application.
+            // But at this point, the old application is replaced with the new one here.
+            image.writeImage(FlashLayout::NEW_APP_START, FlashLayout::APP_START,
+                             FlashLayout::NEW_APP_TOTAL_SIZE);
+            // flags.setState(BootState::Applied);
+        }
+        else
+        {
+            flags.setState(BootState::Failed);
+
+            if (auto orange = gpio.getPin(PinId::LD_ORA))
+            {
+                orange->reset();
+            }
+        }
+        image.clearImage(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_TOTAL_SIZE);
     }
 
-    if (flags.getState() == BootState::Verified)
+    bool appCheck =
+        isImageAuthentic(FlashLayout::APP_START, FlashLayout::APPLICATION_METADATA_START);
+
+    if (appCheck == true)
     {
-        // TODO: Apply update (e.g., copy NEW_APP to APP)
-        flags.setState(BootState::Applied);
+        //JumpToApp();
     }
-    */
-    JumpToApp();
+
+    uint32_t timer{};
 
     while (true)
     {
+        /**
+         * @brief Blinking period depends on number of uC cycles per loop (~30 - 50):
+         *      Tc = 1/16MHz = 62.5ns,
+         *      Tloop = Tc x CyclePerLoop,
+         *      Ttoggle = Tloop x 1M,
+         *  Obserwed blinking period ~1Hz
+         */
+        auto red = gpio.getPin(PinId::LD_RED);
+
+        if ((timer % 1000000) == 0)
+        {
+            if (red != nullptr)
+            {
+                red->toggle();
+            }
+        }
+        ++timer;
     }
 }
 

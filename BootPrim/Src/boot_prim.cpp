@@ -24,8 +24,6 @@
 namespace BootPrim
 {
 
-static bool checkMetaData(std::uintptr_t t_firmware, std::uintptr_t t_metadata);
-
 static void JumpToBootSec()
 {
     constexpr std::uintptr_t addr      = FlashLayout::BOOTLOADER2_START;
@@ -51,7 +49,7 @@ extern "C" int main()
     ImageManager       image(&writer);
     clock.initialize(nullptr);
 
-    bool newBootSecCheck = checkMetaData(FlashLayout::NEW_BOOTLOADER2_START,
+    bool newBootSecCheck = isImageAuthentic(FlashLayout::NEW_BOOTLOADER2_START,
                                          FlashLayout::NEW_BOOTLOADER2_METADATA_START);
     if (newBootSecCheck == true)
     {
@@ -62,8 +60,8 @@ extern "C" int main()
         LEDControl::toggleBlueLED();
     }
 
-    bool newAppCheck =
-        checkMetaData(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_METADATA_START);
+    bool newAppCheck = isImageStaged(FlashLayout::NEW_APP_METADATA_START);
+
     auto isStaged = flags.getState();
 
     if (newAppCheck == true)
@@ -80,7 +78,7 @@ extern "C" int main()
      * Secend Bootloader Integrity check
      */
     bool bootSecCheck =
-        checkMetaData(FlashLayout::BOOTLOADER2_START, FlashLayout::BOOT2_METADATA_START);
+        isImageAuthentic(FlashLayout::BOOTLOADER2_START, FlashLayout::BOOT2_METADATA_START);
 
     if (bootSecCheck == true)
     {
@@ -107,25 +105,6 @@ extern "C" int main()
         }
         ++timer;
     }
-}
-
-static bool checkMetaData(std::uintptr_t t_firmware, std::uintptr_t t_metadata)
-{
-    const std::uint8_t* firmware = reinterpret_cast<const std::uint8_t*>(t_firmware);
-
-    const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(t_metadata);
-
-    bool result = false;
-
-    if (metadata->magic == Firmware::METADATA_MAGIC)
-    {
-        std::size_t   firmware_size = metadata->firmwareSize;
-        std::uint32_t expected_crc  = metadata->firmwareCRC;
-
-        result = Integrity::CRC32Checker::verify(firmware, firmware_size, expected_crc);
-    }
-
-    return result;
 }
 
 } // namespace BootPrim
