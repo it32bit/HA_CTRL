@@ -19,6 +19,7 @@
 #include "clock_manager_stm32.hpp"
 #include "gpio_manager_stm32.hpp"
 #include "image_manager.hpp"
+#include "shared_memory.hpp"
 
 // Access Metadata and Cert Regions
 // const auto* metadata     = reinterpret_cast<const Firmware::Metadata*>(FlashLayout::METADATA_START);
@@ -45,6 +46,12 @@ extern "C" int main()
     if (auto red = gpio.getPin(PinId::LD_RED))
     {
         red->set();
+    }
+
+    if (Shared::firmwareUpdateFlag == Shared::PREPARE_TO_RECEIVE_BINARY)
+    {
+        Shared::firmwareUpdateFlag = 0;
+        // TODO : In here start receive binary.
     }
 
     /**

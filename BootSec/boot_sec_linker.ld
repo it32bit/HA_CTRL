@@ -136,6 +136,14 @@ SECTIONS
     _ebss = .;
   } >RAM
 
+  /* Shared RAM section for bootloader - app communication */
+  .shared_ram (NOLOAD) :
+  {
+    . = ALIGN(4);
+    KEEP(*(.shared_ram))
+    . = ALIGN(4);
+  } >RAM
+
   ._user_heap_stack :
   {
     PROVIDE(end = .);
