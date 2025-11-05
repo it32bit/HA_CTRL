@@ -26,6 +26,7 @@
  ******************************************************************************
  */
 #include <cstdint>
+#include <span>
 #include "stm32f4xx.h"
 #include "flash_writer_stm32.hpp"
 
@@ -45,6 +46,8 @@ void FlashWriterSTM32F4::lock()
 
 void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
 {
+    unlock();
+
     while (FLASH->SR & FLASH_SR_BSY)
     {
     }
@@ -64,11 +67,15 @@ void FlashWriterSTM32F4::eraseSector(std::uint8_t t_sector)
     }
 
     FLASH->CR &= ~FLASH_CR_SER;
+
+    lock();
 }
 
 __attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uintptr_t t_address,
                                                                         std::uint32_t  t_data)
 {
+    unlock();
+
     // Wait for no ongoing operation
     while (FLASH->SR & FLASH_SR_BSY)
     {
@@ -97,19 +104,50 @@ __attribute__((section(".ramfunc"))) void FlashWriterSTM32F4::writeWord(std::uin
 
     // Clear PG bit
     FLASH->CR &= ~FLASH_CR_PG;
+
+    lock();
 }
 
-__attribute__((section(".ramfunc"))) void
-FlashWriterSTM32F4::writeImage(std::uintptr_t t_address_src, std::uintptr_t t_address_dst,
-                               std::size_t t_wordCount)
+std::uint32_t FlashWriterSTM32F4::makeWord(std::span<const std::byte> bytes)
 {
-    std::size_t count = t_wordCount / 4;
-    count += (t_wordCount % 4) ? 1 : 0;
+    // Check if bytes are less or equal 4 byte
+    // assert(bytes.size() <= sizeof(std::uint32_t));
 
-    for (std::size_t i = 0; i < count; ++i)
+    // Create 4 byte buffer filled by 0xFF
+    std::array<std::byte, sizeof(std::uint32_t)> buf{std::byte{0xFF}, std::byte{0xFF},
+                                                     std::byte{0xFF}, std::byte{0xFF}};
+    std::copy(bytes.begin(), bytes.end(), buf.begin());
+
+    // Conversion to uint32_t
+    return std::bit_cast<std::uint32_t>(buf);
+}
+
+void FlashWriterSTM32F4::writeImage(std::uintptr_t t_address_src, std::uintptr_t t_address_dst,
+                                    std::size_t t_byte_number)
+{
+    // assert((t_address_dst % 4) == 0); // destination address must be alligned to word
+
+    // Creation of view to source as a byte
+    auto src_bytes =
+        std::span<const std::byte>(std::bit_cast<const std::byte*>(t_address_src), t_byte_number);
+
+    const std::size_t full_words = src_bytes.size() / sizeof(std::uint32_t);
+    const std::size_t remainder  = src_bytes.size() % sizeof(std::uint32_t);
+
+    // Write full words
+    for (std::size_t i = 0; i < full_words; ++i)
     {
-        std::uint32_t word =
-            *reinterpret_cast<const std::uint32_t*>(t_address_src + i * sizeof(std::uint32_t));
-        FlashWriterSTM32F4::writeWord(t_address_dst + i * sizeof(std::uint32_t), word);
+        auto word_bytes = src_bytes.subspan(i * sizeof(std::uint32_t), sizeof(std::uint32_t));
+        const std::uint32_t word = makeWord(word_bytes);
+        writeWord(t_address_dst + i * sizeof(std::uint32_t), word);
+    }
+
+    // Last word
+    if (remainder != 0)
+    {
+        auto tail_bytes = src_bytes.subspan(full_words * sizeof(std::uint32_t), remainder);
+        const std::uint32_t last_word = makeWord(tail_bytes);
+
+        writeWord(t_address_dst + full_words * sizeof(std::uint32_t), last_word);
     }
 }

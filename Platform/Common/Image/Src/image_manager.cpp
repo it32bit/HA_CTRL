@@ -9,9 +9,7 @@ ImageManager::ImageManager(IFlashWriter* writer) : m_writer(writer) {}
 void ImageManager::writeImage(std::uintptr_t t_image_src, std::uintptr_t t_image_dst,
                               std::size_t t_image_size)
 {
-    __disable_irq();
-
-    m_writer->unlock();
+    CriticalSection criticalSection; // interrupts disabled here
 
     // Image can be bigger then sector size
     std::uintptr_t current_addr = t_image_dst;
@@ -27,16 +25,14 @@ void ImageManager::writeImage(std::uintptr_t t_image_src, std::uintptr_t t_image
     }
 
     m_writer->writeImage(t_image_src, t_image_dst, t_image_size);
-    m_writer->lock();
-    __enable_irq();
+
+    // interrupts enabled here (only if previous they were enabled)
 }
 
 void ImageManager::writeMeta(std::uintptr_t t_image_src, std::uintptr_t t_image_dst,
                              std::size_t t_image_size)
 {
-    __disable_irq();
-
-    m_writer->unlock();
+    CriticalSection criticalSection; // interrupts disabled here
 
     const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(t_image_dst);
 
@@ -48,15 +44,12 @@ void ImageManager::writeMeta(std::uintptr_t t_image_src, std::uintptr_t t_image_
         m_writer->eraseSector(sector);
     }
     m_writer->writeImage(t_image_src, t_image_dst, t_image_size);
-    m_writer->lock();
-    __enable_irq();
 }
 
 void ImageManager::clearImage(std::uintptr_t t_image_start, std::size_t t_image_size)
 {
-    __disable_irq();
+    CriticalSection criticalSection; // interrupts disabled here
 
-    m_writer->unlock();
     // Image can be bigger then sector size
     std::uintptr_t current_addr = t_image_start;
     std::uintptr_t end_addr     = t_image_start + t_image_size;
@@ -69,8 +62,6 @@ void ImageManager::clearImage(std::uintptr_t t_image_start, std::size_t t_image_
         m_writer->eraseSector(sector);
         current_addr += size;
     }
-    m_writer->lock();
-    __enable_irq();
 }
 
 bool isImageStaged(std::uintptr_t t_metadata)

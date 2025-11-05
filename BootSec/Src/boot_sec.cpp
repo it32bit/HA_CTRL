@@ -63,18 +63,17 @@ extern "C" int main()
             // But at this point, the old application is replaced with the new one here.
             image.writeImage(FlashLayout::NEW_APP_START, FlashLayout::APP_START,
                              FlashLayout::NEW_APP_TOTAL_SIZE);
-            image.clearImage(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_TOTAL_SIZE);
-            // flags.setState(BootState::Applied);
+            flags.setState(BootState::Applied);
         }
         else
         {
-            // flags.setState(BootState::Failed);
-            image.clearImage(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_TOTAL_SIZE);
+            flags.setState(BootState::Failed);
             if (auto orange = gpio.getPin(PinId::LD_ORA))
             {
                 orange->reset();
             }
         }
+        image.clearImage(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_TOTAL_SIZE);
     }
 
     bool appCheck =
@@ -82,7 +81,7 @@ extern "C" int main()
 
     if (appCheck == true)
     {
-        //JumpToApp();
+        JumpToApp();
     }
 
     uint32_t timer{};

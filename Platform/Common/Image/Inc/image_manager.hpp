@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "flash_layout.hpp"
 #include "pil_flash_writer.hpp"
+#include "stm32f4xx.h"
 
 class ImageManager
 {
@@ -22,5 +23,34 @@ class ImageManager
 
 bool isImageStaged(std::uintptr_t t_metadata);
 bool isImageAuthentic(std::uintptr_t t_firmware, std::uintptr_t t_metadata);
+
+class CriticalSection
+{
+  public:
+    CriticalSection()
+    {
+        // Save current PRIMASK state
+        previousState = __get_PRIMASK();
+        // Disable interrupts globally
+        __disable_irq();
+    }
+
+    ~CriticalSection()
+    {
+        // Restore previous state
+        if (!previousState)
+        {
+            __enable_irq();
+        }
+        // If previousState == 1, interrupts were already disabled → leave disabled
+    }
+
+    // Non-copyable
+    CriticalSection(const CriticalSection&)            = delete;
+    CriticalSection& operator=(const CriticalSection&) = delete;
+
+  private:
+    uint32_t previousState;
+};
 
 #endif // IMAGE_MANAGER_HPP
