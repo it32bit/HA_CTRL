@@ -28,7 +28,6 @@ void Bootloader::applyUpdate()
 
     std::uintptr_t dst = FlashLayout::APP_START;
 
-    m_flash->unlock();
     m_flash->eraseSector(5); // Sector for APP_START
 
     for (std::size_t i = 0; i < src.size(); i += 4)
