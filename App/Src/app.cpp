@@ -46,8 +46,6 @@ Console            console;
  */
 extern "C" int main(void)
 {
-    //HAL_Init();
-
     clock.initialize(ClockErrorHandler);
 
     FlashWriterSTM32F4 writer;
@@ -56,7 +54,7 @@ extern "C" int main(void)
     if (flags.getState() == BootState::Applied)
     {
         // Confirm update success
-        flags.clear(); // Reset to Idle
+        // flags.clear(); // Reset to Idle
     }
 
     /** Initialization code for C++ application can be added here */

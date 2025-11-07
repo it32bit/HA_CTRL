@@ -39,6 +39,9 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/clock_manager_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/adc_manager_stm32.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/uart_manager_stm32.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/uart_stm32.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/uart_receiver_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/flash_writer_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/crc32_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/Common/Integrity/Src/crc32_check.cpp

@@ -24,6 +24,8 @@ class UartManager
     void write(char c);
     void write(const char* str);
 
+    IConsoleUart* getUart();
+
   private:
     static constexpr std::size_t MaxSize  = sizeof(Uart_STM32);
     static constexpr std::size_t MaxAlign = alignof(Uart_STM32);

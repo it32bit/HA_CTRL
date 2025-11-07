@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 constexpr size_t CONSOLE_BUFFER_SIZE{128};
-constexpr size_t CONSOLE_COMMAND_SIZE{5};
+constexpr size_t CONSOLE_COMMAND_SIZE{6};
 
 constexpr size_t MaxCommandNameLength = 16;
 constexpr size_t MaxCommandDescLength = 64;
@@ -21,6 +21,7 @@ class Console
     static void echo(const char* param);
     static void temperature(const char* msg);
     static void watchdogTest(const char* msg);
+    static void firmwareUpdate(const char* msg);
 
   private:
     static constexpr size_t MaxLength = CONSOLE_BUFFER_SIZE;
@@ -72,6 +73,7 @@ inline constexpr ConsoleCommand cmdConfigArray[CONSOLE_COMMAND_SIZE] = {
     {2, "echo",     &Console::echo,         "Echo a number back"       },
     {3, "temp",     &Console::temperature,  "Get Temp from Tsensor"    },
     {4, "watchdog", &Console::watchdogTest, "Watchdog Test: while(1){}"},
+    {5, "fw_update", &Console::firmwareUpdate, "Firmware Update"},
 };
 
 #endif // CONSOLE_HPP

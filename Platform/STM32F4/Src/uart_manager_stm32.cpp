@@ -40,3 +40,8 @@ void UartManager::write(const char* str)
         m_uart->write(*str++);
     }
 }
+
+IConsoleUart* UartManager::getUart()
+{
+    return m_uart;
+}

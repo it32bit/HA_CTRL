@@ -18,6 +18,8 @@
 #include "flash_layout.hpp"
 #include "clock_manager_stm32.hpp"
 #include "gpio_manager_stm32.hpp"
+#include "uart_receiver_stm32.hpp"
+#include "uart_manager_stm32.hpp"
 #include "image_manager.hpp"
 #include "shared_memory.hpp"
 
@@ -33,6 +35,7 @@ static void ClockErrorHandler();
 
 ClockManager clock;
 GpioManager  gpio;
+UartManager  uart;
 
 extern "C" int main()
 {
@@ -42,6 +45,9 @@ extern "C" int main()
 
     clock.initialize(ClockErrorHandler);
     gpio.initialize(gpioPinConfigs);
+    uart.initialize(UartId::Uart2, 115200);
+
+    UartReceiver receiver(*uart.getUart(), writer);
 
     if (auto red = gpio.getPin(PinId::LD_RED))
     {
@@ -51,7 +57,10 @@ extern "C" int main()
     if (Shared::firmwareUpdateFlag == Shared::PREPARE_TO_RECEIVE_BINARY)
     {
         Shared::firmwareUpdateFlag = 0;
+
         // TODO : In here start receive binary.
+        receiver.receiveImage(FlashLayout::NEW_BOOTLOADER2_START,
+                              FlashLayout::NEW_BOOTLOADER2_SIZE + FlashLayout::NEW_APP_TOTAL_SIZE);
     }
 
     /**
