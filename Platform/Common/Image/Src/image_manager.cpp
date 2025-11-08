@@ -96,3 +96,18 @@ bool isImageAuthentic(std::uintptr_t t_firmware, std::uintptr_t t_metadata)
 
     return result;
 }
+
+bool isImageDiffrent(std::uintptr_t t_meta_active, std::uintptr_t t_meta_candidate)
+{
+    const Firmware::Metadata* active = reinterpret_cast<const Firmware::Metadata*>(t_meta_active);
+    const Firmware::Metadata* candidate = reinterpret_cast<const Firmware::Metadata*>(t_meta_candidate);
+
+    bool result{false};
+
+    if ((active->version != candidate->version) || (active->firmwareCRC != candidate->firmwareCRC))
+    {
+        result = true;
+    }
+
+    return result;
+}

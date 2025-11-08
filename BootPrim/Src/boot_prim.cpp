@@ -79,7 +79,6 @@ static void DeinitPeripheralsBeforeJumpPrime()
     SYSCFG->MEMRMP = 0;
 }
 
-
 static void JumpToBootSec()
 {
     constexpr std::uintptr_t addr      = FlashLayout::BOOTLOADER2_START;
@@ -102,22 +101,36 @@ ClockManager clock;
 
 extern "C" int main()
 {
+    clock.initialize(nullptr);
+
     FlashWriterSTM32F4 writer;
     BootFlagManager    flags(&writer);
     ImageManager       image(&writer);
-    clock.initialize(nullptr);
 
-    bool newBootSecCheck = isImageAuthentic(FlashLayout::NEW_BOOTLOADER2_START,
-                                         FlashLayout::NEW_BOOTLOADER2_METADATA_START);
-    if (newBootSecCheck == true)
+    /**
+     * Boot-Sec
+     */
+    bool newBootSecCandidateCheck = isImageAuthentic(FlashLayout::NEW_BOOTLOADER2_START,
+                                            FlashLayout::NEW_BOOTLOADER2_METADATA_START);
+
+    bool newBootSecCandidateDiffrent = isImageDiffrent(FlashLayout::BOOT2_METADATA_START,
+                                                FlashLayout::NEW_BOOTLOADER2_METADATA_START);
+    if (newBootSecCandidateCheck == true)
     {
-        image.writeImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::BOOTLOADER2_START,
-                         FlashLayout::NEW_BOOTLOADER2_SIZE);
-        image.clearImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::NEW_BOOTLOADER2_SIZE);
+        if (newBootSecCandidateDiffrent == true)
+        {
+            image.writeImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::BOOTLOADER2_START,
+                             FlashLayout::NEW_BOOTLOADER2_SIZE);
 
-        LEDControl::toggleBlueLED();
+            LEDControl::toggleBlueLED();
+        }
+
+        image.clearImage(FlashLayout::NEW_BOOTLOADER2_START, FlashLayout::NEW_BOOTLOADER2_SIZE);
     }
 
+    /**
+     * Application
+     */
     bool newAppCheck = isImageStaged(FlashLayout::NEW_APP_METADATA_START);
 
     auto isStaged = flags.getState();

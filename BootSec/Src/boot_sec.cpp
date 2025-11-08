@@ -46,8 +46,9 @@ extern "C" int main()
     clock.initialize(ClockErrorHandler);
     gpio.initialize(gpioPinConfigs);
     uart.initialize(UartId::Uart2, 115200);
-
     UartReceiver receiver(*uart.getUart(), writer);
+
+    bool candidateReceived{false};
 
     if (auto red = gpio.getPin(PinId::LD_RED))
     {
@@ -56,30 +57,35 @@ extern "C" int main()
 
     if (Shared::firmwareUpdateFlag == Shared::PREPARE_TO_RECEIVE_BINARY)
     {
-        Shared::firmwareUpdateFlag = 0;
-
-        // TODO : In here start receive binary.
         receiver.receiveImage(FlashLayout::NEW_BOOTLOADER2_START,
                               FlashLayout::NEW_BOOTLOADER2_SIZE + FlashLayout::NEW_APP_TOTAL_SIZE);
+        Shared::firmwareUpdateFlag = 0;
+        candidateReceived          = true;
     }
 
     /**
      * If flags == BootState::Staged then: App Image is compared with metadata
      */
-    if (flags.getState() == BootState::Staged)
+    if ((flags.getState() == BootState::Staged) || (candidateReceived == true))
     {
-        bool newAppCheck =
+        bool newAppCandidateCheck =
             isImageAuthentic(FlashLayout::NEW_APP_START, FlashLayout::NEW_APP_METADATA_START);
 
-        if (newAppCheck == true)
+        bool newAppCandidateDiffrent = isImageDiffrent(FlashLayout::APPLICATION_METADATA_START,
+                                                       FlashLayout::NEW_APP_METADATA_START);
+
+        if (newAppCandidateCheck == true)
         {
-            // At this point, you can set the "Verified" flag, then check it in the application (e.g., via CLI).
-            // After verification, set the "Applied" flag — boot-sec will detect it, move the new image to the application area,
-            // and then jump to the application.
-            // But at this point, the old application is replaced with the new one here.
-            image.writeImage(FlashLayout::NEW_APP_START, FlashLayout::APP_START,
-                             FlashLayout::NEW_APP_TOTAL_SIZE);
-            flags.setState(BootState::Applied);
+            if (newAppCandidateDiffrent == true)
+            {
+                // At this point, you can set the "Verified" flag, then check it in the application (e.g., via CLI).
+                // After verification, set the "Applied" flag — boot-sec will detect it, move the new image to the application area,
+                // and then jump to the application.
+                // But at this point, the old application is replaced with the new one here.
+                image.writeImage(FlashLayout::NEW_APP_START, FlashLayout::APP_START,
+                                 FlashLayout::NEW_APP_TOTAL_SIZE);
+                flags.setState(BootState::Applied);
+            }
         }
         else
         {
