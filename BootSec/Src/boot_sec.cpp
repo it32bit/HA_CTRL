@@ -57,10 +57,19 @@ extern "C" int main()
 
     if (Shared::firmwareUpdateFlag == Shared::PREPARE_TO_RECEIVE_BINARY)
     {
+        Shared::firmwareUpdateFlag = 0;
+        if (auto orange = gpio.getPin(PinId::LD_ORA))
+        {
+            orange->set();
+        }
+
         receiver.receiveImage(FlashLayout::NEW_BOOTLOADER2_START,
                               FlashLayout::NEW_BOOTLOADER2_SIZE + FlashLayout::NEW_APP_TOTAL_SIZE);
-        Shared::firmwareUpdateFlag = 0;
-        candidateReceived          = true;
+        if (auto orange = gpio.getPin(PinId::LD_ORA))
+        {
+            orange->reset();
+        }
+        candidateReceived = true;
     }
 
     /**

@@ -30,7 +30,7 @@ void UartReceiver::receiveImage(std::uintptr_t flashDest, std::size_t imageSize)
             buffer[chunk++] = 0xFF;
         }
 
-        std::uint32_t word = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | (buffer[3]);
+        std::uint32_t word = (buffer[3] << 24) | (buffer[2] << 16) | (buffer[1] << 8) | (buffer[0]);
 
         m_writer.writeWord(flashDest, word);
         flashDest += 4;
