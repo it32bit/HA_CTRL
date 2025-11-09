@@ -173,7 +173,7 @@ if(NOT BUILD_TESTING)
 
         string(REGEX MATCH ".*APPLICATION_METADATA_START[ \t]*=[ \t]*0x([0-9A-Fa-f]+)" _match3 "${line}")
         if(_match3)
-            message(STATUS "Regex match: '${_match}'")
+            # message(STATUS "Regex match: '${_match3}'")
             set(APPLICATION_METADATA_START "0x${CMAKE_MATCH_1}")
 
         endif()
