@@ -103,10 +103,20 @@ SECTIONS
     PROVIDE_HIDDEN(__fini_array_end = .);
   } >FLASH
 
+  /* Shared RAM section at the beginning of RAM for bootloader - app communication*/
+  .shared_ram (NOLOAD) :
+  {
+    __shared_ram_start = ORIGIN(RAM);
+    . = __shared_ram_start;
+    KEEP(*(.shared_ram))
+    . = ALIGN(8);
+    __shared_ram_end = .;
+  } >RAM
   _sidata = LOADADDR(.data);
 
   .data :
   {
+    . = __shared_ram_end;
     _sdata = .;
     *(.data)
     *(.data*)

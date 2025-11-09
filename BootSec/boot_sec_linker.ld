@@ -103,10 +103,21 @@ SECTIONS
     PROVIDE_HIDDEN(__fini_array_end = .);
   } >FLASH
 
+  /* Shared RAM section at the beginning of RAM for bootloader - app communication*/
+  .shared_ram (NOLOAD) :
+  {
+    __shared_ram_start = ORIGIN(RAM);
+    . = __shared_ram_start;
+    KEEP(*(.shared_ram))
+    . = ALIGN(8);
+    __shared_ram_end = .;
+  } >RAM
+
   _sidata = LOADADDR(.data);
 
   .data :
   {
+    . = __shared_ram_end;
     _sdata = .;
     *(.data)
     *(.data*)
@@ -136,14 +147,7 @@ SECTIONS
     _ebss = .;
   } >RAM
 
-  /* Shared RAM section for bootloader - app communication */
-  .shared_ram (NOLOAD) :
-  {
-    . = ALIGN(4);
-    KEEP(*(.shared_ram))
-    . = ALIGN(4);
-  } >RAM
-
+  /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
   ._user_heap_stack :
   {
     PROVIDE(end = .);

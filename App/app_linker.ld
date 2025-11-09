@@ -142,12 +142,22 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  /* Shared RAM section at the beginning of RAM for bootloader - app communication*/
+  .shared_ram (NOLOAD) :
+  {
+    __shared_ram_start = ORIGIN(RAM);
+    . = __shared_ram_start;
+    KEEP(*(.shared_ram))
+    . = ALIGN(8);
+    __shared_ram_end = .;
+  } >RAM
+
   _sidata = LOADADDR(.data);
 
   /* Initialized data sections into "RAM" Ram type memory */
   .data :
   {
-    . = ALIGN(4);
+    . = __shared_ram_end;
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
@@ -203,14 +213,6 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >RAM
-
-  /* Shared RAM section for bootloader - app communication */
-  .shared_ram (NOLOAD) :
-  {
-    . = ALIGN(4);
-    KEEP(*(.shared_ram))
-    . = ALIGN(4);
   } >RAM
 
   /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */

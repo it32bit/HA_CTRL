@@ -46,6 +46,7 @@ set(sources_SRCS
     ${CMAKE_SOURCE_DIR}/Platform/${PLATFORM_MCU}/Src/crc32_stm32.cpp
     ${CMAKE_SOURCE_DIR}/Platform/Common/Integrity/Src/crc32_check.cpp
     ${CMAKE_SOURCE_DIR}/Platform/Common/Image/Src/image_manager.cpp
+    ${CMAKE_SOURCE_DIR}/Platform/Common/Image/Src/shared_memory.cpp
 
     ${CMAKE_SOURCE_DIR}/App/Src/app.cpp
     ${CMAKE_SOURCE_DIR}/App/Src/app_it.cpp

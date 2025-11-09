@@ -6,7 +6,7 @@
 namespace Shared
 {
 
-alignas(4) __attribute__((section(".shared_ram"))) std::uint32_t firmwareUpdateFlag = 0;
+extern volatile std::uint32_t firmwareUpdateFlag;
 
 constexpr std::uint32_t PREPARE_TO_RECEIVE_BINARY = 0xFEEDC0DE;
 
