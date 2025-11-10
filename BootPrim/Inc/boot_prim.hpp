@@ -7,7 +7,7 @@
 #include "boot.hpp"
 // Define the instance in a specific section (used for linking, bootloader, etc.)
 __attribute__((section(".firmware_version"), used)) constexpr FirmwareVersion FIRMWARE_VERSION = {
-    .major = 0, .minor = 2};
+    .major = 1, .minor = 0};
 
 class LEDControl
 {
