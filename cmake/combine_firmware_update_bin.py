@@ -67,6 +67,10 @@ def combine(app_bin, app_meta, sec_bin, sec_meta, header_path, output_path):
         pad_to_offset(out, APP_META_OFFSET)
         out.write(f_app_meta.read())
 
+        # Pad to end of 1 KB metadata region (reserved for Public CERT)
+        APP_META_END = APP_META_OFFSET + 1024
+        pad_to_offset(out, APP_META_END)
+
         final_size = out.tell()
         print(f"Combined firmware written to {output_path} ({final_size / 1024:.2f} KB)")
 

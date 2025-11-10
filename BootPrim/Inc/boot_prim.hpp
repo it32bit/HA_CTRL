@@ -1,5 +1,13 @@
 // boot_prim.hpp
+#ifndef BOOT_PRIM_HPP
+#define BOOT_PRIM_HPP
+
 #include "stm32f4xx.h"
+
+#include "boot.hpp"
+// Define the instance in a specific section (used for linking, bootloader, etc.)
+__attribute__((section(".firmware_version"), used)) constexpr FirmwareVersion FIRMWARE_VERSION = {
+    .major = 0, .minor = 2};
 
 class LEDControl
 {
@@ -48,3 +56,5 @@ class LEDControl
         GPIOD->ODR ^= (1 << 15);
     }
 };
+
+#endif // BOOT_PRIM_HPP
