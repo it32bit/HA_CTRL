@@ -24,6 +24,7 @@ class ImageManager
 bool isImageStaged(std::uintptr_t t_metadata);
 bool isImageAuthentic(std::uintptr_t t_firmware, std::uintptr_t t_metadata);
 bool isImageDiffrent(std::uintptr_t t_meta_active, std::uintptr_t t_meta_candidate);
+bool isImageEmpty(std::uintptr_t t_firmware, std::size_t t_size);
 
 class CriticalSection
 {

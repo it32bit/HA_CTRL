@@ -8,14 +8,14 @@
 extern GpioManager gpio;
 extern AdcManager  adc;
 
-typedef struct
+struct FirmwareVersion
 {
-    uint8_t major;
-    uint8_t minor;
-} firmwareVersionS;
+    std::uint8_t major;
+    std::uint8_t minor;
+} __attribute__((packed));
 
-__attribute__((section(".firmware_version"), used)) constexpr firmwareVersionS FIRMWARE_VERSION = {
-    .major = 0, .minor = 3};
+__attribute__((section(".firmware_version"), used)) constexpr FirmwareVersion FIRMWARE_VERSION = {
+    .major = 0, .minor = 4};
 
 class Debouncer
 {

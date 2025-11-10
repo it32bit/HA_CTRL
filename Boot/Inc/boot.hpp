@@ -1,8 +1,7 @@
 #ifndef BOOT_HPP
 #define BOOT_HPP
 
-#include "pil_flash_writer.hpp"
-#include "firmware_metadata.hpp"
+#include <cstdint>
 
 struct FirmwareVersion
 {
@@ -10,23 +9,14 @@ struct FirmwareVersion
     std::uint8_t minor;
 } __attribute__((packed));
 
-// Define the instance in a specific section (used for linking, bootloader, etc.)
-__attribute__((section(".firmware_version"), used)) constexpr FirmwareVersion FIRMWARE_VERSION = {
-    .major = 0, .minor = 4};
-
 class Bootloader
 {
   public:
-    explicit Bootloader(IFlashWriter* writer);
-
-    bool isMetadataValid() const;
-    bool verifyStagedFirmware() const;
-    void applyUpdate();
-    void jumpToApplication();
+    static void jumpToAddress(const std::uintptr_t addr);
+    static void deinitPeripherals();
 
   private:
-    IFlashWriter*             m_flash;
-    const Firmware::Metadata& m_metadata() const;
+    Bootloader() = delete;
 };
 
 #endif // BOOT_HPP

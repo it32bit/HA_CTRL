@@ -1,3 +1,4 @@
+#include <span>
 #include "image_manager.hpp"
 #include "stm32f4xx.h"
 #include "flash_layout.hpp"
@@ -80,19 +81,20 @@ bool isImageStaged(std::uintptr_t t_metadata)
 
 bool isImageAuthentic(std::uintptr_t t_firmware, std::uintptr_t t_metadata)
 {
-    const std::uint8_t* firmware = reinterpret_cast<const std::uint8_t*>(t_firmware);
-
     const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(t_metadata);
 
-    bool result = false;
-
-    if (metadata->magic == Firmware::METADATA_MAGIC)
+    if (metadata->magic != Firmware::METADATA_MAGIC)
     {
-        std::size_t   firmware_size = metadata->firmwareSize;
-        std::uint32_t expected_crc  = metadata->firmwareCRC;
-
-        result = Integrity::CRC32Checker::verify(firmware, firmware_size, expected_crc);
+        return false;
     }
+
+    std::size_t   firmware_size = metadata->firmwareSize;
+    std::uint32_t expected_crc  = metadata->firmwareCRC;
+
+    std::span<const std::uint8_t> firmware{reinterpret_cast<const std::uint8_t*>(t_firmware),
+                                           firmware_size};
+
+    bool result = Integrity::CRC32Checker::verify(firmware, expected_crc);
 
     return result;
 }
@@ -100,7 +102,8 @@ bool isImageAuthentic(std::uintptr_t t_firmware, std::uintptr_t t_metadata)
 bool isImageDiffrent(std::uintptr_t t_meta_active, std::uintptr_t t_meta_candidate)
 {
     const Firmware::Metadata* active = reinterpret_cast<const Firmware::Metadata*>(t_meta_active);
-    const Firmware::Metadata* candidate = reinterpret_cast<const Firmware::Metadata*>(t_meta_candidate);
+    const Firmware::Metadata* candidate =
+        reinterpret_cast<const Firmware::Metadata*>(t_meta_candidate);
 
     bool result{false};
 
@@ -110,4 +113,17 @@ bool isImageDiffrent(std::uintptr_t t_meta_active, std::uintptr_t t_meta_candida
     }
 
     return result;
+}
+
+bool isImageEmpty(std::uintptr_t t_data, std::size_t t_size)
+{
+    std::span<const std::uint8_t> image{reinterpret_cast<const std::uint8_t*>(t_data), t_size};
+
+    for (std::uint8_t byte : image)
+    {
+        if (byte != 0xFF)
+            return false; // Some data exists
+    }
+
+    return true; // Fully erased
 }

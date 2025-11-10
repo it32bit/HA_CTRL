@@ -1,39 +1,89 @@
 /**
- * @file      BootCore/Src/boot.cpp
+ * @file      boot.cpp
  * @author    it32bit
- * @brief     Bootloader core logic for firmware update management.
- *            Handles copying of the new firmware image from the update
- *            region to the main application area using low-level flash access.
+ * @brief     Bootloader jump logic
  *
  * @version   1.0
  * @date      2025-10-24
  * @attention This file is part of the ha-ctrl project and is licensed under the MIT License.
  *            (c) 2025 ha-ctrl project authors.
  */
-#include <cstdint>
-#include <cstring>
-#include <span>
 
 #include "boot.hpp"
-#include "flash_layout.hpp"
+#include "stm32f4xx.h"
 
-Bootloader::Bootloader(IFlashWriter* writer) : m_flash(writer) {}
-
-void Bootloader::applyUpdate()
+void Bootloader::jumpToAddress(const std::uintptr_t t_jump_address)
 {
-    const auto& meta = m_metadata();
+    uint32_t stack_ptr = *reinterpret_cast<volatile uint32_t*>(t_jump_address);
+    uint32_t reset_ptr = *reinterpret_cast<volatile uint32_t*>(t_jump_address + 4);
 
-    auto src = std::span<const std::uint8_t>(
-        reinterpret_cast<const std::uint8_t*>(FlashLayout::NEW_APP_START), meta.firmwareSize);
+    __disable_irq();
+    deinitPeripherals();
 
-    std::uintptr_t dst = FlashLayout::APP_START;
+    SCB->VTOR = t_jump_address;
+    __DSB();
+    __ISB();
+    __set_MSP(stack_ptr);
 
-    m_flash->eraseSector(5); // Sector for APP_START
+    auto entry = reinterpret_cast<void (*)()>(reset_ptr);
+    entry();
 
-    for (std::size_t i = 0; i < src.size(); i += 4)
+    while (true)
     {
-        std::uint32_t word = 0;
-        std::memcpy(&word, src.data() + i, sizeof(word));
-        m_flash->writeWord(dst + i, word);
     }
+}
+
+void Bootloader::deinitPeripherals()
+{
+    SysTick->CTRL = 0;
+    SysTick->LOAD = 0;
+    SysTick->VAL  = 0;
+
+    for (uint32_t i = 0; i < sizeof(NVIC->ICER) / sizeof(NVIC->ICER[0]); ++i)
+    {
+        NVIC->ICER[i] = 0xFFFFFFFF;
+        NVIC->ICPR[i] = 0xFFFFFFFF;
+    }
+
+    RCC->CR |= RCC_CR_HSION;
+    RCC->CFGR = 0;
+    while ((RCC->CR & RCC_CR_HSIRDY) == 0)
+    {
+    }
+
+    RCC->CR &= ~(RCC_CR_HSEON | RCC_CR_HSEBYP | RCC_CR_CSSON | RCC_CR_PLLON);
+    while ((RCC->CR & RCC_CR_PLLRDY) != 0)
+    {
+    }
+
+    RCC->PLLCFGR = 0x24003010;
+    RCC->CIR     = 0;
+
+    RCC->AHB1ENR = 0;
+    RCC->AHB2ENR = 0;
+    RCC->AHB3ENR = 0;
+    RCC->APB1ENR = 0;
+    RCC->APB2ENR = 0;
+
+    EXTI->IMR  = 0;
+    EXTI->EMR  = 0;
+    EXTI->RTSR = 0;
+    EXTI->FTSR = 0;
+    EXTI->PR   = 0xFFFFFFFF;
+
+    constexpr GPIO_TypeDef* ports[] = {GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH};
+    for (auto port : ports)
+    {
+        if (!port)
+            continue;
+        port->MODER   = 0xFFFFFFFF;
+        port->OTYPER  = 0;
+        port->OSPEEDR = 0;
+        port->PUPDR   = 0;
+        port->ODR     = 0;
+    }
+
+    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    SYSCFG->MEMRMP = 0;
 }

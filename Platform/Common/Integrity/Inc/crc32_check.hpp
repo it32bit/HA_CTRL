@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <span>
 
 namespace Integrity
 {
@@ -10,10 +11,9 @@ namespace Integrity
 class CRC32Checker
 {
   public:
-    static std::uint32_t compute(const std::uint8_t* t_data, std::size_t t_length);
+    static std::uint32_t compute(std::span<const std::uint8_t> t_data);
 
-    static bool verify(const std::uint8_t* t_data, std::size_t t_length,
-                       std::uint32_t t_expected_crc);
+    static bool verify(std::span<const std::uint8_t> t_data, std::uint32_t expected_crc);
 };
 
 } // namespace Integrity

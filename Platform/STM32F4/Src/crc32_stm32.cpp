@@ -2,6 +2,8 @@
 #include "stm32f4xx.h"
 #include "stdint-gcc.h"
 
+// Polynomial: 0x04C11DB7 (STM32 hardcoded)
+
 std::uint32_t CRC32Hardware::compute(const std::uint8_t* t_data, std::size_t t_length)
 {
     RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
