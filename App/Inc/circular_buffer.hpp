@@ -1,5 +1,5 @@
-#ifndef _CIRCULAR_BUFFER_HPP_
-#define _CIRCULAR_BUFFER_HPP_
+#ifndef CIRCULAR_BUFFER_HPP
+#define CIRCULAR_BUFFER_HPP
 
 #include <string>
 #include <array>
@@ -107,4 +107,4 @@ class CircularBuffer
         }
     }
 };
-#endif // _CIRCULAR_BUFFER_HPP_
+#endif // CIRCULAR_BUFFER_HPP

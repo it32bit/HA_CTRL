@@ -36,19 +36,21 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
-_estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
+/* Stack and heap configuration */
+_estack = ORIGIN(RAM) + LENGTH(RAM);
+_Min_Heap_Size = 0x200;
+_Min_Stack_Size = 0x400;
 
-_Min_Heap_Size = 0x200; /* required amount of heap */
-_Min_Stack_Size = 0x400; /* required amount of stack */
-
-/* Memories definition */
+/* Memory layout */
 MEMORY
 {
   CCMRAM (xrw): ORIGIN = 0x10000000, LENGTH = 64K
   RAM    (xrw): ORIGIN = 0x20000000, LENGTH = 128K
-  FLASH  (rx) : ORIGIN = 0x08020000, LENGTH = 896K
+  FLASH  (rx) : ORIGIN = 0x08020000, LENGTH = 384K - 1K
 }
+
+/* Place metadata and cert manually */
+__app_end = ORIGIN(FLASH) + LENGTH(FLASH);
 
 /* Sections */
 SECTIONS
@@ -87,14 +89,22 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  /* Firmware version section into "FLASH" Rom type memory */
+  .firmware_version :
+  {
+    . = ALIGN(4);
+    KEEP(*(.firmware_version))
+    . = ALIGN(4);
+  } >FLASH
+
+  .ARM.extab :
   {
     . = ALIGN(4);
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(4);
   } >FLASH
 
-  .ARM (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .ARM :
   {
     . = ALIGN(4);
     __exidx_start = .;
@@ -103,42 +113,51 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .preinit_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .preinit_array :
   {
     . = ALIGN(4);
-    PROVIDE_HIDDEN (__preinit_array_start = .);
-    KEEP (*(.preinit_array*))
-    PROVIDE_HIDDEN (__preinit_array_end = .);
+    PROVIDE_HIDDEN(__preinit_array_start = .);
+    KEEP(*(.preinit_array*))
+    PROVIDE_HIDDEN(__preinit_array_end = .);
     . = ALIGN(4);
   } >FLASH
 
-  .init_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .init_array :
   {
     . = ALIGN(4);
-    PROVIDE_HIDDEN (__init_array_start = .);
-    KEEP (*(SORT(.init_array.*)))
-    KEEP (*(.init_array*))
-    PROVIDE_HIDDEN (__init_array_end = .);
+    PROVIDE_HIDDEN(__init_array_start = .);
+    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(.init_array*))
+    PROVIDE_HIDDEN(__init_array_end = .);
     . = ALIGN(4);
   } >FLASH
 
-  .fini_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  .fini_array :
   {
     . = ALIGN(4);
-    PROVIDE_HIDDEN (__fini_array_start = .);
-    KEEP (*(SORT(.fini_array.*)))
-    KEEP (*(.fini_array*))
-    PROVIDE_HIDDEN (__fini_array_end = .);
+    PROVIDE_HIDDEN(__fini_array_start = .);
+    KEEP(*(SORT(.fini_array.*)))
+    KEEP(*(.fini_array*))
+    PROVIDE_HIDDEN(__fini_array_end = .);
     . = ALIGN(4);
   } >FLASH
 
-  /* Used by the startup to initialize data */
+  /* Shared RAM section at the beginning of RAM for bootloader - app communication*/
+  .shared_ram (NOLOAD) :
+  {
+    __shared_ram_start = ORIGIN(RAM);
+    . = __shared_ram_start;
+    KEEP(*(.shared_ram))
+    . = ALIGN(8);
+    __shared_ram_end = .;
+  } >RAM
+
   _sidata = LOADADDR(.data);
 
   /* Initialized data sections into "RAM" Ram type memory */
   .data :
   {
-    . = ALIGN(4);
+    . = __shared_ram_end;
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
@@ -164,10 +183,22 @@ SECTIONS
     _sccmram = .;       /* create a global symbol at ccmram start */
     *(.ccmram)
     *(.ccmram*)
-
     . = ALIGN(4);
     _eccmram = .;       /* create a global symbol at ccmram end */
   } >CCMRAM AT> FLASH
+
+  /* RAM-executed flash functions */
+  .ramfunc :
+  {
+    . = ALIGN(4);
+    _sramfunc = .;
+    KEEP(*(.ramfunc))
+    KEEP(*(.ramfunc*))
+    . = ALIGN(4);
+    _eramfunc = .;
+  } >RAM AT> FLASH
+
+  _sidata_ramfunc = LOADADDR(.ramfunc);
 
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
@@ -179,7 +210,6 @@ SECTIONS
     *(.bss)
     *(.bss*)
     *(COMMON)
-
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
@@ -189,12 +219,45 @@ SECTIONS
   ._user_heap_stack :
   {
     . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
+    PROVIDE(end = .);
+    PROVIDE(_end = .);
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM
+
+  /* Optional: Update region metadata + cert */
+  .metadata_cert_region (NOLOAD) :
+  {
+    __metadata_start__ = 0x0807FC00;
+    __cert_start__     = 0x0807FE00;
+  } >FLASH
+
+  .update_metadata_cert_region (NOLOAD) :
+  {
+    __new_metadata_start__ = 0x080FFC00;
+    __new_cert_start__     = 0x080FFE00;
+  } >FLASH
+
+  .cert_public_region (NOLOAD) :
+  {
+    __cert_public_start__ = 0x080F8400;
+  } >FLASH
+
+  .cert_private_region (NOLOAD) :
+  {
+    __cert_private_start__ = 0x08004000;
+  } >FLASH
+
+  .error_log_region (NOLOAD) :
+  {
+    __error_log_start__ = 0x08008000;
+  } >FLASH
+
+  .config_region (NOLOAD) :
+  {
+    __config_start__ = 0x0800C000;
+  } >FLASH
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

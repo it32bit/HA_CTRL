@@ -1,5 +1,5 @@
-#ifndef APP_IT_HPP__
-#define APP_IT_HPP__
+#ifndef APP_IT_HPP
+#define APP_IT_HPP
 
 #ifdef __cplusplus
 extern "C"
@@ -14,4 +14,4 @@ extern "C"
 }
 #endif
 
-#endif //APP_IT_HPP__
+#endif //APP_IT_HPP

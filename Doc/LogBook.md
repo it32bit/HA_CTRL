@@ -1333,7 +1333,7 @@ git push origin --delete feature/bootloader
 │       ├── CMakeLists.txt
 │       ├── Inc
 │       │   ├── gpio_config_stm32.hpp
-│       │   ├── gpio_hal_stm32.hpp
+│       │   ├── gpio_stm32.hpp
 │       │   ├── gpio_manager_stm32.hpp
 │       │   ├── gpio_pin_stm32.hpp
 │       │   ├── hal_adc.hpp
@@ -1366,3 +1366,357 @@ Added /Platform/Architecture/GPIO.puml
 PlantUML online Server
 
 <https://www.plantuml.com/plantuml/uml/>
+
+## INFO-45 ALGINAS NEW
+
+What’s Happening with new (m_storage) Watchdog_STM32(timeout_ms);
+
+Using placement new, which constructs an object at a specific memory location — in this case, inside statically allocated buffer m_storage.
+
+```c
+alignas(MaxWatchdogAlign) std::byte m_storage[MaxWatchdogSize];
+```
+
+### This buffer is
+
+- Allocated at compile-time (i.e., its memory is reserved in the .bss or .data section depending on initialization).
+- Located in RAM (typically SRAM on STM32).
+- Sized and aligned to hold your Watchdog_STM32 object safely.
+
+### Then, at run-time, you construct the object in-place
+
+```c
+m_watchdog = new (m_storage) Watchdog_STM32(timeout_ms);
+```
+
+This does not allocate memory — it simply calls the constructor at the address of m_storage.
+
+### Summary: Compile-Time vs Run-Time
+
+| Aspect               | Timing      | Description                                      |
+|----------------------|-------------|--------------------------------------------------|
+| m_storage allocation | Compile-time| Memory reserved statically in RAM               |
+| Object construction  | Run-time    | Constructor runs at runtime using placement new |
+| Object lifetime      | Run-time    | Begins when new(...) is called                  |
+| Memory location      | RAM         | Typically in .bss or .data section              |
+
+### Why This Is Useful in Embedded Systems
+
+- Avoids dynamic allocation (new/delete)
+- Guarantees memory layout and alignment
+- Enables deterministic behavior and testability
+
+## INFO-46 Clock Configuration
+
+- Create a reusable and hidden STM32F4 clock setup module.
+- Avoid global SystemClock_Config() in main.
+- Provide a clean ClockManager interface.
+- No dynamic memory (all static).
+- Hide STM32 HAL details from user code.
+
+## INFO-47 Binary files
+
+<https://software-dl.ti.com/ccs/esd/documents/sdto_cgt_an_introduction_to_binary_files.html>
+
+## INFO-48 Architecture Strategy
+
+### Layered Design
+
+- Portability: Swap Platform Layer for STM32 or ESP32
+- Testability: Mock PIL interfaces for unit tests
+- RTOS Flexibility: Add FreeRTOS support in Platform Layer without touching Application
+
+### Driver Design Principles
+
+#### C++20 Features
+
+- consteval for compile-time configuration
+- concepts for interface enforcement
+- constexpr for static configuration
+- std::span for buffer handling (no dynamic allocation)
+- enum class for type-safe flags and modes
+
+#### Memory Model
+
+- No dynamic allocation
+- Use static memory pools or placement new if needed
+- Avoid STL containers that allocate (e.g., std::vector, std::string)
+
+#### RTOS Compatibility
+
+To support FreeRTOS later:
+
+- Add optional PlatformTask wrappers in Platform Layer
+- Use compile-time flags to switch between bare-metal and RTOS
+- Avoid blocking calls in drivers; use callbacks or polling
+
+#### Portability Strategy
+
+Shared Codebase
+
+- Use #ifdef STM32F4 / #ifdef ESP32 only in Platform Layer
+- Keep Application and PIL completely platform-agnostic
+- Use constexpr traits to define board capabilities
+
+#### Peripheral Drivers
+
+```cpp
+// Platform Interface Layer
+struct IUart {
+    virtual void init() = 0;
+    virtual void write(std::span<const uint8_t> data) = 0;
+    virtual void read(std::span<uint8_t> buffer) = 0;
+    virtual bool isReady() const = 0;
+    virtual ~IUart() = default;
+};
+
+// STM32F4 Implementation
+class STM32Uart : public IUart {
+public:
+    void init() override;
+    void write(std::span<const uint8_t> data) override;
+    void read(std::span<uint8_t> buffer) override;
+    bool isReady() const override;
+private:
+    static inline volatile USART_TypeDef* uart = USART1;
+};
+```
+
+## INFO-49 Traits
+
+Traits are compile-time structures (usually structs or classes) that encapsulate platform-specific or type-specific behavior, constants, or types. They allow you to write generic code that adapts to different platforms or configurations without runtime overhead.
+
+Think of traits as a way to say: “For this platform or type, here’s how things behave.”
+
+### Using Traits
+
+This is a classic trait: it binds STM32-specific types and functions to a generic interface.
+
+```cpp
+struct STM32Traits {
+    using PinType     = GpioPin_STM32;
+    using ManagerType = GpioManager;
+    static GPIO_TypeDef* portFromIndex(uint8_t idx) { return getPortStm32FromIndex(idx); }
+};
+```
+
+### Why Traits Are Useful
+
+- Portability: You can write generic code that works for STM32 and ESP32 by swapping traits.
+- Compile-time abstraction: No virtual functions, no dynamic dispatch — fast and safe.
+- Configurability: You can specialize traits for different boards, peripherals, or modes.
+
+## ISSUE-50 CMAKE_POSITION_INDEPENDENT_CODE
+
+When I had the CMAKE_POSITION_INDEPENDENT_CODE flag enabled, the bootloader would immediately jump back to the Reset_Handler right after entering main().
+
+This behavior was caused by the fact that __libc_init_array, which invokes global C++ constructors, was executed before HAL_Init. As a result, some global objects accessed hardware peripherals before the HAL (Hardware Abstraction Layer) was properly initialized, leading to undefined behavior and a system fault.
+
+### What HAL_Init Does
+
+HAL_Init() is a critical initialization function provided by the STM32 HAL library. It performs the following tasks:
+
+- Configures the SysTick timer for timekeeping and delays
+- Initializes the NVIC (interrupt controller) with default priorities
+- Resets peripheral states to ensure a clean startup
+- Prepares the HAL infrastructure so that all subsequent HAL drivers (GPIO, RCC, UART, etc.) work correctly
+
+If HAL_Init() is skipped or executed too late, any access to HAL-based peripherals (like clocks, GPIOs, or timers) may result in a fault — especially during static object construction.
+
+## ISSUE-51 Why set(CMAKE_POSITION_INDEPENDENT_CODE ON) might be interfering with bootloader’s startup sequence and HAL initialization
+
+When
+
+```cmake
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+```
+
+CMake adds the `-fPIC` or `-fPIE` flag to your compiler options. This tells the compiler to generate position-independent code, meaning the code can run at any memory address.
+
+On embedded systems like STM32, this is not typically needed — because:
+
+- Code runs from a fixed FLASH address
+- You don’t use shared libraries or dynamic loading
+- The startup sequence and vector table rely on absolute addresses
+
+### Why It Breaks Bootloader
+
+#### Startup Code and Vector Table Misalignment
+
+Position-independent code can interfere with:
+
+- The placement of Reset_Handler and interrupt vectors
+- The assumption that main() is at a fixed address
+- The correct execution of SystemInit, HAL_Init, and __libc_init_array
+
+If -fPIE is applied to your startup assembly or HAL files, it may:
+
+- Alter symbol visibility or linkage
+- Prevent HAL_Init from being called correctly
+- Cause constructors to run before HAL is ready
+
+#### Incorrect Ordering of Initialization
+
+HAL_Init is not executed in correct order before __libc_init_array
+
+That’s likely because:
+
+- Your startup file (startup_stm32f407vgtx.s) does not call HAL_Init
+- And with `-fPIE`, the linker may reorder or misplace symbols like Reset_Handler, causing unexpected behavior
+
+### How to Fix It
+
+- Turn Off Position-Independent Code: set(CMAKE_POSITION_INDEPENDENT_CODE `OFF`) in top-level CMakeLists.txt
+- Verify Startup Sequence: In startup_stm32f407vgtx.s, make sure Reset_Handler includes:
+
+    ```ASM
+    bl SystemInit
+    bl HAL_Init          ; <-Must be here
+    bl __libc_init_array
+    bl main
+    ```
+
+- Clean and Rebuild: This ensures no stale `-fPIE` flags remain.
+
+## INFO-52 DEBUG TRACE
+
+### Verify with `nm` to inspect the symbol table of the compiled ELF file — which is incredibly useful in embedded development for debugging, verification, and optimization
+
+The nm tool lists all symbols (functions, variables, interrupt handlers, etc.) in the ELF file, along with:
+
+- Memory addresses where each symbol is placed
+- Size of each symbol (if used with --print-size)
+- Type of symbol (e.g. T for text/code, D for data, B for BSS, W for weak)
+
+```bash
+$ arm-none-eabi-nm ha-ctrl-boot.elf | grep HAL_
+08001134 W HAL_GetTick
+080010dc W HAL_InitTick
+080017ec T HAL_NVIC_SetPriority
+08001614 T HAL_RCC_ClockConfig
+08001538 W HAL_RCC_GetSysClockFreq
+08001140 W HAL_RCC_OscConfig
+0800180c T HAL_SYSTICK_Config
+
+$ arm-none-eabi-nm ha-ctrl-boot.elf | grep libc_init_array
+08002ed4 T __libc_init_array
+$ arm-none-eabi-nm ha-ctrl-boot.elf --print-size  | grep libc_init_array
+08002ed4 00000048 T __libc_init_array
+```
+
+#### Why It’s Useful in Embedded Projects
+
+1. Check for Missing or Mislinked Symbols. If HAL_Init is missing, or constructors like `_GLOBAL__sub_I_clock` are misordered, `nm` helps you catch it immediately.
+2. Inspect Interrupt Vector Table. It can see if handlers like HardFault_Handler, SysTick_Handler, etc. are aliased to Default_Handler or properly defined.
+3. Debug Hard Faults and Crashes. By comparing symbol addresses, you can trace whether the fault occurred before or after HAL_Init, or during a global constructor.
+4. Optimize Memory Usage. With --size-sort, you can identify large symbols and optimize them to reduce FLASH or RAM usage.
+5. Verify Startup Sequence, it can confirm that critical functions are present and placed correctly in memory. Function like:
+
+- Reset_Handler
+- SystemInit
+- HAL_Init
+- __libc_init_array
+- main
+
+### Verify with `readelf` to confirm ABI consistency
+
+```bash
+$ arm-none-eabi-readelf -A ha-ctrl-boot.elf
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "7E-M"
+  Tag_CPU_arch: v7E-M
+  Tag_CPU_arch_profile: Microcontroller
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_FP_arch: VFPv4-D16
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_enum_size: small
+  Tag_ABI_HardFP_use: SP only
+  Tag_ABI_VFP_args: VFP registers <----------- using hardware float correctly
+  Tag_CPU_unaligned_access: v6
+```
+
+## INFO-53 GIT HEAD detached
+
+```bash
+$ git checkout -b temp-changes
+Switched to a new branch 'temp-changes'
+
+$ git fetch origin
+
+$ git checkout feature/bin-to-flash
+Switched to branch 'feature/bin-to-flash'
+Your branch is up to date with 'origin/feature/bin-to-flash'.
+
+$ git merge temp-changes
+Updating 3b37b55..1d0e54b
+Fast-forward
+ Bootloader/CMakeLists.txt       |   4 +-
+ Bootloader/Src/boot.cpp         |  15 ++--
+...
+ 7 files changed, 165 insertions(+), 39 deletions(-)
+
+$ git push origin feature/bin-to-flash
+
+$ git branch -d temp-changes
+Deleted branch temp-changes (was 1d0e54b).
+
+$ git status
+On branch feature/bin-to-flash
+Your branch is up to date with 'origin/feature/bin-to-flash'.
+
+nothing to commit, working tree clean
+
+```
+
+## INFO-54 arm-none-eabi-objdump for .firmware_version
+
+VMA (0807fff8) is the flash address where .firmware_version is located.
+
+```bash
+arm-none-eabi-objdump -h your-app.elf | grep .firmware_version
+
+Idx Name              Size      VMA       LMA       File off  Algn
+ 10 .firmware_version 00000008  0807fff8  0807fff8  0017fff8  2**2
+```
+
+## INFO-55 How to get Firmware version
+
+```cpp
+extern const firmwareVersionS FIRMWARE_VERSION __attribute__((section(".firmware_version")));
+```
+
+## INFO-56 RAM memory after jump to app
+
+If you want to preserve data across jumps, place it in a reserved RAM region and mark it NOINIT in the linker script.
+
+| RAM Used by BootPrim     | After Jump to App                             |
+|--------------------------|-----------------------------------------------|
+| Static/global objects     | Overwritten by App `.data` / `.bss`          |
+| Stack                    | Replaced by App’s stack                       |
+| Heap (if used)           | Lost unless explicitly preserved              |
+| Reserved regions         | Available if coordinated via linker          |
+
+## INFO-57 I need another logic Layer to separate Hardware logic and Application logic
+
+### Platform/Common
+
+| Reason | Benefit |
+|--------|----------|
+| Reusability | Shared across all firmware stages |
+| Encapsulation | Keeps CRC logic out of PIL and App logic |
+| Testability | Easy to unit test independently |
+| Security | Centralizes integrity logic for future upgrades (e.g. SHA256, signature) |
+
+## INFO-58 CRC Check
+
+STM32F4 uses polynomial 0x04C11DB7, no reflection, no final XOR, thats why I need to switch from zlib.crc32() to crcmod.mkCrcFun and this package need to be installed
+
+```bash
+apt install python3-crcmod
+```
+

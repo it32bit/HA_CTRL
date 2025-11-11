@@ -1,0 +1,129 @@
+#include <span>
+#include "image_manager.hpp"
+#include "stm32f4xx.h"
+#include "flash_layout.hpp"
+#include "firmware_metadata.hpp"
+#include "crc32_check.hpp"
+
+ImageManager::ImageManager(IFlashWriter* writer) : m_writer(writer) {}
+
+void ImageManager::writeImage(std::uintptr_t t_image_src, std::uintptr_t t_image_dst,
+                              std::size_t t_image_size)
+{
+    CriticalSection criticalSection; // interrupts disabled here
+
+    // Image can be bigger then sector size
+    std::uintptr_t current_addr = t_image_dst;
+    std::uintptr_t end_addr     = t_image_dst + t_image_size;
+
+    while (current_addr < end_addr)
+    {
+        uint8_t       sector = FlashLayout::sectorFromAddress(current_addr);
+        std::uint32_t size   = FlashLayout::sectorSize(sector);
+
+        m_writer->eraseSector(sector);
+        current_addr += size;
+    }
+
+    m_writer->writeImage(t_image_src, t_image_dst, t_image_size);
+
+    // interrupts enabled here (only if previous they were enabled)
+}
+
+void ImageManager::writeMeta(std::uintptr_t t_image_src, std::uintptr_t t_image_dst,
+                             std::size_t t_image_size)
+{
+    CriticalSection criticalSection; // interrupts disabled here
+
+    const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(t_image_dst);
+
+    if ((metadata->magic == Firmware::METADATA_MAGIC) ||
+        (metadata->magic != Firmware::METADATA_EMPTY))
+    {
+        // The image does not occupy this sector
+        uint8_t sector = FlashLayout::sectorFromAddress(t_image_dst);
+        m_writer->eraseSector(sector);
+    }
+    m_writer->writeImage(t_image_src, t_image_dst, t_image_size);
+}
+
+void ImageManager::clearImage(std::uintptr_t t_image_start, std::size_t t_image_size)
+{
+    CriticalSection criticalSection; // interrupts disabled here
+
+    // Image can be bigger then sector size
+    std::uintptr_t current_addr = t_image_start;
+    std::uintptr_t end_addr     = t_image_start + t_image_size;
+
+    while (current_addr < end_addr)
+    {
+        uint8_t       sector = FlashLayout::sectorFromAddress(current_addr);
+        std::uint32_t size   = FlashLayout::sectorSize(sector);
+
+        m_writer->eraseSector(sector);
+        current_addr += size;
+    }
+}
+
+bool isImageStaged(std::uintptr_t t_metadata)
+{
+    const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(t_metadata);
+
+    bool result = false;
+
+    if (metadata->magic == Firmware::METADATA_MAGIC)
+    {
+        result = true;
+    }
+
+    return result;
+}
+
+bool isImageAuthentic(std::uintptr_t t_firmware, std::uintptr_t t_metadata)
+{
+    const Firmware::Metadata* metadata = reinterpret_cast<const Firmware::Metadata*>(t_metadata);
+
+    if (metadata->magic != Firmware::METADATA_MAGIC)
+    {
+        return false;
+    }
+
+    std::size_t   firmware_size = metadata->firmwareSize;
+    std::uint32_t expected_crc  = metadata->firmwareCRC;
+
+    std::span<const std::uint8_t> firmware{reinterpret_cast<const std::uint8_t*>(t_firmware),
+                                           firmware_size};
+
+    bool result = Integrity::CRC32Checker::verify(firmware, expected_crc);
+
+    return result;
+}
+
+bool isImageDiffrent(std::uintptr_t t_meta_active, std::uintptr_t t_meta_candidate)
+{
+    const Firmware::Metadata* active = reinterpret_cast<const Firmware::Metadata*>(t_meta_active);
+    const Firmware::Metadata* candidate =
+        reinterpret_cast<const Firmware::Metadata*>(t_meta_candidate);
+
+    bool result{false};
+
+    if ((active->version != candidate->version) || (active->firmwareCRC != candidate->firmwareCRC))
+    {
+        result = true;
+    }
+
+    return result;
+}
+
+bool isImageEmpty(std::uintptr_t t_data, std::size_t t_size)
+{
+    std::span<const std::uint8_t> image{reinterpret_cast<const std::uint8_t*>(t_data), t_size};
+
+    for (std::uint8_t byte : image)
+    {
+        if (byte != 0xFF)
+            return false; // Some data exists
+    }
+
+    return true; // Fully erased
+}

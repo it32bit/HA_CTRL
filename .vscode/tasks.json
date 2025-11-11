@@ -21,7 +21,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Build Bootloader",
+      "label": "Build Primary Bootloader",
       "dependsOrder": "sequence",
       "dependsOn": [
         "Configure"
@@ -29,7 +29,22 @@
       "type": "cmake",
       "command": "build",
       "targets": [
-        "ha-ctrl-boot"
+        "ha-ctrl-prim"
+      ],
+      "preset": "debug",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Secondary Bootloader",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Configure"
+      ],
+      "type": "cmake",
+      "command": "build",
+      "targets": [
+        "ha-ctrl-sec"
       ],
       "preset": "debug",
       "group": "build",
@@ -51,10 +66,12 @@
       "problemMatcher": []
     },
     {
-      "label": "Build Both",
+      "label": "Build All-T",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "Configure"
+        "Build Primary Bootloader",
+        "Build Secondary Bootloader",
+        "Build App"
       ],
       "type": "cmake",
       "command": "build",
@@ -66,14 +83,63 @@
       "problemMatcher": []
     },
     {
-      "label": "Flash Bootloader",
+      "label": "FlashHalt",
+      "type": "shell",
+      "command": "STM32_Programmer_CLI",
+      "args": [
+        "-c",
+        "port=SWD",
+        "-halt"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "FlashEraseAll",
+      "type": "shell",
+      "command": "STM32_Programmer_CLI",
+      "args": [
+        "-c",
+        "port=SWD",
+        "-halt",
+        "-e all"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash Primary Bootloader",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "FlashHalt"
+      ],
       "type": "shell",
       "command": "STM32_Programmer_CLI",
       "args": [
         "-c",
         "port=SWD",
         "-d",
-        "${workspaceFolder}/build/bin/ha-ctrl-boot.elf",
+        "${workspaceFolder}/build/bin/ha-ctrl-prim.elf",
+        "-hardRst",
+        "-rst",
+        "--start"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash Secondary Bootloader",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "FlashHalt"
+      ],
+      "type": "shell",
+      "command": "STM32_Programmer_CLI",
+      "args": [
+        "-c",
+        "port=SWD",
+        "-d",
+        "${workspaceFolder}/build/bin/ha-ctrl-sec.elf",
         "-hardRst",
         "-rst",
         "--start"
@@ -83,11 +149,16 @@
     },
     {
       "label": "Flash App",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "FlashHalt"
+      ],
       "type": "shell",
       "command": "STM32_Programmer_CLI",
       "args": [
         "-c",
         "port=SWD",
+        "-e [5 7]",
         "-d",
         "${workspaceFolder}/build/bin/ha-ctrl-app.elf",
         "-hardRst",
@@ -98,14 +169,44 @@
       "problemMatcher": []
     },
     {
-      "label": "ReBuildFlashBoth",
+      "label": "ReBuild Flash All",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "Build Bootloader",
+        "Build Primary Bootloader",
+        "Build Secondary Bootloader",
         "Build App",
-        "Flash Bootloader",
-        "Flash App"
+        "Flash Secondary Bootloader",
+        "Flash App",
+        "Flash Primary Bootloader"
       ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash Metadata",
+      "type": "cmake",
+      "command": "build",
+      "targets": [
+        "add-metadata-flash"
+      ],
+      "preset": "debug",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash Combined Image",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Build Primary Bootloader",
+        "Build Secondary Bootloader",
+        "Build App"
+      ],
+      "type": "cmake",
+      "command": "build",
+      "targets": [
+        "combined-flash"
+      ],
+      "preset": "debug",
       "group": "build",
       "problemMatcher": []
     },
@@ -145,7 +246,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Clang-Tidy Consle",
+      "label": "Clang-Tidy Console",
       "type": "cmake",
       "command": "build",
       "targets": [

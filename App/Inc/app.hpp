@@ -1,18 +1,21 @@
-#ifndef APP_HPP__
-#define APP_HPP__
+#ifndef APP_HPP
+#define APP_HPP
 
 #include "patterns.hpp"
 #include "gpio_manager_stm32.hpp"
+#include "adc_manager_stm32.hpp"
 
-extern GpioManager gpioManager;
+extern GpioManager gpio;
+extern AdcManager  adc;
 
-typedef struct
+struct FirmwareVersion
 {
-    uint8_t major;
-    uint8_t minor;
-} firmwareVersionS;
+    std::uint8_t major;
+    std::uint8_t minor;
+} __attribute__((packed));
 
-constexpr firmwareVersionS FIRMWARE_VERSION = {.major = 0, .minor = 2};
+__attribute__((section(".firmware_version"), used)) constexpr FirmwareVersion FIRMWARE_VERSION = {
+    .major = 0, .minor = 4};
 
 class Debouncer
 {
@@ -73,11 +76,11 @@ class LedManager : public Observer
     mutable volatile bool m_pending{false};
 };
 
-void consoleNotify(uint8_t t_item);
+void ConsoleNotify(uint8_t t_item);
 
-inline constexpr StaticObserver<uint8_t> staticObservers[] = {{consoleNotify}};
+inline constexpr StaticObserver<uint8_t> staticObservers[] = {{ConsoleNotify}};
 
 inline constexpr StaticObserverList<uint8_t>
     uart2_Observers(staticObservers, sizeof(staticObservers) / sizeof(staticObservers[0]));
 
-#endif // APP_HPP__
+#endif // APP_HPP

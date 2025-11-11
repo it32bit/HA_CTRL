@@ -6,6 +6,55 @@ This project is a home automation control unit built around the **STM32F4-DISC1*
 - Gate control
 - Air conditioning
 
+## Project Status
+
+### Bootloader Overview
+
+The bootloader is responsible for secure startup, firmware validation, and controlled firmware updates. It supports both ST-Link and UART (serial) interfaces for loading the combined firmware image.
+
+#### Firmware Integrity Check
+
+Verifies the integrity of the active application using a CRC32 checksum before executing it.
+
+#### New Firmware Validation
+
+Confirms that any new firmware image written to the update region is valid and complete (metadata, certificate, and image CRC verification).
+
+#### Firmware Update Process
+
+Handles in-field updates using a combined image that includes:
+
+- Secondary bootloader
+- Application binary
+- Corresponding metadata and certificates for both regions
+
+After validation, the bootloader copies the new images into their active regions safely.
+
+#### Dual-Boot Architecture
+
+Utilizes two separate firmware regions — active and update — to ensure rollback safety and prevent bricking during failed updates.
+
+#### Communication Interfaces
+
+- ST-Link: Used for direct programming via SWD during development or recovery.
+- Serial UART: Used for remote updates; supports reception of the combined image and triggers the update sequence automatically.
+
+#### Metadata Handling
+
+Each image (bootloader and application) includes a small metadata block containing:
+
+- CRC32 checksum
+- Firmware size
+- Version information
+
+#### Certificates and Security Placeholders
+
+Each image region reserves 512B for certificate data (future-proofing for digital signature validation).
+
+### Application
+
+- At this stage, only basic LED blinking functionality has been implemented. No control logic or peripheral interaction is in place yet.
+
 ## Software Stack
 
 - Embedded Platform: `STM32F4-DISC1`
@@ -70,21 +119,55 @@ The project uses the following external dependencies:
 [submodule "Drivers/cmsis-device-f4"]
     path = Drivers/cmsis-device-f4
     url = https://github.com/STMicroelectronics/cmsis-device-f4.git
+[submodule "extern/cpputest"]
+    path = extern/cpputest
+    url = https://github.com/cpputest/cpputest.git
 ```
 
 ## Clock configuration
 
-<img src="./Doc/HaCtrl-ClockConfig.png" alt="Clock configuration">
+<!-- <img src="./Doc/HaCtrl-ClockConfig.png" alt="Clock configuration"> -->
 
-## Project Status
+| Parameter                  | Value        | Notes                            |
+|---------------------------|--------------|----------------------------------|
+| System Clock Source       | PLL (HSE)    | Phase-locked loop using HSE      |
+| SYSCLK                    | 168 MHz      | System clock                     |
+| HCLK                      | 168 MHz      | AHB bus clock                    |
+| AHB Prescaler             | 1            | No division                      |
+| APB1 Prescaler            | 4            | APB1 clock = 42 MHz              |
+| APB2 Prescaler            | 2            | APB2 clock = 84 MHz              |
+| HSE Frequency             | 8 MHz        | External crystal frequency       |
+| PLL_M                     | 8            | Input divider                    |
+| PLL_N                     | 336          | Multiplier                       |
+| PLL_P                     | 2            | Output divider for SYSCLK        |
+| PLL_Q                     | 7            | For USB, RNG, etc.               |
+| VDD                       | 3.3 V        | Core voltage                     |
+| Regulator Output          | Scale1 mode  | Max performance power scale      |
+| Flash Latency             | 5 WS         | Flash wait states for 168 MHz    |
 
-The board is currently in its initial state.
-At this stage, only basic LED blinking functionality has been implemented. No control logic or peripheral interaction is in place yet.
+### Flash Memory Map (STM32F4 - 1MB Flash)
 
-## Goals
+| Sector | Component                      | Start          | Size     | End            | Notes                                         |
+| :----: | ------------------------------ | -------------- | -------- | -------------- | --------------------------------------------- |
+|    0   | Bootloader I (Primary)         | 0x08000000     | 16 KB    | 0x08003FFF     | Main bootloader                               |
+|    1   | Private Certificate            | 0x08004000     | 16 KB    | 0x08007FFF     | Secure/private key storage                    |
+|    2   | Error Logs                     | 0x08008000     | 16 KB    | 0x0800BFFF     | Runtime or diagnostic logs                    |
+|    3   | Configuration & Flags          | 0x0800C000     | 16 KB    | 0x0800FFFF     | Boot configuration and flags                  |
+|    4   | Bootloader II (Secondary)      | 0x08010000     | 64 KB    | 0x0801FFFF     | Secondary bootloader                          |
+|    4   | Bootloader II Metadata         | 0x0801FC00     | 512 B    | 0x0801FDFF     | Metadata block inside sector 4                |
+|    5   | Main Application               | 0x08020000     | 128 KB   | 0x0803FFFF     | Application (part 1)                          |
+|    6   | Main Application               | 0x08040000     | 128 KB   | 0x0805FFFF     | Application (part 2)                          |
+|    7   | Main Application               | 0x08060000     | 127 KB   | 0x0807FBFF     | Application (part 3, excluding reserved area) |
+|    7   | App Metadata                   | 0x0807FC00     | 512 B    | 0x0807FDFF     | Metadata for current application              |
+|    7   | App Certificate                | 0x0807FE00     | 512 B    | 0x0807FFFF     | Firmware certificate for current app          |
+|    8   | Reserved (lower half)          | 0x08080000     | 64 KB    | 0x0808FFFF     | Reserved for future use                       |
+|    8   | New Bootloader II (upper half) | 0x08090000     | 64 KB    | 0x0809FFFF     | Used during firmware updates                  |
+|    8   | New Bootloader II Metadata     | 0x0809FC00     | 512 B    | 0x0809FDFF     | Metadata for new secondary bootloader         |
+|    9   | New Application                | 0x080A0000     | 128 KB   | 0x080BFFFF     | New app (part 1)                              |
+|   10   | New Application                | 0x080C0000     | 128 KB   | 0x080DFFFF     | New app (part 2)                              |
+|   11   | New Application                | 0x080E0000     | 127 KB   | 0x080FFBFF     | New app (part 3, excluding reserved area)     |
+|   11   | New App Metadata               | 0x080FFC00     | 512 B    | 0x080FFDFF     | Metadata for new application                  |
+|   11   | New App Certificate            | 0x080FFE00     | 512 B    | 0x080FFFFF     | Firmware certificate for new app              |
+|    —   | **Flash Total**                | **0x08000000** | **1 MB** | **0x080FFFFF** | Entire internal flash region                  |
 
-- Develop a robust and modular control application
-- Ensure reliable communication between host and embedded system
-- Transition to a custom HAL for optimized performance and flexibility
-
-*Stay tuned for updates as the project evolves!*
+[*Stay tuned for updates as the project evolves!*](https://team3m.atlassian.net/jira/software/projects/HA/boards/2/backlog)

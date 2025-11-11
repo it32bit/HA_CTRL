@@ -1,0 +1,21 @@
+@startuml watchdog_driver_sequence_diagram
+
+title Watchdog Feed Sequence - ha-ctrl project
+
+actor App
+participant WatchdogManager
+participant Watchdog_STM32
+participant "IWDG Peripheral" as IWDG
+
+App -> WatchdogManager : initialize(1000)
+WatchdogManager -> Watchdog_STM32 : initialize(1000)
+Watchdog_STM32 -> IWDG : configure timeout
+Watchdog_STM32 -> IWDG : enable watchdog
+
+loop Main loop
+    App -> WatchdogManager : feed()
+    WatchdogManager -> Watchdog_STM32 : feed()
+    Watchdog_STM32 -> IWDG : reload counter
+end
+
+@enduml

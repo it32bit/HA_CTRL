@@ -15,7 +15,7 @@
  */
 #include "gpio_pin_stm32.hpp"
 #include "gpio_config_stm32.hpp"
-#include "gpio_hal_stm32.hpp"
+#include "gpio_stm32.hpp"
 #include "stm32f4xx_ll_gpio.h"
 
 void GpioPin_STM32::toggle()

@@ -1,0 +1,17 @@
+@startuml clock_sequence_diagram
+
+title Clock Initialization Sequence - ha-ctrl project
+
+actor App
+participant ClockManager
+participant Clock_STM32
+participant "RCC Peripheral" as RCC
+
+App -> ClockManager : initialize(errorHandler)
+ClockManager -> Clock_STM32 : initialize(errorHandler)
+Clock_STM32 -> RCC : configure system clock
+Clock_STM32 -> RCC : enable PLL, HSE, etc.
+Clock_STM32 -> ClockManager : return
+ClockManager -> App : return
+
+@enduml

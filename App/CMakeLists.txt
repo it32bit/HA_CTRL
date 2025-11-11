@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
-include("${CMAKE_SOURCE_DIR}/cmake/vscode_generated.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/platform-traits.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/project-sources.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/compiler-warnings.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/utilities.cmake")
 
@@ -14,17 +15,15 @@ set(app_linker_script_SRC ${app_linker_script_SRC}
 
 # Filter only app-related sources
 set(app_sources "")
-
 foreach(src ${sources_SRCS})
-    if(src MATCHES ".*/App/.*")
-        list(APPEND app_sources ${src})
-    elseif(src MATCHES ".*/Platform/STM32F4/Src/.*")
-        list(APPEND app_sources ${src})
-    elseif(src MATCHES ".*/Core/Src/.*")
-        list(APPEND app_sources ${src})
-    elseif(src MATCHES ".*/Startup/startup_stm32f407vgtx.s")
-        list(APPEND app_sources ${src})
-    elseif(src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
+    if(src MATCHES ".*/App/.*" OR
+       src MATCHES ".*/Core/Src/.*" OR
+       src MATCHES ".*/Boot/Src/boot_flag_manager.cpp" OR
+       src MATCHES ".*/Platform/Common/Integrity/Src/.*" OR
+       src MATCHES ".*/Platform/Common/Image/Src/.*" OR
+       src MATCHES ".*/Platform/STM32F4/Src/.*" OR
+       src MATCHES ".*/Startup/startup_stm32f407vgtx.s" OR
+       src MATCHES ".*/Drivers/stm32f4xx-hal-driver/Src/.*")
         list(APPEND app_sources ${src})
     endif()
 endforeach()
@@ -36,7 +35,7 @@ endforeach()
 
 # Create executable first
 add_executable(${APP_TARGET}
-    ${app_sources}
+ ${app_sources}
 )
 
 # Link with Platform_STM32F4 HAL wrapper library
@@ -54,18 +53,14 @@ target_include_directories(${APP_TARGET} PRIVATE
     ${CMAKE_SOURCE_DIR}/App/Inc
 	${CMAKE_SOURCE_DIR}/Core/Inc
     ${CMAKE_SOURCE_DIR}/Platform/Interface
-    ${CMAKE_SOURCE_DIR}/Platform/STM32F4/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/stm32f4xx-hal-driver/Inc
-    ${CMAKE_SOURCE_DIR}/Drivers/cmsis-device-f4/Include
-    ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Core/Include
-
+    ${CMAKE_SOURCE_DIR}/Boot/Inc
+    ${MCU_INCLUDE_DIRS}
 )
 
 # Compiler defines
 target_compile_definitions(${APP_TARGET} PRIVATE
-    STM32F407xx
     USE_HAL_DRIVER
-    USE_FULL_LL_DRIVER
+    ${MCU_DEFINES}
 )
 
 # Linker script (set externally from parent CMakeLists)
